@@ -1,8 +1,9 @@
 <script lang="ts">
-    import Step from '$lib/components/Step.svelte';
-    import StepContent from '$lib/components/StepContent.svelte';
+    import Step from "$lib/components/Step.svelte";
+    import StepContent from "$lib/components/StepContent.svelte";
 
-    const FORMS_COPY_URL = 'https://docs.google.com/forms/d/REPLACE_WITH_FORM_ID/copy';
+    const FORMS_COPY_URL =
+        "https://docs.google.com/forms/d/1NPfygE5n_37uiPebmw23j0SxaCU02rDuR3uaqfaO304/copy";
 
     interface Props {
         open?: boolean;
@@ -19,7 +20,12 @@
             Google Drive zu erstellen. Jedes Semester braucht eine eigene Kopie,
             damit sich die Antworten nicht vermischen.
         </p>
-        <a class="action" href={FORMS_COPY_URL} target="_blank" rel="noopener noreferrer">
+        <a
+            class="action"
+            href={FORMS_COPY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+        >
             Google Forms Kopie erstellen
         </a>
         <small class="hint">
@@ -28,3 +34,21 @@
         </small>
     </StepContent>
 </Step>
+
+<style>
+    .action {
+        display: inline-block;
+        padding: var(--space-2) var(--space-4);
+        background: var(--color-primary);
+        color: var(--color-surface);
+        font-size: var(--text-base);
+        font-weight: 600;
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        transition: background var(--transition-fast);
+    }
+
+    .action:hover {
+        background: var(--color-primary-hover);
+    }
+</style>

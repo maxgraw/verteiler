@@ -17,7 +17,7 @@
         ondone,
         datum = $bindable(""),
         uhrzeit = $bindable(""),
-        link = $bindable(""),
+        link = "",
     }: Props = $props();
 
     const tag = $derived(
@@ -54,7 +54,7 @@
 </script>
 
 <Step
-    num={3}
+    num={4}
     title="Google Forms Link mit Deadline rausschicken"
     bind:open
     {ondone}
@@ -64,7 +64,7 @@
             Deadline und Link eingeben — die fertige Nachricht in die
             Semestergruppe schicken.
         </p>
-        <DeadlineInputs bind:datum bind:uhrzeit bind:link />
+        <DeadlineInputs bind:datum bind:uhrzeit />
         <TemplateMessage {message} disabled={!complete} />
     </StepContent>
 </Step>

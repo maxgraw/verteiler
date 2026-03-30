@@ -19,7 +19,7 @@
         'LG';
 </script>
 
-<Step num={2} title="Semester über das Verfahren informieren" bind:open {ondone}>
+<Step num={3} title="Semester über das Verfahren informieren" bind:open {ondone}>
     <StepContent>
         <p class="description">
             Schick diese Nachricht in eure Semestergruppe, bevor du das Google

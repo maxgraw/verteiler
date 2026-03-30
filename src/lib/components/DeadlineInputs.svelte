@@ -2,13 +2,11 @@
     interface Props {
         datum?: string;
         uhrzeit?: string;
-        link?: string;
     }
 
     let {
         datum = $bindable(''),
         uhrzeit = $bindable(''),
-        link = $bindable(''),
     }: Props = $props();
 </script>
 
@@ -21,16 +19,43 @@
         <label for="deadline-uhrzeit">Uhrzeit</label>
         <input type="time" id="deadline-uhrzeit" bind:value={uhrzeit} />
     </div>
-    <div class="field field--link">
-        <label for="deadline-link">Google Forms Link</label>
-        <input
-            type="url"
-            id="deadline-link"
-            placeholder="https://..."
-            bind:value={link}
-        />
-    </div>
 </div>
 
 <style>
+    .inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-3);
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    label {
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: var(--color-text-secondary);
+    }
+
+    input {
+        padding: var(--space-1) var(--space-2);
+        border: 1px solid var(--color-border-input);
+        border-radius: var(--radius-sm);
+        font-size: var(--text-base);
+        background: var(--color-bg-subtle);
+        width: 100%;
+    }
+
+    input:focus {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 1px;
+    }
+
+    input:user-invalid {
+        border-color: var(--color-error);
+        background: var(--color-error-bg);
+    }
 </style>

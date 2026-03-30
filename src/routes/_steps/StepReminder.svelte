@@ -21,7 +21,7 @@
     );
 </script>
 
-<Step num={4} title="Einen Tag vor Deadline: Erinnerung schicken" bind:open {ondone}>
+<Step num={5} title="Einen Tag vor Deadline: Erinnerung schicken" bind:open {ondone}>
     <StepContent>
         <TemplateMessage {message} {disabled} />
     </StepContent>

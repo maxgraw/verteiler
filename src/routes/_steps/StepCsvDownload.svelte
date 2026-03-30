@@ -10,7 +10,7 @@
     let { open = $bindable(false), ondone }: Props = $props();
 </script>
 
-<Step num={6} title="Antworten als CSV herunterladen" bind:open {ondone}>
+<Step num={7} title="Antworten als CSV herunterladen" bind:open {ondone}>
     <StepContent>
         <ol>
             <li>Google Forms öffnen → Reiter Antworten.</li>
