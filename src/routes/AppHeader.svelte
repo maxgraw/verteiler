@@ -1,33 +1,29 @@
 <script lang="ts">
-    import { state } from '$lib/state.svelte';
-    import { ArrowRight } from '@lucide/svelte';
+    import { state } from "$lib/state.svelte";
 </script>
 
 <header>
     <div class="header-top">
         <div>
             <h1>Verteiler</h1>
-            <p class="tagline">Rotationsgruppenverteilung für Semesterorganisatoren</p>
+            <p class="tagline">
+                Rotationsgruppenverteilung für Semesterorganisatoren
+            </p>
         </div>
-        <button class="reset-btn" onclick={() => state.reset()}>Zurücksetzen</button>
+        <button class="reset-btn" onclick={() => state.reset()}
+            >Zurücksetzen</button
+        >
     </div>
 
     <div class="intro">
         <p>
-            Diese App führt euch Schritt für Schritt durch den gesamten Prozess – vom Erstellen des
-            Google-Formulars bis zur fertigen Gruppenverteilung. Folgt einfach den Schritten der
-            Reihe nach.
+            Diese App führt euch Schritt für Schritt durch den gesamten Prozess
+            – vom Erstellen des Google-Formulars bis zur fertigen
+            Gruppenverteilung. Folgt einfach den Schritten der Reihe nach.
         </p>
-        <div class="flow">
-            <span>Formular erstellen</span>
-            <ArrowRight class="arrow" size={14} />
-            <span>Anmeldungen sammeln</span>
-            <ArrowRight class="arrow" size={14} />
-            <span>Verteilung berechnen</span>
-        </div>
         <p class="save-note">
-            Euer Fortschritt wird automatisch gespeichert und bleibt nach dem Schließen des
-            Browsers erhalten – aber nur auf diesem Gerät.
+            Euer Fortschritt wird automatisch gespeichert und bleibt nach dem
+            Schließen des Browsers erhalten – aber nur auf diesem Gerät.
         </p>
     </div>
 </header>
@@ -72,16 +68,6 @@
         font-size: var(--text-sm);
         color: var(--color-text-secondary);
         line-height: 1.6;
-    }
-
-    .flow {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        flex-wrap: wrap;
-        font-size: var(--text-sm);
-        font-weight: 600;
-        color: var(--color-text);
     }
 
     :global(.arrow) {

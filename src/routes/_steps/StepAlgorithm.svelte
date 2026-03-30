@@ -20,16 +20,31 @@
         error = "";
         solveResult = null;
         running = true;
-        await new Promise<void>((resolve) => setTimeout(resolve, 0));
-        try {
-            const slots = buildSlots(
-                NUM_TIME_SLOTS,
-                SLOTS_PER_TIME_SLOT,
-                [...appState.capacities],
+
+        // Clear previous console log to avoid duplicates
+        if (typeof console !== "undefined") {
+            console.clear();
+            console.log(
+                `[Verteiler] ${appState.parsedGroups.length} Gruppen, ${appState.capacities.reduce((a, b) => a + b, 0)} Studierende`,
             );
+        }
+
+        // Log to browser console for debugging
+        const logProgress = (message: string) => {
+            console.log(`[Verteiler] ${message}`);
+        };
+
+        try {
+            const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, [
+                ...appState.capacities,
+            ]);
+            logProgress("Slots erstellt");
+
             solveResult = await solve(appState.parsedGroups, slots);
+            logProgress("Erfolg!");
         } catch (e) {
             error = e instanceof Error ? e.message : "Unbekannter Fehler";
+            logProgress(`Fehler: ${error}`);
         } finally {
             running = false;
         }
@@ -99,6 +114,12 @@
         >
             {running ? "Wird berechnet…" : "Verteilung berechnen"}
         </button>
+
+        <div class="progress-info">
+            <span class="progress-hint">
+                Ergebnisse werden direkt im Browser berechnet.
+            </span>
+        </div>
 
         {#if error}
             <div class="error-box">{error}</div>
@@ -346,5 +367,65 @@
 
     .copy-btn:hover {
         background: var(--color-primary-border);
+    }
+
+    .progress-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
+        background: var(--color-bg-subtle);
+        border-radius: var(--radius-md);
+        font-size: var(--text-sm);
+        border: 1px solid var(--color-border);
+    }
+
+    .progress-hint {
+        color: var(--color-text-muted);
+        font-weight: 500;
+    }
+
+    .progress-hint:has(span:last-child) {
+        color: var(--color-text);
+        font-style: italic;
+    }
+
+    .debug-toggle {
+        border-top: 1px solid var(--color-border);
+        margin-top: var(--space-2);
+    }
+
+    .debug-toggle summary {
+        padding: var(--space-2) var(--space-3);
+        cursor: pointer;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        color: var(--color-text-subtle);
+        user-select: none;
+    }
+
+    .debug-toggle summary:hover {
+        color: var(--color-text);
+    }
+
+    .debug-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height var(--transition-fast) ease-out;
+    }
+
+    .debug-content:open {
+        max-height: 500px;
+    }
+
+    .debug-output {
+        margin: 0;
+        padding: var(--space-2) var(--space-3);
+        background: var(--color-bg-darker);
+        color: var(--color-code-text);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        white-space: pre-wrap;
+        overflow-x: auto;
     }
 </style>
