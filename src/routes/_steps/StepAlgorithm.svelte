@@ -384,48 +384,4 @@
         color: var(--color-text-muted);
         font-weight: 500;
     }
-
-    .progress-hint:has(span:last-child) {
-        color: var(--color-text);
-        font-style: italic;
-    }
-
-    .debug-toggle {
-        border-top: 1px solid var(--color-border);
-        margin-top: var(--space-2);
-    }
-
-    .debug-toggle summary {
-        padding: var(--space-2) var(--space-3);
-        cursor: pointer;
-        font-size: var(--text-xs);
-        font-weight: 600;
-        color: var(--color-text-subtle);
-        user-select: none;
-    }
-
-    .debug-toggle summary:hover {
-        color: var(--color-text);
-    }
-
-    .debug-content {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height var(--transition-fast) ease-out;
-    }
-
-    .debug-content:open {
-        max-height: 500px;
-    }
-
-    .debug-output {
-        margin: 0;
-        padding: var(--space-2) var(--space-3);
-        background: var(--color-bg-darker);
-        color: var(--color-code-text);
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        white-space: pre-wrap;
-        overflow-x: auto;
-    }
 </style>

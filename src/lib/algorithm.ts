@@ -140,7 +140,12 @@ export async function solve(
       subjectTo: [...assignConstraints, ...capacityConstraints],
       binaries,
     },
-    { msglev: glpk.GLP_MSG_OFF },
+    {
+      msglev: glpk.GLP_MSG_OFF,
+      tmlim: 30,
+      mipgap: 0.01,
+      presol: true,
+    },
   );
   finalizeStep("ILP-Problem lösen", performance.now() - startTime);
 
