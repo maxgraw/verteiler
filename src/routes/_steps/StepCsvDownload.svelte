@@ -4,13 +4,14 @@
 
     interface Props {
         open?: boolean;
+        done?: boolean;
         ondone?: () => void;
     }
 
-    let { open = $bindable(false), ondone }: Props = $props();
+    let { open = $bindable(false), done = $bindable(false), ondone }: Props = $props();
 </script>
 
-<Step num={7} title="Antworten als CSV herunterladen" bind:open {ondone}>
+<Step num={7} title="Antworten als CSV herunterladen" bind:open bind:done {ondone}>
     <StepContent>
         <ol>
             <li>Google Forms öffnen → Reiter Antworten.</li>

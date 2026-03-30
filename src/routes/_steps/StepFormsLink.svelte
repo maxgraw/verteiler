@@ -6,6 +6,7 @@
 
     interface Props {
         open?: boolean;
+        done?: boolean;
         ondone?: () => void;
         datum?: string;
         uhrzeit?: string;
@@ -16,6 +17,7 @@
 
     let {
         open = $bindable(false),
+        done = $bindable(false),
         ondone,
         datum = $bindable(""),
         uhrzeit = $bindable(""),
@@ -51,6 +53,7 @@
     num={4}
     title="Google Forms Link mit Deadline rausschicken"
     bind:open
+    bind:done
     {ondone}
     checkDisabled={!complete}
 >
@@ -60,6 +63,25 @@
             Semestergruppe schicken.
         </p>
         <DeadlineInputs bind:datum bind:uhrzeit />
+        {#if !complete}
+            <small class="missing">
+                Noch fehlt:
+                {[
+                    !link && 'Google Forms Link (Schritt 2)',
+                    !datum && 'Datum',
+                    !uhrzeit && 'Uhrzeit',
+                ]
+                    .filter(Boolean)
+                    .join(', ')}
+            </small>
+        {/if}
         <TemplateMessage {message} disabled={!complete} />
     </StepContent>
 </Step>
+
+<style>
+    .missing {
+        font-size: var(--text-sm);
+        color: var(--color-error);
+    }
+</style>

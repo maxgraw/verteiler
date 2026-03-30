@@ -4,13 +4,14 @@
 
     interface Props {
         open?: boolean;
+        done?: boolean;
         ondone?: () => void;
     }
 
-    let { open = $bindable(false), ondone }: Props = $props();
+    let { open = $bindable(false), done = $bindable(false), ondone }: Props = $props();
 </script>
 
-<Step num={6} title="Google Forms nach Deadline schließen" bind:open {ondone}>
+<Step num={6} title="Google Forms nach Deadline schließen" bind:open bind:done {ondone}>
     <StepContent>
         <ol>
             <li>Google Forms öffnen → Reiter Antworten.</li>

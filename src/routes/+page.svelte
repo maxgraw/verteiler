@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
     import StepFormsCopy from "./_steps/StepFormsCopy.svelte";
     import StepFormsUrl from "./_steps/StepFormsUrl.svelte";
     import StepAnnounce from "./_steps/StepAnnounce.svelte";
@@ -8,6 +9,7 @@
     import StepCsvDownload from "./_steps/StepCsvDownload.svelte";
 
     let open = $state([true, false, false, false, false, false, false]);
+    let done = $state([false, false, false, false, false, false, false]);
 
     function openNext(i: number) {
         if (i + 1 < open.length) open[i + 1] = true;
@@ -27,6 +29,26 @@
     );
     const formattedDatum = $derived(datum ? datum.split("-").reverse().join(".") : "");
     const deadlineComplete = $derived(!!datum && !!uhrzeit);
+
+    const STORAGE_KEY = 'verteiler';
+
+    onMount(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.link) link = data.link;
+                if (data.datum) datum = data.datum;
+                if (data.uhrzeit) uhrzeit = data.uhrzeit;
+                if (data.open) open = data.open;
+                if (data.done) done = data.done;
+            }
+        } catch {}
+    });
+
+    $effect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ link, datum, uhrzeit, open, done }));
+    });
 </script>
 
 <header>
@@ -37,19 +59,21 @@
 <main>
     <ol>
         <li>
-            <StepFormsCopy bind:open={open[0]} ondone={() => openNext(0)} />
+            <StepFormsCopy bind:open={open[0]} bind:done={done[0]} ondone={() => openNext(0)} />
         </li>
         <li>
             <StepFormsUrl
                 bind:open={open[1]}
+                bind:done={done[1]}
                 bind:link
                 ondone={() => openNext(1)}
             />
         </li>
-        <li><StepAnnounce bind:open={open[2]} ondone={() => openNext(2)} /></li>
+        <li><StepAnnounce bind:open={open[2]} bind:done={done[2]} ondone={() => openNext(2)} /></li>
         <li>
             <StepFormsLink
                 bind:open={open[3]}
+                bind:done={done[3]}
                 bind:datum
                 bind:uhrzeit
                 {link}
@@ -61,6 +85,7 @@
         <li>
             <StepReminder
                 bind:open={open[4]}
+                bind:done={done[4]}
                 {tag}
                 {uhrzeit}
                 disabled={!deadlineComplete}
@@ -68,10 +93,10 @@
             />
         </li>
         <li>
-            <StepFormsClose bind:open={open[5]} ondone={() => openNext(5)} />
+            <StepFormsClose bind:open={open[5]} bind:done={done[5]} ondone={() => openNext(5)} />
         </li>
         <li>
-            <StepCsvDownload bind:open={open[6]} ondone={() => openNext(6)} />
+            <StepCsvDownload bind:open={open[6]} bind:done={done[6]} ondone={() => openNext(6)} />
         </li>
     </ol>
 </main>

@@ -7,13 +7,14 @@
 
     interface Props {
         open?: boolean;
+        done?: boolean;
         ondone?: () => void;
     }
 
-    let { open = $bindable(false), ondone }: Props = $props();
+    let { open = $bindable(false), done = $bindable(false), ondone }: Props = $props();
 </script>
 
-<Step num={1} title="Eigene Google Forms Kopie erstellen" bind:open {ondone}>
+<Step num={1} title="Eigene Google Forms Kopie erstellen" bind:open bind:done {ondone}>
     <StepContent>
         <p class="description">
             Klicke auf den Button, um eine eigene Kopie des Formulars in deinem

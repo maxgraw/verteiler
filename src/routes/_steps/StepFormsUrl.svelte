@@ -4,12 +4,14 @@
 
     interface Props {
         open?: boolean;
+        done?: boolean;
         ondone?: () => void;
         link?: string;
     }
 
     let {
         open = $bindable(false),
+        done = $bindable(false),
         ondone,
         link = $bindable(""),
     }: Props = $props();
@@ -34,6 +36,7 @@
     num={2}
     title="Formular veröffentlichen und Link speichern"
     bind:open
+    bind:done
     {ondone}
     checkDisabled={!isValidLink}
 >

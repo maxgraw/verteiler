@@ -5,10 +5,11 @@
 
     interface Props {
         open?: boolean;
+        done?: boolean;
         ondone?: () => void;
     }
 
-    let { open = $bindable(false), ondone }: Props = $props();
+    let { open = $bindable(false), done = $bindable(false), ondone }: Props = $props();
 
     const message =
         'Hallo an Alle!\n\n' +
@@ -19,7 +20,7 @@
         'LG';
 </script>
 
-<Step num={3} title="Semester über das Verfahren informieren" bind:open {ondone}>
+<Step num={3} title="Semester über das Verfahren informieren" bind:open bind:done {ondone}>
     <StepContent>
         <p class="description">
             Schick diese Nachricht in eure Semestergruppe, bevor du das Google

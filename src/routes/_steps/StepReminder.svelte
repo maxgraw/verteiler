@@ -5,13 +5,14 @@
 
     interface Props {
         open?: boolean;
+        done?: boolean;
         ondone?: () => void;
         tag?: string;
         uhrzeit?: string;
         disabled?: boolean;
     }
 
-    let { open = $bindable(false), ondone, tag = '', uhrzeit = '', disabled = false }: Props =
+    let { open = $bindable(false), done = $bindable(false), ondone, tag = '', uhrzeit = '', disabled = false }: Props =
         $props();
 
     const message = $derived(
@@ -20,7 +21,7 @@
     );
 </script>
 
-<Step num={5} title="Einen Tag vor Deadline: Erinnerung schicken" bind:open {ondone}>
+<Step num={5} title="Einen Tag vor Deadline: Erinnerung schicken" bind:open bind:done {ondone}>
     <StepContent>
         <p class="description">
             Schick diese Erinnerung einen Tag vor der Deadline in die
