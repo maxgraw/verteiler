@@ -13,9 +13,11 @@
         ondone,
         link = $bindable(""),
     }: Props = $props();
+
+    const isValidLink = $derived(link.startsWith('https://docs.google.com/forms/'));
 </script>
 
-<Step num={2} title="Formular veröffentlichen und Link speichern" bind:open {ondone}>
+<Step num={2} title="Formular veröffentlichen und Link speichern" bind:open {ondone} checkDisabled={!isValidLink}>
     <StepContent>
         <ol>
             <li>Google Forms öffnen → Senden.</li>
@@ -29,6 +31,8 @@
                 type="url"
                 id="forms-url"
                 placeholder="https://docs.google.com/forms/..."
+                required
+                pattern="https://docs\.google\.com/forms/.*"
                 bind:value={link}
             />
         </div>

@@ -10,6 +10,8 @@
         datum?: string;
         uhrzeit?: string;
         link?: string;
+        tag?: string;
+        formattedDatum?: string;
     }
 
     let {
@@ -18,18 +20,10 @@
         datum = $bindable(""),
         uhrzeit = $bindable(""),
         link = "",
+        tag = "",
+        formattedDatum = "",
     }: Props = $props();
 
-    const tag = $derived(
-        datum
-            ? new Date(`${datum}T12:00`).toLocaleDateString("de-DE", {
-                  weekday: "long",
-              })
-            : "",
-    );
-    const formattedDatum = $derived(
-        datum ? datum.split("-").reverse().join(".") : "",
-    );
     const complete = $derived(!!datum && !!uhrzeit && !!link);
 
     const message = $derived(
@@ -58,6 +52,7 @@
     title="Google Forms Link mit Deadline rausschicken"
     bind:open
     {ondone}
+    checkDisabled={!complete}
 >
     <StepContent>
         <p class="description">

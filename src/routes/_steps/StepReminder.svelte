@@ -16,13 +16,16 @@
 
     const message = $derived(
         `Friendly reminder: bitte noch bis ${tag || '[TAG]'}, ${uhrzeit || '[UHRZEIT]'} Uhr ins Google Forms eintragen für die Rotationsgruppen 😊 ` +
-        'Wer nicht eingetragen ist, von dem wissen wir nicht, dass er/sie existiert — ' +
-        'diese Personen bekommen keine Gruppe zugeteilt und müssen Restplätze nehmen.'
+        'Nicht eingetragene Personen werden bei der Verteilung nicht berücksichtigt und müssen Restplätze nehmen.'
     );
 </script>
 
 <Step num={5} title="Einen Tag vor Deadline: Erinnerung schicken" bind:open {ondone}>
     <StepContent>
+        <p class="description">
+            Schick diese Erinnerung einen Tag vor der Deadline in die
+            Semestergruppe.
+        </p>
         <TemplateMessage {message} {disabled} />
     </StepContent>
 </Step>

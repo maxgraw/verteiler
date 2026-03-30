@@ -25,6 +25,7 @@
               })
             : "",
     );
+    const formattedDatum = $derived(datum ? datum.split("-").reverse().join(".") : "");
     const deadlineComplete = $derived(!!datum && !!uhrzeit);
 </script>
 
@@ -52,6 +53,8 @@
                 bind:datum
                 bind:uhrzeit
                 {link}
+                {tag}
+                {formattedDatum}
                 ondone={() => openNext(3)}
             />
         </li>

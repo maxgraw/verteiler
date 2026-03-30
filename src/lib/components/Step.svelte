@@ -8,6 +8,7 @@
         tag?: string;
         done?: boolean;
         open?: boolean;
+        checkDisabled?: boolean;
         ondone?: () => void;
         children: Snippet;
     }
@@ -19,6 +20,7 @@
         tag,
         done = $bindable(false),
         open = $bindable(false),
+        checkDisabled = false,
         ondone,
         children,
     }: Props = $props();
@@ -38,6 +40,7 @@
             bind:checked={done}
             onclick={(e) => e.stopPropagation()}
             onchange={onCheckboxChange}
+            disabled={checkDisabled}
         />
         <div class="step-title">
             <span class="step-num">{num}</span>

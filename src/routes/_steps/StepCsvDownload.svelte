@@ -15,11 +15,7 @@
         <ol>
             <li>Google Forms öffnen → Reiter Antworten.</li>
             <li>
-                Oben rechts auf das Tabellen-Symbol klicken (→ Google Tabellen).
-            </li>
-            <li>
-                In Google Tabellen: Datei → Herunterladen → Kommagetrennte Werte
-                (.csv).
+                Oben rechts auf „⋮" klicken → „Antworten herunterladen (.csv)".
             </li>
             <li>Die heruntergeladene Datei im nächsten Schritt hochladen.</li>
         </ol>
