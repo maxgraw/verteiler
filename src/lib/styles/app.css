@@ -1,5 +1,3 @@
-/* ── Reset ───────────────────────────────────────────────────────── */
-
 *,
 *::before,
 *::after {
@@ -70,8 +68,6 @@ details summary {
 details summary::-webkit-details-marker {
     display: none;
 }
-
-/* ── Design tokens ───────────────────────────────────────────────── */
 
 :root {
     /* Colors: text */
@@ -153,12 +149,9 @@ details summary::-webkit-details-marker {
     --transition-base: 0.3s;
 }
 
-/* ── Base ────────────────────────────────────────────────────────── */
-
 body {
     font-family: system-ui, sans-serif;
     background: var(--color-bg);
     color: var(--color-text);
-    min-height: 100vh;
     padding: var(--space-8) var(--space-4) var(--space-16);
 }

@@ -1,24 +1,15 @@
 <script lang="ts">
-    import type { Snippet } from 'svelte';
-
     interface Props {
-        children: Snippet;
+        message: string;
         disabled?: boolean;
     }
 
-    let { children, disabled = false }: Props = $props();
+    let { message, disabled = false }: Props = $props();
 
-    let bodyEl: HTMLDivElement;
     let copied = $state(false);
 
     function copy() {
-        const text = bodyEl.innerText
-            .split('\n')
-            .map((l) => l.trim())
-            .join('\n')
-            .trim();
-
-        navigator.clipboard.writeText(text).then(() => {
+        navigator.clipboard.writeText(message).then(() => {
             copied = true;
             setTimeout(() => (copied = false), 2000);
         });
@@ -26,13 +17,14 @@
 </script>
 
 <div class="template">
-    <div class="body" bind:this={bodyEl}>
-        {@render children()}
-    </div>
+    <div class="body">{message}</div>
     <button class="copy-btn" onclick={copy} {disabled}>
         {copied ? 'Kopiert ✓' : 'Nachricht kopieren'}
     </button>
 </div>
 
 <style>
+    .body {
+        white-space: pre-wrap;
+    }
 </style>
