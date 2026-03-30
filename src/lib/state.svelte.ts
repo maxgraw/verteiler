@@ -54,6 +54,15 @@ class VerteilerState {
   openNext = (i: number) => {
     if (i + 1 < this.open.length) this.open[i + 1] = true;
   };
+
+  /** Clears all inputs and resets the workflow to the beginning. */
+  reset = () => {
+    this.link = "";
+    this.datum = "";
+    this.uhrzeit = "";
+    this.open = [true, false, false, false, false, false, false];
+    this.done = [false, false, false, false, false, false, false];
+  };
 }
 
 export const state = new VerteilerState();
