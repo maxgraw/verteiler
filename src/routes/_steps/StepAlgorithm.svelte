@@ -27,7 +27,7 @@
                 SLOTS_PER_TIME_SLOT,
                 [...appState.capacities],
             );
-            solveResult = solve(appState.parsedGroups, slots);
+            solveResult = await solve(appState.parsedGroups, slots);
         } catch (e) {
             error = e instanceof Error ? e.message : "Unbekannter Fehler";
         } finally {
