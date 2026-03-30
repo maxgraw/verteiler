@@ -1,17 +1,33 @@
 import GLPK from "glpk.js";
 import { generateSparseVariables } from "./variables";
 import { buildConstraints } from "./constraints";
-import { PENALTIES } from "./utils";
+import { PENALTIES, getPenalty } from "./utils";
 import type { SolveResult, Solution } from "./types";
+import type { Group, Slot } from "../parser";
 
 let glpk: any;
 
-export async function solve(groups: any[], slots: any[]): Promise<SolveResult> {
-  if (!glpk) glpk = await GLPK();
+/**
+ * Solves the group-to-slot assignment problem using GLPK MIP.
+ * @param groups - Parsed student groups with preferences
+ * @param slots - Available rotation slots with capacities
+ * @param onProgress - Optional callback fired at each stage of solving
+ */
+export async function solve(
+  groups: Group[],
+  slots: Slot[],
+  onProgress?: (message: string) => void,
+): Promise<SolveResult> {
+  if (!glpk) {
+    onProgress?.("Initialisiere Solver…");
+    glpk = await GLPK();
+  }
 
+  onProgress?.("Erstelle Modell…");
   const { objVars, binaries, varMap } = generateSparseVariables(groups, slots);
   const constraints = buildConstraints(groups, slots, varMap, glpk);
 
+  onProgress?.("Optimiere…");
   const result = await glpk.solve(
     {
       name: "distribution",
@@ -21,7 +37,6 @@ export async function solve(groups: any[], slots: any[]): Promise<SolveResult> {
     },
     {
       msglev: glpk.GLP_MSG_OFF,
-      tmlim: 10,
       presol: true,
     },
   );
@@ -33,6 +48,7 @@ export async function solve(groups: any[], slots: any[]): Promise<SolveResult> {
     throw new Error("No feasible solution found.");
   }
 
+  onProgress?.("Verarbeite Ergebnis…");
   return reconstruct(result.result.vars, groups, slots, varMap);
 }
 
@@ -60,8 +76,13 @@ function reconstruct(
       solution.groups[i].currentSelection = j;
       solution.occupancy[j].amount += groups[i].size;
 
-      // Calculate score/spread logic here...
-      // (Omitted for brevity, but use the penalty logic from earlier)
+      if (!solution.invAllocation[j]) solution.invAllocation[j] = [];
+      solution.invAllocation[j].push(i);
+
+      const penalty = getPenalty(groups[i], slots[j]);
+      score += penalty;
+      const rankIndex = (PENALTIES as readonly number[]).indexOf(penalty);
+      spread[rankIndex >= 0 ? rankIndex : 3]++;
     }
   }
 

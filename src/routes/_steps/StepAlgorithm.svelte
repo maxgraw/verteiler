@@ -3,7 +3,6 @@
     import StepContent from "$lib/components/StepContent.svelte";
     import { state as appState } from "$lib/state.svelte";
     import { buildSlots } from "$lib/parser";
-    import { solve } from "$lib/algorithm/index";
     import type { SolveResult, Solution } from "$lib/algorithm/types";
     import type { Group } from "$lib/parser";
 
@@ -12,41 +11,53 @@
     const SPREAD_LABELS = ["1. Wahl", "2. Wahl", "3. Wahl", "Kein Match"];
 
     let running = $state(false);
+    let statusMessage = $state("");
     let solveResult = $state<SolveResult | null>(null);
     let error = $state("");
+
+    let worker: Worker | null = null;
+
+    function getWorker(): Worker {
+        if (!worker) {
+            worker = new Worker(
+                new URL("../../lib/solver.worker.ts", import.meta.url),
+                { type: "module" },
+            );
+        }
+        return worker;
+    }
 
     async function run() {
         if (!appState.parsedGroups) return;
         error = "";
         solveResult = null;
         running = true;
+        statusMessage = "Starte…";
 
-        // Clear previous console log to avoid duplicates
-        if (typeof console !== "undefined") {
-            console.clear();
-            console.log(
-                `[Verteiler] ${appState.parsedGroups.length} Gruppen, ${appState.capacities.reduce((a, b) => a + b, 0)} Studierende`,
-            );
-        }
-
-        // Log to browser console for debugging
-        const logProgress = (message: string) => {
-            console.log(`[Verteiler] ${message}`);
-        };
+        const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, [
+            ...appState.capacities,
+        ]);
 
         try {
-            const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, [
-                ...appState.capacities,
-            ]);
-            logProgress("Slots erstellt");
-
-            solveResult = await solve(appState.parsedGroups, slots);
-            logProgress("Erfolg!");
+            solveResult = await new Promise<SolveResult>((resolve, reject) => {
+                const w = getWorker();
+                w.onmessage = (e) => {
+                    if (e.data.type === "status") {
+                        statusMessage = e.data.message;
+                    } else if (e.data.type === "result") {
+                        resolve(e.data.data);
+                    } else if (e.data.type === "error") {
+                        reject(new Error(e.data.message));
+                    }
+                };
+                w.onerror = (e) => reject(new Error(e.message ?? "Worker-Fehler"));
+                w.postMessage({ groups: $state.snapshot(appState.parsedGroups), slots });
+            });
         } catch (e) {
             error = e instanceof Error ? e.message : "Unbekannter Fehler";
-            logProgress(`Fehler: ${error}`);
         } finally {
             running = false;
+            statusMessage = "";
         }
     }
 
@@ -112,14 +123,15 @@
             onclick={run}
             disabled={!appState.parsedGroups || running}
         >
-            {running ? "Wird berechnet…" : "Verteilung berechnen"}
+            Verteilung berechnen
         </button>
 
-        <div class="progress-info">
-            <span class="progress-hint">
-                Ergebnisse werden direkt im Browser berechnet.
-            </span>
-        </div>
+        {#if running}
+            <div class="progress-info">
+                <span class="spinner"></span>
+                <span class="progress-status">{statusMessage}</span>
+            </div>
+        {/if}
 
         {#if error}
             <div class="error-box">{error}</div>
@@ -371,7 +383,7 @@
 
     .progress-info {
         display: flex;
-        flex-direction: column;
+        align-items: center;
         gap: var(--space-2);
         padding: var(--space-3) var(--space-4);
         background: var(--color-bg-subtle);
@@ -380,7 +392,21 @@
         border: 1px solid var(--color-border);
     }
 
-    .progress-hint {
+    .spinner {
+        flex-shrink: 0;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid var(--color-border);
+        border-top-color: var(--color-primary);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .progress-status {
         color: var(--color-text-muted);
         font-weight: 500;
     }
