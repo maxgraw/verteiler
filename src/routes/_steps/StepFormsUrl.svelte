@@ -1,43 +1,30 @@
 <script lang="ts">
-    import Step from "$lib/components/Step.svelte";
-    import StepContent from "$lib/components/StepContent.svelte";
-
-    interface Props {
-        open?: boolean;
-        done?: boolean;
-        ondone?: () => void;
-        link?: string;
-    }
-
-    let {
-        open = $bindable(false),
-        done = $bindable(false),
-        ondone,
-        link = $bindable(""),
-    }: Props = $props();
+    import Step from '$lib/components/Step.svelte';
+    import StepContent from '$lib/components/StepContent.svelte';
+    import { state } from '$lib/state.svelte';
 
     const isValidLink = $derived(
-        link.startsWith("https://docs.google.com/forms/") &&
-            link.includes("/viewform"),
+        state.link.startsWith('https://docs.google.com/forms/') &&
+            state.link.includes('/viewform'),
     );
     const linkError = $derived.by(() => {
-        if (link.length === 0) return "";
-        if (!link.startsWith("https://docs.google.com/forms/"))
-            return "Das sieht nicht wie ein Google Forms Link aus. Der Link muss mit https://docs.google.com/forms/ beginnen.";
-        if (link.includes("/edit") || link.includes("/copy"))
+        if (state.link.length === 0) return '';
+        if (!state.link.startsWith('https://docs.google.com/forms/'))
+            return 'Das sieht nicht wie ein Google Forms Link aus. Der Link muss mit https://docs.google.com/forms/ beginnen.';
+        if (state.link.includes('/edit') || state.link.includes('/copy'))
             return 'Das ist kein Teilnehmerlink. Bitte den Link über "Veröffentlichen" und dann "Teilnehmerlink kopieren" holen - er enthält /viewform.';
-        if (!link.includes("/viewform"))
+        if (!state.link.includes('/viewform'))
             return 'Bitte den Teilnehmerlink einfügen. Er enthält /viewform und ist über "Veröffentlichen" und dann "Teilnehmerlink kopieren" erreichbar.';
-        return "";
+        return '';
     });
 </script>
 
 <Step
     num={2}
     title="Formular veröffentlichen und Link speichern"
-    bind:open
-    bind:done
-    {ondone}
+    bind:open={state.open[1]}
+    bind:done={state.done[1]}
+    ondone={() => state.openNext(1)}
     checkDisabled={!isValidLink}
 >
     <StepContent>
@@ -47,20 +34,18 @@
             <li>Im Dialog erneut „Veröffentlichen" bestätigen.</li>
             <li>
                 Oben rechts sollte ein Dialog mit „Teilnehmerlink kopieren"
-                klicken erscheinen.
+                erscheinen.
             </li>
             <li>„Teilnehmerlink kopieren" klicken.</li>
             <li>Link hier einfügen.</li>
         </ol>
-        <small class="hint"
-            >Der Link wird später automatisch in die Nachrichten eingefügt.</small
-        >
+        <small class="hint">Der Link wird später automatisch in die Nachrichten eingefügt.</small>
         <div class="field">
             <label for="forms-url">Google Forms Link</label>
             {#if isValidLink}
                 <div class="confirmed">
-                    <span class="confirmed-text">{link}</span>
-                    <button class="change-btn" onclick={() => (link = "")}>Ändern</button>
+                    <span class="confirmed-text">{state.link}</span>
+                    <button class="change-btn" onclick={() => (state.link = '')}>Ändern</button>
                 </div>
             {:else}
                 <input
@@ -69,7 +54,7 @@
                     placeholder="https://docs.google.com/forms/..."
                     required
                     pattern="https://docs\.google\.com/forms/.*/viewform.*"
-                    bind:value={link}
+                    bind:value={state.link}
                 />
                 {#if linkError}
                     <small class="error">{linkError}</small>

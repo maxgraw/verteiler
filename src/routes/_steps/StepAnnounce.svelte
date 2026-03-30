@@ -2,14 +2,7 @@
     import Step from '$lib/components/Step.svelte';
     import StepContent from '$lib/components/StepContent.svelte';
     import TemplateMessage from '$lib/components/TemplateMessage.svelte';
-
-    interface Props {
-        open?: boolean;
-        done?: boolean;
-        ondone?: () => void;
-    }
-
-    let { open = $bindable(false), done = $bindable(false), ondone }: Props = $props();
+    import { state } from '$lib/state.svelte';
 
     const message =
         'Hallo an Alle!\n\n' +
@@ -20,7 +13,7 @@
         'LG';
 </script>
 
-<Step num={3} title="Semester über das Verfahren informieren" bind:open bind:done {ondone}>
+<Step num={3} title="Semester über das Verfahren informieren" bind:open={state.open[2]} bind:done={state.done[2]} ondone={() => state.openNext(2)}>
     <StepContent>
         <p class="description">
             Schick diese Nachricht in eure Semestergruppe, bevor du das Google

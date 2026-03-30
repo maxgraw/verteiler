@@ -1,20 +1,13 @@
 <script lang="ts">
-    import Step from "$lib/components/Step.svelte";
-    import StepContent from "$lib/components/StepContent.svelte";
+    import Step from '$lib/components/Step.svelte';
+    import StepContent from '$lib/components/StepContent.svelte';
+    import { state } from '$lib/state.svelte';
 
     const FORMS_COPY_URL =
-        "https://docs.google.com/forms/d/1NPfygE5n_37uiPebmw23j0SxaCU02rDuR3uaqfaO304/copy";
-
-    interface Props {
-        open?: boolean;
-        done?: boolean;
-        ondone?: () => void;
-    }
-
-    let { open = $bindable(false), done = $bindable(false), ondone }: Props = $props();
+        'https://docs.google.com/forms/d/1NPfygE5n_37uiPebmw23j0SxaCU02rDuR3uaqfaO304/copy';
 </script>
 
-<Step num={1} title="Eigene Google Forms Kopie erstellen" bind:open bind:done {ondone}>
+<Step num={1} title="Eigene Google Forms Kopie erstellen" bind:open={state.open[0]} bind:done={state.done[0]} ondone={() => state.openNext(0)}>
     <StepContent>
         <p class="description">
             Klicke auf den Button, um eine eigene Kopie des Formulars in deinem
