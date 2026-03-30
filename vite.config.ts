@@ -16,8 +16,12 @@ export default defineConfig({
 						provider: playwright(),
 						instances: [{ browser: 'chromium', headless: true }]
 					},
-					// algorithm.spec.ts runs here: glpk.js requires Web Workers (browser-only)
-					include: ['src/**/*.svelte.{test,spec}.{js,ts}', 'src/lib/algorithm.spec.ts'],
+					// algorithm files run here: require browser APIs (performance, Web Workers)
+					include: [
+						'src/**/*.svelte.{test,spec}.{js,ts}',
+						'src/lib/algorithm/index.spec.ts',
+						'src/lib/algorithm/benchmark.spec.ts',
+					],
 					exclude: ['src/lib/server/**']
 				}
 			},
@@ -28,7 +32,11 @@ export default defineConfig({
 					name: 'server',
 					environment: 'node',
 					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}', 'src/lib/algorithm.spec.ts']
+					exclude: [
+						'src/**/*.svelte.{test,spec}.{js,ts}',
+						'src/lib/algorithm/index.spec.ts',
+						'src/lib/algorithm/benchmark.spec.ts',
+					]
 				}
 			}
 		]
