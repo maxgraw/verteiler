@@ -7,6 +7,8 @@
     import StepReminder from "./_steps/StepReminder.svelte";
     import StepFormsClose from "./_steps/StepFormsClose.svelte";
     import StepCsvDownload from "./_steps/StepCsvDownload.svelte";
+    import StepCsvUpload from "./_steps/StepCsvUpload.svelte";
+    import StepAlgorithm from "./_steps/StepAlgorithm.svelte";
 </script>
 
 <header>
@@ -26,6 +28,8 @@
         <li><StepReminder /></li>
         <li><StepFormsClose /></li>
         <li><StepCsvDownload /></li>
+        <li><StepCsvUpload /></li>
+        <li><StepAlgorithm /></li>
     </ol>
 </main>
 

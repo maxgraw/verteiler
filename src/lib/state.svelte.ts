@@ -1,68 +1,73 @@
-const STORAGE_KEY = "verteiler";
+import type { Group } from './parser.js';
+
+const STORAGE_KEY = 'verteiler';
 
 class VerteilerState {
-  open = $state([true, false, false, false, false, false, false]);
-  done = $state([false, false, false, false, false, false, false]);
-  link = $state("");
-  datum = $state("");
-  uhrzeit = $state("");
+    open = $state([true, false, false, false, false, false, false, false, false]);
+    done = $state([false, false, false, false, false, false, false, false, false]);
+    link = $state('');
+    datum = $state('');
+    uhrzeit = $state('');
 
-  readonly tag = $derived(
-    this.datum
-      ? new Date(`${this.datum}T12:00`).toLocaleDateString("de-DE", {
-          weekday: "long",
-        })
-      : "",
-  );
+    // Session-only — not persisted to localStorage
+    csvFileName = $state('');
+    parsedGroups = $state<Group[] | null>(null);
+    parseWarnings = $state<string[]>([]);
 
-  readonly formattedDatum = $derived(
-    this.datum ? this.datum.split("-").reverse().join(".") : "",
-  );
+    readonly tag = $derived(
+        this.datum
+            ? new Date(`${this.datum}T12:00`).toLocaleDateString('de-DE', { weekday: 'long' })
+            : '',
+    );
 
-  readonly deadlineComplete = $derived(!!this.datum && !!this.uhrzeit);
+    readonly formattedDatum = $derived(
+        this.datum ? this.datum.split('-').reverse().join('.') : '',
+    );
 
-  constructor() {
-    if (typeof localStorage !== "undefined") {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const { link, datum, uhrzeit, open, done } = JSON.parse(saved);
-          if (link) this.link = link;
-          if (datum) this.datum = datum;
-          if (uhrzeit) this.uhrzeit = uhrzeit;
-          if (open) this.open = open;
-          if (done) this.done = done;
+    readonly deadlineComplete = $derived(!!this.datum && !!this.uhrzeit);
+
+    constructor() {
+        if (typeof localStorage !== 'undefined') {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const { link, datum, uhrzeit, open, done } = JSON.parse(saved);
+                    if (link) this.link = link;
+                    if (datum) this.datum = datum;
+                    if (uhrzeit) this.uhrzeit = uhrzeit;
+                    if (open) this.open = open.concat(Array(this.open.length).fill(false)).slice(0, this.open.length);
+                    if (done) this.done = done.concat(Array(this.done.length).fill(false)).slice(0, this.done.length);
+                }
+            } catch {}
         }
-      } catch {}
+
+        $effect.root(() => {
+            $effect(() => {
+                const { link, datum, uhrzeit, open, done } = this;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ link, datum, uhrzeit, open, done }));
+            });
+        });
     }
 
-    $effect.root(() => {
-      $effect(() => {
-        const { link, datum, uhrzeit, open, done } = this;
-        localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify({ link, datum, uhrzeit, open, done }),
-        );
-      });
-    });
-  }
+    /**
+     * Opens the next step after step i completes.
+     * @param i - Zero-based index of the completed step
+     */
+    openNext = (i: number) => {
+        if (i + 1 < this.open.length) this.open[i + 1] = true;
+    };
 
-  /**
-   * Opens the next step after step i completes.
-   * @param i - Zero-based index of the completed step
-   */
-  openNext = (i: number) => {
-    if (i + 1 < this.open.length) this.open[i + 1] = true;
-  };
-
-  /** Clears all inputs and resets the workflow to the beginning. */
-  reset = () => {
-    this.link = "";
-    this.datum = "";
-    this.uhrzeit = "";
-    this.open = [true, false, false, false, false, false, false];
-    this.done = [false, false, false, false, false, false, false];
-  };
+    /** Clears all inputs and resets the workflow to the beginning. */
+    reset = () => {
+        this.link = '';
+        this.datum = '';
+        this.uhrzeit = '';
+        this.open = [true, false, false, false, false, false, false, false, false];
+        this.done = [false, false, false, false, false, false, false, false, false];
+        this.csvFileName = '';
+        this.parsedGroups = null;
+        this.parseWarnings = [];
+    };
 }
 
 export const state = new VerteilerState();
