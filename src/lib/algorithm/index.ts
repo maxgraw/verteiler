@@ -1,14 +1,14 @@
-import type { Group, Slot } from '../parser';
-import type { SolveResult, Solution } from './types';
+import type { Group, Slot } from "../parser";
+import type { SolveResult, Solution } from "./types";
 
 // Penalty for each preference rank: [1st choice, 2nd, 3rd, no match]
 const PENALTIES = [0, -1, -5, -100] as const;
 
 // SA parameters
-const ITERATIONS = 30_000;   // iterations per restart
-const RESTARTS = 10;          // independent restarts (different seeds, same greedy start)
-const T_START = 5;            // initial temperature — accepts ~37% of 5-point worsenings
-const T_END = 0.01;           // final temperature — accepts essentially nothing
+const ITERATIONS = 30_000; // iterations per restart
+const RESTARTS = 10; // independent restarts (different seeds, same greedy start)
+const T_START = 5; // initial temperature — accepts ~37% of 5-point worsenings
+const T_END = 0.01; // final temperature — accepts essentially nothing
 const COOLING = Math.pow(T_END / T_START, 1 / ITERATIONS);
 
 // Seeded LCG PRNG for reproducible results
@@ -55,7 +55,10 @@ function greedyInit(groups: Group[], slots: Slot[]): number[] {
     for (let s = 0; s < slots.length; s++) {
       if (remaining[s] < g.size) continue;
       const rank = rankOf(g, slots[s].timeSlot);
-      if (rank < bestRank || (rank === bestRank && remaining[s] > bestRemaining)) {
+      if (
+        rank < bestRank ||
+        (rank === bestRank && remaining[s] > bestRemaining)
+      ) {
         bestSlot = s;
         bestRank = rank;
         bestRemaining = remaining[s];
@@ -94,7 +97,8 @@ function runSA(
   // Running score (maximise — closer to 0 is better)
   let score = 0;
   for (let gi = 0; gi < groups.length; gi++) {
-    if (current[gi] >= 0) score += penaltyOf(groups[gi], slots[current[gi]].timeSlot);
+    if (current[gi] >= 0)
+      score += penaltyOf(groups[gi], slots[current[gi]].timeSlot);
   }
 
   let best = [...current];
@@ -166,7 +170,11 @@ function runSA(
   return { assignment: best, score: bestScore };
 }
 
-function buildResult(groups: Group[], slots: Slot[], assignment: number[]): SolveResult {
+function buildResult(
+  groups: Group[],
+  slots: Slot[],
+  assignment: number[],
+): SolveResult {
   const solution: Solution = {
     occupancy: slots.map((s) => ({ ...s, amount: 0 })),
     groups: groups.map((g, i) => ({ ...g, currentSelection: assignment[i] })),
@@ -207,13 +215,14 @@ export async function solve(
   slots: Slot[],
   onProgress?: (message: string) => void,
 ): Promise<SolveResult> {
-  onProgress?.('Greedy-Initialisierung…');
+  onProgress?.("Greedy-Initialisierung…");
   const initial = greedyInit(groups, slots);
 
   let best = initial;
   let bestScore = 0;
   for (let gi = 0; gi < groups.length; gi++) {
-    if (initial[gi] >= 0) bestScore += penaltyOf(groups[gi], slots[initial[gi]].timeSlot);
+    if (initial[gi] >= 0)
+      bestScore += penaltyOf(groups[gi], slots[initial[gi]].timeSlot);
   }
 
   for (let r = 0; r < RESTARTS; r++) {
@@ -229,7 +238,7 @@ export async function solve(
   }
 
   if (best.some((s) => s < 0)) {
-    throw new Error('No feasible solution found.');
+    throw new Error("No feasible solution found.");
   }
 
   return buildResult(groups, slots, best);
