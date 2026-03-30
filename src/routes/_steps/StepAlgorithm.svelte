@@ -3,8 +3,8 @@
     import StepContent from "$lib/components/StepContent.svelte";
     import { state as appState } from "$lib/state.svelte";
     import { buildSlots } from "$lib/parser";
-    import { solve } from "$lib/algorithm";
-    import type { SolveResult, Solution } from "$lib/algorithm";
+    import { solve } from "$lib/algorithm/index";
+    import type { SolveResult, Solution } from "$lib/algorithm/types";
     import type { Group } from "$lib/parser";
 
     const NUM_TIME_SLOTS = 8;
