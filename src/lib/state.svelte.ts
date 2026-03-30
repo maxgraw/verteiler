@@ -3,8 +3,9 @@ import type { Group } from './parser.js';
 const STORAGE_KEY = 'verteiler';
 
 class VerteilerState {
-    open = $state([true, false, false, false, false, false, false, false, false]);
-    done = $state([false, false, false, false, false, false, false, false, false]);
+    open = $state([true, false, false, false, false, false, false, false, false, false]);
+    done = $state([false, false, false, false, false, false, false, false, false, false]);
+    capacities = $state<number[]>(Array(32).fill(6));
     link = $state('');
     datum = $state('');
     uhrzeit = $state('');
@@ -30,12 +31,13 @@ class VerteilerState {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
-                    const { link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings } = JSON.parse(saved);
+                    const { link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings, capacities } = JSON.parse(saved);
                     if (link) this.link = link;
                     if (datum) this.datum = datum;
                     if (uhrzeit) this.uhrzeit = uhrzeit;
                     if (open) this.open = open.concat(Array(this.open.length).fill(false)).slice(0, this.open.length);
                     if (done) this.done = done.concat(Array(this.done.length).fill(false)).slice(0, this.done.length);
+                    if (capacities && Array.isArray(capacities) && capacities.length === 32) this.capacities = capacities;
                     if (csvFileName) this.csvFileName = csvFileName;
                     if (parsedGroups) this.parsedGroups = parsedGroups;
                     if (parseWarnings) this.parseWarnings = parseWarnings;
@@ -45,8 +47,8 @@ class VerteilerState {
 
         $effect.root(() => {
             $effect(() => {
-                const { link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings } = this;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings }));
+                const { link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings, capacities } = this;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings, capacities }));
             });
         });
     }
@@ -64,8 +66,9 @@ class VerteilerState {
         this.link = '';
         this.datum = '';
         this.uhrzeit = '';
-        this.open = [true, false, false, false, false, false, false, false, false];
-        this.done = [false, false, false, false, false, false, false, false, false];
+        this.open = [true, false, false, false, false, false, false, false, false, false];
+        this.done = [false, false, false, false, false, false, false, false, false, false];
+        this.capacities = Array(32).fill(6);
         this.csvFileName = '';
         this.parsedGroups = null;
         this.parseWarnings = [];

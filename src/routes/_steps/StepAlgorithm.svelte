@@ -11,7 +11,6 @@
     const SLOTS_PER_TIME_SLOT = 4;
     const SPREAD_LABELS = ["1. Wahl", "2. Wahl", "3. Wahl", "Kein Match"];
 
-    let capacity = $state(6);
     let running = $state(false);
     let solveResult = $state<SolveResult | null>(null);
     let error = $state("");
@@ -23,11 +22,10 @@
         running = true;
         await new Promise<void>((resolve) => setTimeout(resolve, 0));
         try {
-            const totalSlots = NUM_TIME_SLOTS * SLOTS_PER_TIME_SLOT;
             const slots = buildSlots(
                 NUM_TIME_SLOTS,
                 SLOTS_PER_TIME_SLOT,
-                Array(totalSlots).fill(capacity),
+                [...appState.capacities],
             );
             solveResult = solve(appState.parsedGroups, slots);
         } catch (e) {
@@ -81,33 +79,18 @@
 </script>
 
 <Step
-    num={9}
+    num={10}
     title="Verteilung berechnen"
-    bind:open={appState.open[8]}
-    bind:done={appState.done[8]}
-    ondone={() => appState.openNext(8)}
+    bind:open={appState.open[9]}
+    bind:done={appState.done[9]}
+    ondone={() => appState.openNext(9)}
     checkDisabled={!solveResult}
 >
     <StepContent>
         <p class="description">
-            Kapazität einstellen und Verteilung berechnen.
+            Starte die Berechnung. Der Algorithmus verteilt alle Gruppen
+            möglichst nach ihren Wunsch-Zeitslots.
         </p>
-
-        <div class="capacity-row">
-            <label for="capacity">Kapazität pro Rotationsgruppe</label>
-            <input
-                type="number"
-                id="capacity"
-                min="1"
-                max="20"
-                bind:value={capacity}
-            />
-        </div>
-
-        <small class="hint">
-            Maximale Anzahl Studierende pro Rotationsgruppe. Bei Voranmeldungen
-            entsprechend reduzieren.
-        </small>
 
         <button
             class="run-btn"
@@ -170,28 +153,6 @@
 </Step>
 
 <style>
-    .capacity-row {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-    }
-
-    .capacity-row label {
-        font-size: var(--text-sm);
-        font-weight: 600;
-        color: var(--color-text-secondary);
-    }
-
-    .capacity-row input {
-        width: 5rem;
-        padding: var(--space-1) var(--space-2);
-        border: 1px solid var(--color-border-input);
-        border-radius: var(--radius-sm);
-        font-size: var(--text-base);
-        background: var(--color-bg-subtle);
-        text-align: center;
-    }
-
     .run-btn {
         width: 100%;
         padding: var(--space-2) var(--space-4);
