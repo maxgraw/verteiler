@@ -9,7 +9,6 @@ class VerteilerState {
     datum = $state('');
     uhrzeit = $state('');
 
-    // Session-only — not persisted to localStorage
     csvFileName = $state('');
     parsedGroups = $state<Group[] | null>(null);
     parseWarnings = $state<string[]>([]);
@@ -31,20 +30,23 @@ class VerteilerState {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
-                    const { link, datum, uhrzeit, open, done } = JSON.parse(saved);
+                    const { link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings } = JSON.parse(saved);
                     if (link) this.link = link;
                     if (datum) this.datum = datum;
                     if (uhrzeit) this.uhrzeit = uhrzeit;
                     if (open) this.open = open.concat(Array(this.open.length).fill(false)).slice(0, this.open.length);
                     if (done) this.done = done.concat(Array(this.done.length).fill(false)).slice(0, this.done.length);
+                    if (csvFileName) this.csvFileName = csvFileName;
+                    if (parsedGroups) this.parsedGroups = parsedGroups;
+                    if (parseWarnings) this.parseWarnings = parseWarnings;
                 }
             } catch {}
         }
 
         $effect.root(() => {
             $effect(() => {
-                const { link, datum, uhrzeit, open, done } = this;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ link, datum, uhrzeit, open, done }));
+                const { link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings } = this;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings }));
             });
         });
     }

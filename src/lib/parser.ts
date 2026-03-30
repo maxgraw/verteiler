@@ -29,6 +29,7 @@ export interface ParseResult {
 
 const DONT_CARE_WORD = 'Egal';
 const MIN_COLUMNS = 7;
+const NUM_TIME_SLOTS = 8;
 
 function detectSeparator(firstLine: string): ',' | ';' {
     const commas = (firstLine.match(/,/g) ?? []).length;
@@ -83,7 +84,9 @@ function parseChoiceCell(cell: string): number | null {
     const match = trimmed.match(/-(\d+)$/);
     if (!match) return null;
     const y = parseInt(match[1], 10);
-    return Math.floor(y / 4) - 1;
+    const timeSlot = Math.floor(y / 4) - 1;
+    if (timeSlot < 0 || timeSlot >= NUM_TIME_SLOTS) return null;
+    return timeSlot;
 }
 
 /**
@@ -156,6 +159,18 @@ export function parseChoices(csvText: string): ParseResult {
             choices.push(parsed);
         }
         if (choiceError) continue;
+
+        const uniqueSlots = new Set(choices.filter((c) => c !== -1));
+        if (uniqueSlots.size < choices.filter((c) => c !== -1).length) {
+            warnings.push(`Zeile ${rowNum}: Doppelte Zeitslot-Präferenz — Eintrag dennoch übernommen.`);
+        }
+
+        const memberCount = members.split(',').filter((m) => m.trim()).length;
+        if (memberCount !== size) {
+            warnings.push(
+                `Zeile ${rowNum}: Gruppengröße ${size}, aber ${memberCount} Mitglied(er) angegeben.`
+            );
+        }
 
         groups.push({ id: groups.length, size, members, choices, currentSelection: -1 });
     }
