@@ -1,6 +1,7 @@
 <script lang="ts">
     import Step from '$lib/components/Step.svelte';
     import StepContent from '$lib/components/StepContent.svelte';
+    import ImageHint from '$lib/components/ImageHint.svelte';
     import { state } from '$lib/state.svelte';
 
     const isValidLink = $derived(
@@ -30,13 +31,14 @@
     <StepContent>
         <ol>
             <li>Kopiertes Google Forms öffnen</li>
-            <li>„Veröffentlichen" oben rechts klicken.</li>
-            <li>Im Dialog erneut „Veröffentlichen" bestätigen.</li>
             <li>
-                Oben rechts sollte ein Dialog mit „Teilnehmerlink kopieren"
-                erscheinen.
+                „Veröffentlichen" oben rechts klicken und im Dialog bestätigen.
+                <ImageHint src="/images/forms-publish.png" />
             </li>
-            <li>„Teilnehmerlink kopieren" klicken.</li>
+            <li>
+                Im erscheinenden Dialog „Teilnehmerlink kopieren" klicken.
+                <ImageHint src="/images/forms-link.png" />
+            </li>
             <li>Link hier einfügen.</li>
         </ol>
         <small class="hint">Der Link wird später automatisch in die Nachrichten eingefügt.</small>

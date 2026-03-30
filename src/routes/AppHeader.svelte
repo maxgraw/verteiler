@@ -1,5 +1,6 @@
 <script lang="ts">
     import { state } from '$lib/state.svelte';
+    import { ArrowRight } from '@lucide/svelte';
 </script>
 
 <header>
@@ -19,9 +20,9 @@
         </p>
         <div class="flow">
             <span>Formular erstellen</span>
-            <span class="arrow">→</span>
+            <ArrowRight class="arrow" size={14} />
             <span>Anmeldungen sammeln</span>
-            <span class="arrow">→</span>
+            <ArrowRight class="arrow" size={14} />
             <span>Verteilung berechnen</span>
         </div>
         <p class="save-note">
@@ -83,9 +84,9 @@
         color: var(--color-text);
     }
 
-    .arrow {
+    :global(.arrow) {
         color: var(--color-text-faint);
-        font-weight: 400;
+        flex-shrink: 0;
     }
 
     .save-note {

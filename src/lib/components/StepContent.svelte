@@ -40,6 +40,6 @@
     }
 
     .content :global(li) {
-        margin-bottom: var(--space-1);
+        margin-bottom: var(--space-3);
     }
 </style>

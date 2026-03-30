@@ -30,7 +30,7 @@
 
 <Step
     num={4}
-    title="Google Forms Link mit Deadline rausschicken"
+    title="Deadline eintragen und Nachricht rausschicken"
     bind:open={state.open[3]}
     bind:done={state.done[3]}
     ondone={() => state.openNext(3)}
@@ -38,8 +38,7 @@
 >
     <StepContent>
         <p class="description">
-            Deadline und Link eingeben — die fertige Nachricht in die
-            Semestergruppe schicken.
+            Trag die Deadline ein und schick die fertige Nachricht in die Semestergruppe.
         </p>
         <DeadlineInputs bind:datum={state.datum} bind:uhrzeit={state.uhrzeit} />
         {#if !complete}
