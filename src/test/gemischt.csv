@@ -1,0 +1,13 @@
+Zeitstempel,E-Mail-Adresse,Gruppengröße,Mitglieder,1. Wahl,2. Wahl,3. Wahl
+01.01.2026 09:00:00,g01@test.de,6,"Anna Müller, Ben Schmidt, Carl Fischer, Dora Weber, Eva Becker, Felix Koch",Gruppe 9-12,Gruppe 5-8,Gruppe 13-16
+01.01.2026 09:05:00,g02@test.de,6,"Greta Braun, Hans Wolf, Ida Zimmermann, Jan Lange, Kira Neumann, Leo Haas",Gruppe 9-12,Gruppe 13-16,Gruppe 17-20
+01.01.2026 09:10:00,g03@test.de,5,"Mia Herrmann, Noah Walter, Olivia Huber, Paul Keller, Quin Berger",Gruppe 5-8,Gruppe 1-4,Gruppe 9-12
+01.01.2026 09:15:00,g04@test.de,5,"Rosa Kaiser, Sam Maier, Tina Groß, Uwe Hahn, Vera Schuster",Gruppe 5-8,Gruppe 9-12,Egal
+01.01.2026 09:20:00,g05@test.de,5,"Willi Steiner, Xena Werner, Yvonne Roth, Zara Krause, Anton Meier",Gruppe 13-16,Gruppe 9-12,Gruppe 17-20
+01.01.2026 09:25:00,g06@test.de,4,"Berta Funke, Carl Pfeiffer, Dora Brandt, Emil Seidel",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12
+01.01.2026 09:30:00,g07@test.de,4,"Frida Beck, Georg Friedrich, Hanna Kühn, Ingo Lindner",Gruppe 17-20,Gruppe 21-24,Gruppe 13-16
+01.01.2026 09:35:00,g08@test.de,3,"Jutta Köhler, Kurt Wenzel, Laura Hofer",Gruppe 21-24,Gruppe 17-20,Gruppe 25-28
+01.01.2026 09:40:00,g09@test.de,3,"Mats Altmann, Nina Steffen, Otto Kempe",Gruppe 25-28,Gruppe 29-32,Gruppe 21-24
+01.01.2026 09:45:00,g10@test.de,2,"Petra Nuss, Quentin Nagel",Gruppe 29-32,Gruppe 25-28,Gruppe 21-24
+01.01.2026 09:50:00,g11@test.de,2,"Rita Petersen, Stefan Rudolph",Egal,Gruppe 1-4,Egal
+01.01.2026 09:55:00,g12@test.de,1,"Thomas Dorn",Gruppe 13-16,Egal,Gruppe 5-8

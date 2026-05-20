@@ -1,0 +1,4 @@
+Zeitstempel,E-Mail-Adresse,Gruppengröße,Mitglieder,1. Wahl,2. Wahl,3. Wahl
+01.01.2026 10:00:00,a@test.de,3,"Alice Müller, Bob Schmidt, Carol Fischer",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12
+01.01.2026 10:01:00,b@test.de,3,"Dave Weber, Eve Becker, Frank Koch",Gruppe 5-8,Gruppe 9-12,Gruppe 1-4
+01.01.2026 10:02:00,c@test.de,3,"Grace Braun, Heike Wolf, Ivan Lange",Gruppe 9-12,Gruppe 1-4,Gruppe 5-8

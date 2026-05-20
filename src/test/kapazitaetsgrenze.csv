@@ -1,0 +1,13 @@
+Zeitstempel,E-Mail-Adresse,Gruppengröße,Mitglieder,1. Wahl,2. Wahl,3. Wahl
+01.01.2026 10:00:00,g01@test.de,6,"A1 Müller, A2 Schmidt, A3 Fischer, A4 Weber, A5 Becker, A6 Koch",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12
+01.01.2026 10:01:00,g02@test.de,6,"B1 Braun, B2 Wolf, B3 Zimmermann, B4 Lange, B5 Neumann, B6 Haas",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12
+01.01.2026 10:02:00,g03@test.de,6,"C1 Herrmann, C2 Walter, C3 Huber, C4 Keller, C5 Berger, C6 Kaiser",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12
+01.01.2026 10:03:00,g04@test.de,6,"D1 Maier, D2 Groß, D3 Hahn, D4 Schuster, D5 Steiner, D6 Werner",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12
+01.01.2026 10:04:00,g05@test.de,6,"E1 Roth, E2 Krause, E3 Meier, E4 Funke, E5 Pfeiffer, E6 Brandt",Gruppe 5-8,Gruppe 1-4,Gruppe 9-12
+01.01.2026 10:05:00,g06@test.de,6,"F1 Seidel, F2 Beck, F3 Friedrich, F4 Kühn, F5 Lindner, F6 Köhler",Gruppe 5-8,Gruppe 1-4,Gruppe 9-12
+01.01.2026 10:06:00,g07@test.de,6,"G1 Wenzel, G2 Hofer, G3 Altmann, G4 Steffen, G5 Kempe, G6 Nuss",Gruppe 5-8,Gruppe 9-12,Gruppe 1-4
+01.01.2026 10:07:00,g08@test.de,6,"H1 Nagel, H2 Petersen, H3 Rudolph, H4 Dorn, H5 Siebert, H6 Bach",Gruppe 5-8,Gruppe 9-12,Gruppe 1-4
+01.01.2026 10:08:00,g09@test.de,6,"I1 Arnold, I2 Bauer, I3 Wenzel, I4 Hofer, I5 Lindner, I6 Köhler",Gruppe 9-12,Gruppe 1-4,Gruppe 5-8
+01.01.2026 10:09:00,g10@test.de,6,"J1 Vogel, J2 Heinrich, J3 Engel, J4 Bergmann, J5 Krämer, J6 Stein",Gruppe 9-12,Gruppe 5-8,Gruppe 1-4
+01.01.2026 10:10:00,g11@test.de,6,"K1 Reich, K2 Maurer, K3 Sauer, K4 Voigt, K5 Reimann, K6 Haas",Gruppe 9-12,Gruppe 13-16,Gruppe 5-8
+01.01.2026 10:11:00,g12@test.de,6,"L1 Busch, L2 Franke, L3 Weiß, L4 Körner, L5 Böttcher, L6 Sander",Gruppe 9-12,Gruppe 13-16,Gruppe 17-20
