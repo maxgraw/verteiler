@@ -1,6 +1,7 @@
 import type { Group } from './parser.js';
 
 const STORAGE_KEY = 'verteiler';
+const VERSION = 1;
 
 class VerteilerState {
     open = $state([true, false, false, false, false, false, false, false, false, false]);
@@ -31,7 +32,9 @@ class VerteilerState {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
-                    const { link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings, capacities } = JSON.parse(saved);
+                    const parsed = JSON.parse(saved);
+                    if (parsed.version !== VERSION) return;
+                    const { link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings, capacities } = parsed;
                     if (link) this.link = link;
                     if (datum) this.datum = datum;
                     if (uhrzeit) this.uhrzeit = uhrzeit;
@@ -48,7 +51,7 @@ class VerteilerState {
         $effect.root(() => {
             $effect(() => {
                 const { link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings, capacities } = this;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings, capacities }));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: VERSION, link, datum, uhrzeit, open, done, csvFileName, parsedGroups, parseWarnings, capacities }));
             });
         });
     }

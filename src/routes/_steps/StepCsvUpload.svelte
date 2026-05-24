@@ -19,6 +19,11 @@
         try {
             const { groups, warnings } = parseChoices(await file.text());
             appState.parsedGroups = groups;
+            if (groups.length > 80) {
+                warnings.unshift(
+                    `Ungewöhnlich viele Gruppen (${groups.length}). Bitte prüfen ob die richtige Datei hochgeladen wurde.`,
+                );
+            }
             appState.parseWarnings = warnings;
         } catch (e) {
             error = e instanceof Error ? e.message : "Unbekannter Fehler";

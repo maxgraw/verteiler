@@ -96,9 +96,9 @@ export async function solve(
   const lp = buildLP(groups, slots);
 
   onProgress?.('Optimiere…');
-  const result = highs.solve(lp);
+  const result = highs.solve(lp, { time_limit: 30 });
 
-  if (result.Status !== 'Optimal') {
+  if (result.Status !== 'Optimal' && result.Status !== 'Time limit reached') {
     throw new Error(`No feasible solution found (status: ${result.Status}).`);
   }
 

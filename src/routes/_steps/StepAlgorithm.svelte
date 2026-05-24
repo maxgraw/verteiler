@@ -27,6 +27,28 @@
         return worker;
     }
 
+    // Prewarm worker when capacities step is completed
+    $effect(() => {
+        if (appState.done[8]) getWorker();
+    });
+
+    // Clear results when CSV is removed or state is reset
+    $effect(() => {
+        if (!appState.parsedGroups) {
+            solveResult = null;
+            error = "";
+        }
+    });
+
+    function toUserMessage(e: unknown): string {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (msg.includes("Infeasible") || msg.includes("feasible"))
+            return "Keine gültige Verteilung möglich. Prüfe ob die Kapazitäten ausreichen.";
+        if (msg.includes("Zeitüberschreitung"))
+            return msg;
+        return `Unbekannter Fehler. Bitte Seite neu laden und erneut versuchen. (${msg})`;
+    }
+
     async function run() {
         if (!appState.parsedGroups) return;
         error = "";
@@ -34,27 +56,52 @@
         running = true;
         statusMessage = "Starte…";
 
-        const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, [
-            ...appState.capacities,
-        ]);
+        const safeCapacities = appState.capacities.map((c) =>
+            Number.isFinite(c) && c >= 1 ? c : 1,
+        );
+        const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, safeCapacities);
+
+        const totalStudents = appState.parsedGroups.reduce(
+            (s, g) => s + g.size,
+            0,
+        );
+        const totalCapacity = safeCapacities.reduce((a, b) => a + b, 0);
+        if (totalStudents > totalCapacity) {
+            error = `Nicht genug Kapazität: ${totalStudents} Studierende, aber nur ${totalCapacity} Plätze verfügbar. Bitte Kapazitäten erhöhen.`;
+            running = false;
+            return;
+        }
 
         try {
             solveResult = await new Promise<SolveResult>((resolve, reject) => {
                 const w = getWorker();
+
+                const timeout = setTimeout(() => {
+                    worker?.terminate();
+                    worker = null;
+                    reject(new Error("Zeitüberschreitung: Berechnung dauerte zu lange."));
+                }, 60_000);
+
                 w.onmessage = (e) => {
                     if (e.data.type === "status") {
                         statusMessage = e.data.message;
                     } else if (e.data.type === "result") {
+                        clearTimeout(timeout);
                         resolve(e.data.data);
                     } else if (e.data.type === "error") {
+                        clearTimeout(timeout);
                         reject(new Error(e.data.message));
                     }
                 };
-                w.onerror = (e) => reject(new Error(e.message ?? "Worker-Fehler"));
+                w.onerror = (e) => {
+                    clearTimeout(timeout);
+                    worker = null;
+                    reject(new Error(e.message ?? "Worker-Fehler"));
+                };
                 w.postMessage({ groups: $state.snapshot(appState.parsedGroups), slots });
             });
         } catch (e) {
-            error = e instanceof Error ? e.message : "Unbekannter Fehler";
+            error = toUserMessage(e);
         } finally {
             running = false;
             statusMessage = "";
@@ -147,6 +194,14 @@
                         </div>
                     {/each}
                 </div>
+
+                {#if solveResult.spread[3] > 0}
+                    <div class="warning-box">
+                        {solveResult.spread[3]} Gruppe(n) konnten keinem
+                        Wunsch-Zeitslot zugewiesen werden und benötigen manuelle
+                        Nachbearbeitung.
+                    </div>
+                {/if}
 
                 <div class="zeitslots">
                     {#each zeitslots as zs}
@@ -283,6 +338,16 @@
     .spread-item[data-rank="3"] .spread-count,
     .spread-item[data-rank="3"] .spread-label {
         color: var(--color-choice-0);
+    }
+
+    .warning-box {
+        padding: var(--space-3);
+        border: 1px solid var(--color-warning-border);
+        border-radius: var(--radius-sm);
+        background: var(--color-warning-bg);
+        color: var(--color-warning-text);
+        font-size: var(--text-sm);
+        font-weight: 500;
     }
 
     .zeitslots {
