@@ -1,9 +1,8 @@
 <script lang="ts">
-import Step from "$lib/components/Step.svelte";
-import StepContent from "$lib/components/StepContent.svelte";
-import TemplateMessage from "$lib/components/TemplateMessage.svelte";
 import DeadlineInputs from "$lib/components/DeadlineInputs.svelte";
+import TemplateMessage from "$lib/components/TemplateMessage.svelte";
 import { state } from "$lib/state.svelte";
+import WizardStep from "./WizardStep.svelte";
 
 const complete = $derived(!!state.datum && !!state.uhrzeit && !!state.link);
 
@@ -23,39 +22,35 @@ const message = $derived(
 		"- Vorangemeldete Personen tragen sich hier NICHT ein!\n" +
 		"- 1./2./3.-Wahl ist entsprechend gewichtet.\n" +
 		"- Ein Erhalt der 1., 2. oder 3. Wahl kann nicht garantiert werden.\n" +
-		"- Die Gruppe bleibt in jedem Fall zusammen.\n\n" +
+		"- Die Gruppe bleibt in jedem Fall zusammen.\n" +
+		`- Sind mehrere Verteilungen gleich fair, entscheidet ein Losverfahren mit dem Startwert ${state.lotterySeed}. Den veröffentliche ich hiermit vorab, damit das Ergebnis nachvollziehbar bleibt.\n\n` +
 		"Bei Fragen gerne melden!",
 );
 </script>
 
-<Step
-    num={4}
+<WizardStep
+    index={3}
     title="Deadline eintragen und Nachricht rausschicken"
-    bind:open={state.open[3]}
-    bind:done={state.done[3]}
-    ondone={() => state.openNext(3)}
     checkDisabled={!complete}
 >
-    <StepContent>
-        <p class="description">
-            Trag die Deadline ein und schick die fertige Nachricht in die Semestergruppe.
-        </p>
-        <DeadlineInputs bind:datum={state.datum} bind:uhrzeit={state.uhrzeit} />
-        {#if !complete}
-            <small class="missing">
-                Noch fehlt:
-                {[
-                    !state.link && 'Google Forms Link (Schritt 2)',
-                    !state.datum && 'Datum',
-                    !state.uhrzeit && 'Uhrzeit',
-                ]
-                    .filter(Boolean)
-                    .join(', ')}
-            </small>
-        {/if}
-        <TemplateMessage {message} disabled={!complete} />
-    </StepContent>
-</Step>
+    <p class="description">
+        Trag die Deadline ein und schick die fertige Nachricht in die Semestergruppe.
+    </p>
+    <DeadlineInputs bind:datum={state.datum} bind:uhrzeit={state.uhrzeit} />
+    {#if !complete}
+        <small class="missing">
+            Noch fehlt:
+            {[
+                !state.link && 'Google Forms Link (Schritt 2)',
+                !state.datum && 'Datum',
+                !state.uhrzeit && 'Uhrzeit',
+            ]
+                .filter(Boolean)
+                .join(', ')}
+        </small>
+    {/if}
+    <TemplateMessage {message} disabled={!complete} />
+</WizardStep>
 
 <style>
     .missing {

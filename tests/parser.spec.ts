@@ -226,6 +226,32 @@ describe("parseChoices", () => {
 		});
 	});
 
+	describe("implausible group count", () => {
+		const validRow = (i: number) =>
+			row(1, `Test ${i}`, "Gruppe 9-12", "Gruppe 5-8", "Gruppe 13-16");
+
+		it("does not warn at 80 groups", () => {
+			const { groups, warnings } = parseChoices(
+				csv(...Array.from({ length: 80 }, (_, i) => validRow(i))),
+			);
+			expect(groups).toHaveLength(80);
+			expect(warnings).toHaveLength(0);
+		});
+
+		it("warns first when more than 80 groups were parsed", () => {
+			const { groups, warnings } = parseChoices(
+				csv(
+					// A per-row warning, so the order of the two can be checked
+					row(3, "Anna, Ben", "Gruppe 9-12", "Gruppe 5-8", "Gruppe 13-16"),
+					...Array.from({ length: 80 }, (_, i) => validRow(i)),
+				),
+			);
+			expect(groups).toHaveLength(81);
+			expect(warnings[0]).toContain("Ungewöhnlich viele Gruppen (81)");
+			expect(warnings[1]).toContain("Mitglied");
+		});
+	});
+
 	describe("separator detection", () => {
 		it("parses semicolon-separated CSV", () => {
 			const semicolonCsv =

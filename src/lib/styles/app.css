@@ -116,6 +116,10 @@ details summary::-webkit-details-marker {
 	--color-choice-3: #ea580c;
 	--color-choice-0: #dc2626;
 
+	/* Orange has no semantic counterpart, so rank 3 carries its own surface */
+	--color-choice-3-bg: #fff7ed;
+	--color-choice-3-border: #fed7aa;
+
 	/* Spacing */
 	--space-1: 0.25rem;
 	--space-2: 0.5rem;
@@ -186,6 +190,35 @@ body {
 .field input:user-invalid {
 	border-color: var(--color-error);
 	background: var(--color-error-bg);
+}
+
+/*
+ * Preference rank palette. Any element carrying data-rank picks up the matching
+ * colors, so the four-way mapping is written once instead of per component.
+ * Ranks are 0-based like SolveResult.spread: 1st, 2nd, 3rd choice, no match.
+ */
+[data-rank="0"] {
+	--rank-text: var(--color-choice-1);
+	--rank-bg: var(--color-success-bg);
+	--rank-border: var(--color-success-border);
+}
+
+[data-rank="1"] {
+	--rank-text: var(--color-choice-2);
+	--rank-bg: var(--color-warning-bg);
+	--rank-border: var(--color-warning-border);
+}
+
+[data-rank="2"] {
+	--rank-text: var(--color-choice-3);
+	--rank-bg: var(--color-choice-3-bg);
+	--rank-border: var(--color-choice-3-border);
+}
+
+[data-rank="3"] {
+	--rank-text: var(--color-choice-0);
+	--rank-bg: var(--color-error-bg);
+	--rank-border: var(--color-error-border);
 }
 
 /* Lucide chevron used inline inside instruction lists */

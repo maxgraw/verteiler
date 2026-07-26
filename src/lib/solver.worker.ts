@@ -1,20 +1,20 @@
 import { solve } from "./algorithm/index";
-import type { Group, Slot } from "./parser";
+import type { SolveRequest, WorkerMessage } from "./solver-client";
 
-interface WorkerInput {
-	groups: Group[];
-	slots: Slot[];
+function post(message: WorkerMessage) {
+	self.postMessage(message);
 }
 
-self.onmessage = async (e: MessageEvent<WorkerInput>) => {
-	const { groups, slots } = e.data;
+self.onmessage = async (e: MessageEvent<SolveRequest>) => {
+	const { groups, slots, lotterySeed } = e.data;
 	try {
-		const result = await solve(groups, slots, (message) => {
-			self.postMessage({ type: "status", message });
+		const result = await solve(groups, slots, {
+			lotterySeed,
+			onProgress: (message) => post({ type: "status", message }),
 		});
-		self.postMessage({ type: "result", data: result });
+		post({ type: "result", data: result });
 	} catch (err) {
-		self.postMessage({
+		post({
 			type: "error",
 			message: err instanceof Error ? err.message : String(err),
 		});

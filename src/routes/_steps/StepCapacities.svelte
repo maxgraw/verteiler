@@ -1,88 +1,79 @@
 <script lang="ts">
-import Step from "$lib/components/Step.svelte";
-import StepContent from "$lib/components/StepContent.svelte";
-import { state as appState } from "$lib/state.svelte";
 import {
 	DEFAULT_CAPACITY,
 	NUM_TIME_SLOTS,
 	SLOTS_PER_TIME_SLOT,
 	TOTAL_SLOTS,
 } from "$lib/config";
+import { state as appState } from "$lib/state.svelte";
+import WizardStep from "./WizardStep.svelte";
 
 let defaultCapacity = $state(DEFAULT_CAPACITY);
 </script>
 
-<Step
-    num={9}
-    title="Kapazitäten einstellen"
-    bind:open={appState.open[8]}
-    bind:done={appState.done[8]}
-    ondone={() => appState.openNext(8)}
->
-    <StepContent>
-        <p class="description">
-            Prüfe in KLIPS, ob Voranmeldungen Plätze in einzelnen
-            Rotationsgruppen belegen, und passe die Kapazitäten entsprechend an.
-        </p>
+<WizardStep index={8} title="Kapazitäten einstellen">
+    <p class="description">
+        Prüfe in KLIPS, ob Voranmeldungen Plätze in einzelnen Rotationsgruppen
+        belegen, und passe die Kapazitäten entsprechend an.
+    </p>
 
-        <ol>
-            <li>Öffne KLIPS und navigiere zu „Generalanmeldung".</li>
-            <li>Wähle dein Semester aus und klicke auf „weiter".</li>
-            <li>
-                Klappe „Studiengruppe 1" auf. Dort siehst du für jede
-                Rotationsgruppe, wie viele Plätze noch verfügbar sind
-                (z.&nbsp;B. „Verfügbare Plätze: 5").
-            </li>
-            <li>
-                Gruppen mit weniger als 6 freien Plätzen haben Voranmeldungen.
-                Trage die jeweilige Anzahl unten ein.
-            </li>
-        </ol>
+    <ol>
+        <li>Öffne KLIPS und navigiere zu „Generalanmeldung".</li>
+        <li>Wähle dein Semester aus und klicke auf „weiter".</li>
+        <li>
+            Klappe „Studiengruppe 1" auf. Dort siehst du für jede
+            Rotationsgruppe, wie viele Plätze noch verfügbar sind (z.&nbsp;B.
+            „Verfügbare Plätze: 5").
+        </li>
+        <li>
+            Gruppen mit weniger als 6 freien Plätzen haben Voranmeldungen. Trage
+            die jeweilige Anzahl unten ein.
+        </li>
+    </ol>
 
-        <div class="capacity-card">
-            <div class="capacity-card-header">
-                <span class="capacity-card-title">Kapazitäten</span>
-                <div class="capacity-default">
-                    <label for="default-capacity">Alle auf</label>
-                    <input
-                        type="number"
-                        id="default-capacity"
-                        min="1"
-                        max="20"
-                        bind:value={defaultCapacity}
-                    />
-                    <button
-                        class="apply-btn"
-                        onclick={() => {
-                            appState.capacities =
-                                Array(TOTAL_SLOTS).fill(defaultCapacity);
-                        }}>Anwenden</button
-                    >
-                </div>
-            </div>
-
-            <div class="capacity-grid">
-                {#each Array(NUM_TIME_SLOTS) as _, t}
-                    <div class="grid-row">
-                        <span class="zs-label">ZS {t + 1}</span>
-                        {#each Array(SLOTS_PER_TIME_SLOT) as _, s}
-                            {@const slotId = t * SLOTS_PER_TIME_SLOT + s}
-                            <div class="grid-cell">
-                                <span class="group-num">Gr. {slotId + 1}</span>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="20"
-                                    bind:value={appState.capacities[slotId]}
-                                />
-                            </div>
-                        {/each}
-                    </div>
-                {/each}
+    <div class="capacity-card">
+        <div class="capacity-card-header">
+            <span class="capacity-card-title">Kapazitäten</span>
+            <div class="capacity-default">
+                <label for="default-capacity">Alle auf</label>
+                <input
+                    type="number"
+                    id="default-capacity"
+                    min="1"
+                    max="20"
+                    bind:value={defaultCapacity}
+                />
+                <button
+                    class="apply-btn"
+                    onclick={() => {
+                        appState.capacities =
+                            Array(TOTAL_SLOTS).fill(defaultCapacity);
+                    }}>Anwenden</button
+                >
             </div>
         </div>
-    </StepContent>
-</Step>
+
+        <div class="capacity-grid">
+            {#each Array(NUM_TIME_SLOTS) as _, t}
+                <div class="grid-row">
+                    <span class="zs-label">ZS {t + 1}</span>
+                    {#each Array(SLOTS_PER_TIME_SLOT) as _, s}
+                        {@const slotId = t * SLOTS_PER_TIME_SLOT + s}
+                        <div class="grid-cell">
+                            <span class="group-num">Gr. {slotId + 1}</span>
+                            <input
+                                type="number"
+                                min="1"
+                                max="20"
+                                bind:value={appState.capacities[slotId]}
+                            />
+                        </div>
+                    {/each}
+                </div>
+            {/each}
+        </div>
+    </div>
+</WizardStep>
 
 <style>
     .capacity-card {

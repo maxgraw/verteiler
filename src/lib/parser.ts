@@ -32,6 +32,12 @@ export interface ParseResult {
 const DONT_CARE_WORD = "Egal";
 const MIN_COLUMNS = 7;
 
+/**
+ * Above this many groups the organizer almost certainly picked the wrong export.
+ * Only warned about, never rejected: an unusually large semester is possible.
+ */
+const IMPLAUSIBLE_GROUP_COUNT = 80;
+
 function detectSeparator(firstLine: string): "," | ";" {
 	const commas = (firstLine.match(/,/g) ?? []).length;
 	const semicolons = (firstLine.match(/;/g) ?? []).length;
@@ -210,6 +216,13 @@ export function parseChoices(csvText: string): ParseResult {
 	if (groups.length === 0) {
 		throw new Error(
 			"Es konnten keine gültigen Einträge gelesen werden. Bitte prüfe das Format der CSV-Datei.",
+		);
+	}
+
+	// Goes first: it questions the file as a whole, so it outranks the per-row notes.
+	if (groups.length > IMPLAUSIBLE_GROUP_COUNT) {
+		warnings.unshift(
+			`Ungewöhnlich viele Gruppen (${groups.length}). Bitte prüfen ob die richtige Datei hochgeladen wurde.`,
 		);
 	}
 

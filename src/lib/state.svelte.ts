@@ -1,5 +1,6 @@
 import type { Group } from "./parser.js";
 import { DEFAULT_CAPACITY, TOTAL_SLOTS } from "./config.js";
+import { generateSeed } from "./lottery.js";
 
 export const STORAGE_KEY = "verteiler";
 
@@ -37,6 +38,13 @@ export class VerteilerState {
 	datum = $state("");
 	uhrzeit = $state("");
 
+	/**
+	 * Seed for the tie-break lottery, published in the deadline message before the
+	 * form closes. Additive field: older saved states simply draw a fresh one, so
+	 * this needs no VERSION bump and does not discard a semester in progress.
+	 */
+	lotterySeed = $state(generateSeed());
+
 	csvFileName = $state("");
 	parsedGroups = $state<Group[] | null>(null);
 	parseWarnings = $state<string[]>([]);
@@ -72,6 +80,7 @@ export class VerteilerState {
 						parsedGroups,
 						parseWarnings,
 						capacities,
+						lotterySeed,
 					} = parsed;
 					if (link) this.link = link;
 					if (datum) this.datum = datum;
@@ -93,6 +102,7 @@ export class VerteilerState {
 					if (csvFileName) this.csvFileName = csvFileName;
 					if (parsedGroups) this.parsedGroups = parsedGroups;
 					if (parseWarnings) this.parseWarnings = parseWarnings;
+					if (lotterySeed) this.lotterySeed = lotterySeed;
 				}
 			} catch {}
 		}
@@ -109,6 +119,7 @@ export class VerteilerState {
 					parsedGroups,
 					parseWarnings,
 					capacities,
+					lotterySeed,
 				} = this;
 				localStorage.setItem(
 					STORAGE_KEY,
@@ -123,6 +134,7 @@ export class VerteilerState {
 						parsedGroups,
 						parseWarnings,
 						capacities,
+						lotterySeed,
 					}),
 				);
 			});
@@ -170,6 +182,7 @@ export class VerteilerState {
 		this.csvFileName = "";
 		this.parsedGroups = null;
 		this.parseWarnings = [];
+		this.lotterySeed = generateSeed();
 	};
 }
 

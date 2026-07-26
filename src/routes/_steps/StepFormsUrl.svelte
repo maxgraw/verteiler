@@ -1,8 +1,7 @@
 <script lang="ts">
-import Step from "$lib/components/Step.svelte";
-import StepContent from "$lib/components/StepContent.svelte";
 import ImageHint from "$lib/components/ImageHint.svelte";
 import { state } from "$lib/state.svelte";
+import WizardStep from "./WizardStep.svelte";
 
 const isValidLink = $derived(
 	state.link.startsWith("https://docs.google.com/forms/") &&
@@ -20,51 +19,46 @@ const linkError = $derived.by(() => {
 });
 </script>
 
-<Step
-    num={2}
+<WizardStep
+    index={1}
     title="Formular veröffentlichen und Link speichern"
-    bind:open={state.open[1]}
-    bind:done={state.done[1]}
-    ondone={() => state.openNext(1)}
     checkDisabled={!isValidLink}
 >
-    <StepContent>
-        <ol>
-            <li>Kopiertes Google Forms öffnen</li>
-            <li>
-                „Veröffentlichen" oben rechts klicken und im Dialog bestätigen.
-                <ImageHint src="/images/forms-publish.png" />
-            </li>
-            <li>
-                Im erscheinenden Dialog „Teilnehmerlink kopieren" klicken.
-                <ImageHint src="/images/forms-link.png" />
-            </li>
-            <li>Link hier einfügen.</li>
-        </ol>
-        <small class="hint">Der Link wird später automatisch in die Nachrichten eingefügt.</small>
-        <div class="field">
-            <label for="forms-url">Google Forms Link</label>
-            {#if isValidLink}
-                <div class="confirmed">
-                    <span class="confirmed-text">{state.link}</span>
-                    <button class="change-btn" onclick={() => (state.link = '')}>Ändern</button>
-                </div>
-            {:else}
-                <input
-                    type="url"
-                    id="forms-url"
-                    placeholder="https://docs.google.com/forms/..."
-                    required
-                    pattern="https://docs\.google\.com/forms/.*/viewform.*"
-                    bind:value={state.link}
-                />
-                {#if linkError}
-                    <small class="error">{linkError}</small>
-                {/if}
+    <ol>
+        <li>Kopiertes Google Forms öffnen</li>
+        <li>
+            „Veröffentlichen" oben rechts klicken und im Dialog bestätigen.
+            <ImageHint src="/images/forms-publish.png" />
+        </li>
+        <li>
+            Im erscheinenden Dialog „Teilnehmerlink kopieren" klicken.
+            <ImageHint src="/images/forms-link.png" />
+        </li>
+        <li>Link hier einfügen.</li>
+    </ol>
+    <small class="hint">Der Link wird später automatisch in die Nachrichten eingefügt.</small>
+    <div class="field">
+        <label for="forms-url">Google Forms Link</label>
+        {#if isValidLink}
+            <div class="confirmed">
+                <span class="confirmed-text">{state.link}</span>
+                <button class="change-btn" onclick={() => (state.link = '')}>Ändern</button>
+            </div>
+        {:else}
+            <input
+                type="url"
+                id="forms-url"
+                placeholder="https://docs.google.com/forms/..."
+                required
+                pattern="https://docs\.google\.com/forms/.*/viewform.*"
+                bind:value={state.link}
+            />
+            {#if linkError}
+                <small class="error">{linkError}</small>
             {/if}
-        </div>
-    </StepContent>
-</Step>
+        {/if}
+    </div>
+</WizardStep>
 
 <style>
     .confirmed {

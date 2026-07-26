@@ -17,5 +17,7 @@ Never hardcode a color, spacing value, radius or font size. Use the tokens:
 Drive variants with data attributes instead of extra classes, for example
 .spread-item[data-rank="0"].
 
-If a token is missing, add one rather than inlining a literal. StepAlgorithm.svelte still
-has two literals (#fff7ed, #fed7aa) for the rank-3 tint.
+If a token is missing, add one rather than inlining a literal.
+
+Rank colors are not written per component. app.css maps data-rank 0 to 3 onto --rank-text,
+--rank-bg and --rank-border, and any element carrying data-rank picks them up.

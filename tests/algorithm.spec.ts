@@ -273,3 +273,124 @@ describe("solve — integration", () => {
 		expect(spread[0] + spread[1]).toBeGreaterThanOrEqual(28);
 	});
 });
+
+// ─── solve — fairness measured in students ───────────────────────────────────
+
+describe("solve — fairness measured in students", () => {
+	it("studentSpread has the same four buckets as spread", async () => {
+		const { studentSpread } = await solve(
+			[makeGroup(0, 4, [0, 1, 2])],
+			fullSlots(),
+		);
+		expect(studentSpread).toHaveLength(4);
+	});
+
+	it("studentSpread accounts for every student", async () => {
+		const groups = [
+			makeGroup(0, 6, [0, 1, 2]),
+			makeGroup(1, 5, [1, 2, 3]),
+			makeGroup(2, 3, [2, 3, 4]),
+		];
+		const { studentSpread } = await solve(groups, fullSlots());
+		expect(studentSpread.reduce((a, b) => a + b, 0)).toBe(14);
+	});
+
+	it("studentSpread equals spread weighted by group size", async () => {
+		const groups = [
+			makeGroup(0, 6, [2, 1, 0]),
+			makeGroup(1, 2, [2, 1, 0]),
+			makeGroup(2, 4, [3, 2, 1]),
+		];
+		const { solution, studentSpread } = await solve(groups, fullSlots());
+		const expected = [0, 0, 0, 0];
+		for (const g of solution.groups) {
+			const ts = solution.occupancy[g.currentSelection].timeSlot;
+			const rank = g.choices.findIndex((c) => c === -1 || c === ts);
+			expected[rank === -1 ? 3 : rank] += g.size;
+		}
+		expect(studentSpread).toEqual(expected);
+	});
+
+	it("displaces the smaller group when only one of two can have the contested slot", async () => {
+		// Both want time slot 0, which holds 6. Sacrificing the single applicant
+		// costs one student, sacrificing the six-person group costs six.
+		const slots = buildSlots(2, 1, [6, 6]);
+		const groups = [makeGroup(0, 6, [0, 1, -1]), makeGroup(1, 1, [0, 1, -1])];
+		const { solution, studentSpread } = await solve(groups, slots);
+
+		expect(
+			solution.occupancy[solution.groups[0].currentSelection].timeSlot,
+		).toBe(0);
+		expect(
+			solution.occupancy[solution.groups[1].currentSelection].timeSlot,
+		).toBe(1);
+		expect(studentSpread).toEqual([6, 1, 0, 0]);
+	});
+
+	it("counts an unmatched group's students in the last bucket", async () => {
+		const group = makeGroup(0, 5, [0, 1, 2]);
+		const { studentSpread } = await solve([group], onlyTimeslot(7, 6));
+		expect(studentSpread).toEqual([0, 0, 0, 5]);
+	});
+});
+
+// ─── solve — lottery tie-break ───────────────────────────────────────────────
+
+describe("solve — lottery tie-break", () => {
+	/** Two interchangeable groups, only one of which fits time slot 0. A pure tie. */
+	function tiedCase() {
+		return {
+			slots: buildSlots(2, 1, [3, 3]),
+			groups: [makeGroup(0, 3, [0, 1, -1]), makeGroup(1, 3, [0, 1, -1])],
+		};
+	}
+
+	function winnerOf(result: Awaited<ReturnType<typeof solve>>): number {
+		return result.solution.groups.findIndex(
+			(g) => result.solution.occupancy[g.currentSelection].timeSlot === 0,
+		);
+	}
+
+	it("returns the same distribution for the same seed", async () => {
+		const { groups, slots } = tiedCase();
+		const a = await solve(groups, slots, { lotterySeed: "ABC123" });
+		const b = await solve(groups, slots, { lotterySeed: "ABC123" });
+		expect(winnerOf(a)).toBe(winnerOf(b));
+	});
+
+	it("lets the seed decide which tied group wins", async () => {
+		const { groups, slots } = tiedCase();
+		const winners = new Set<number>();
+		for (const seed of ["AAAAAA", "CCCCCC"]) {
+			winners.add(winnerOf(await solve(groups, slots, { lotterySeed: seed })));
+		}
+		expect([...winners].sort()).toEqual([0, 1]);
+	});
+
+	it("does not let the seed change how good the distribution is", async () => {
+		const { groups, slots } = tiedCase();
+		const a = await solve(groups, slots, { lotterySeed: "AAAAAA" });
+		const b = await solve(groups, slots, { lotterySeed: "CCCCCC" });
+		expect(a.studentSpread).toEqual(b.studentSpread);
+	});
+
+	it("stays deterministic when no seed is supplied", async () => {
+		const { groups, slots } = tiedCase();
+		const a = await solve(groups, slots);
+		const b = await solve(groups, slots);
+		expect(winnerOf(a)).toBe(winnerOf(b));
+	});
+
+	it("does not sacrifice fairness to satisfy the lottery", async () => {
+		// Group 1 may draw the luckier number, but group 0 is six times larger, so
+		// the frozen fairness objective still protects it whatever the seed.
+		const slots = buildSlots(2, 1, [6, 6]);
+		const groups = [makeGroup(0, 6, [0, 1, -1]), makeGroup(1, 1, [0, 1, -1])];
+		for (const seed of ["AAAAAA", "CCCCCC", "ZZZ999"]) {
+			const { studentSpread } = await solve(groups, slots, {
+				lotterySeed: seed,
+			});
+			expect(studentSpread).toEqual([6, 1, 0, 0]);
+		}
+	});
+});

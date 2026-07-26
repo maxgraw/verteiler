@@ -1,8 +1,9 @@
 <script lang="ts">
-import Step from "$lib/components/Step.svelte";
-import StepContent from "$lib/components/StepContent.svelte";
-import { state as appState } from "$lib/state.svelte";
+import { FileText, Upload } from "@lucide/svelte";
+import Alert from "$lib/components/Alert.svelte";
 import { parseChoices } from "$lib/parser";
+import { state as appState } from "$lib/state.svelte";
+import WizardStep from "./WizardStep.svelte";
 
 let error = $state("");
 let dragOver = $state(false);
@@ -19,11 +20,6 @@ async function processFile(file: File) {
 	try {
 		const { groups, warnings } = parseChoices(await file.text());
 		appState.parsedGroups = groups;
-		if (groups.length > 80) {
-			warnings.unshift(
-				`Ungewöhnlich viele Gruppen (${groups.length}). Bitte prüfen ob die richtige Datei hochgeladen wurde.`,
-			);
-		}
 		appState.parseWarnings = warnings;
 	} catch (e) {
 		error = e instanceof Error ? e.message : "Unbekannter Fehler";
@@ -60,96 +56,67 @@ function reset() {
 }
 </script>
 
-<Step
-    num={8}
+<WizardStep
+    index={7}
     title="CSV hochladen"
-    bind:open={appState.open[7]}
-    bind:done={appState.done[7]}
-    ondone={() => appState.openNext(7)}
     checkDisabled={!appState.parsedGroups}
 >
-    <StepContent>
-        <p class="description">
-            Lade die heruntergeladene CSV-Datei aus Schritt 7 hoch.
-        </p>
+    <p class="description">
+        Lade die heruntergeladene CSV-Datei aus Schritt 7 hoch.
+    </p>
 
-        {#if appState.parsedGroups}
-            <div class="success-area">
-                <div class="success-info">
-                    <svg
-                        class="file-icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.5"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-                        />
-                    </svg>
-                    <div class="success-text">
-                        <span class="file-name">{appState.csvFileName}</span>
-                        <span class="file-meta"
-                            >{appState.parsedGroups.length} Gruppen · {studentCount}
-                            Studierende</span
-                        >
-                    </div>
+    {#if appState.parsedGroups}
+        <div class="success-area">
+            <div class="success-info">
+                <span class="file-icon"><FileText size={28} /></span>
+                <div class="success-text">
+                    <span class="file-name">{appState.csvFileName}</span>
+                    <span class="file-meta">
+                        {appState.parsedGroups.length} Gruppen · {studentCount}
+                        Studierende
+                    </span>
                 </div>
-                <button class="reset-btn" onclick={reset}>Entfernen</button>
             </div>
-        {:else}
-            <div class="upload-area" class:drag-over={dragOver}>
-                <input
-                    type="file"
-                    id="csv-input"
-                    accept=".csv"
-                    onchange={handleFileChange}
-                />
-                <!-- Drag handlers sit on the label: it is the visible drop target and
-                     reaches the keyboard through its associated file input. -->
-                <label
-                    for="csv-input"
-                    ondrop={handleDrop}
-                    ondragover={handleDragOver}
-                    ondragleave={handleDragLeave}
-                >
-                    <svg
-                        class="upload-icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.5"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
-                        />
-                    </svg>
-                    <span class="upload-label">CSV-Datei auswählen</span>
-                    <span class="upload-hint">oder hierher ziehen</span>
-                </label>
-            </div>
-        {/if}
+            <button class="reset-btn" onclick={reset}>Entfernen</button>
+        </div>
+    {:else}
+        <div class="upload-area" class:drag-over={dragOver}>
+            <input
+                type="file"
+                id="csv-input"
+                accept=".csv"
+                onchange={handleFileChange}
+            />
+            <!-- Drag handlers sit on the label: it is the visible drop target and
+                 reaches the keyboard through its associated file input. -->
+            <label
+                for="csv-input"
+                ondrop={handleDrop}
+                ondragover={handleDragOver}
+                ondragleave={handleDragLeave}
+            >
+                <span class="upload-icon"><Upload size={32} /></span>
+                <span class="upload-label">CSV-Datei auswählen</span>
+                <span class="upload-hint">oder hierher ziehen</span>
+            </label>
+        </div>
+    {/if}
 
-        {#if error}
-            <div class="error-box">{error}</div>
-        {/if}
+    {#if error}
+        <Alert variant="error">{error}</Alert>
+    {/if}
 
-        {#if appState.parseWarnings.length}
-            <div class="warnings">
-                <strong>Hinweise zur CSV:</strong>
-                <ul>
-                    {#each appState.parseWarnings as w}
-                        <li>{w}</li>
-                    {/each}
-                </ul>
-            </div>
-        {/if}
-    </StepContent>
-</Step>
+    {#if appState.parseWarnings.length}
+        <Alert variant="warning">
+            <strong>Hinweise zur CSV:</strong>
+            <ul class="warning-list">
+                {#each appState.parseWarnings as w}
+                    <li>{w}</li>
+                {/each}
+            </ul>
+        </Alert>
+    {/if}
+</WizardStep>
 
 <style>
     .upload-area {
@@ -190,9 +157,9 @@ function reset() {
     }
 
     .upload-icon {
-        width: 2rem;
-        height: 2rem;
+        display: flex;
         color: var(--color-text-subtle);
+        transition: color var(--transition-fast);
     }
 
     .upload-area label:hover .upload-icon,
@@ -228,9 +195,8 @@ function reset() {
     }
 
     .file-icon {
+        display: flex;
         flex-shrink: 0;
-        width: 1.75rem;
-        height: 1.75rem;
         color: var(--color-choice-1);
     }
 
@@ -276,28 +242,7 @@ function reset() {
         border-color: var(--color-error);
     }
 
-    .error-box {
-        padding: var(--space-3);
-        border: 1px solid var(--color-error-border);
-        border-radius: var(--radius-sm);
-        background: var(--color-error-bg);
-        color: var(--color-error-text);
-        font-size: var(--text-sm);
-    }
-
-    .warnings {
-        padding: var(--space-3);
-        border: 1px solid var(--color-warning-border);
-        border-radius: var(--radius-sm);
-        background: var(--color-warning-bg);
-        color: var(--color-warning-text);
-        font-size: var(--text-sm);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-    }
-
-    .warnings ul {
+    .warning-list {
         list-style: disc;
         padding-left: var(--space-4);
         display: flex;

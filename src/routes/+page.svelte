@@ -9,7 +9,7 @@ import StepFormsClose from "./_steps/StepFormsClose.svelte";
 import StepCsvDownload from "./_steps/StepCsvDownload.svelte";
 import StepCsvUpload from "./_steps/StepCsvUpload.svelte";
 import StepCapacities from "./_steps/StepCapacities.svelte";
-import StepAlgorithm from "./_steps/StepAlgorithm.svelte";
+import StepAlgorithm from "./_steps/StepAlgorithm/StepAlgorithm.svelte";
 </script>
 
 <AppHeader />

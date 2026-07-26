@@ -1,8 +1,6 @@
 <script lang="ts">
-import Step from "$lib/components/Step.svelte";
-import StepContent from "$lib/components/StepContent.svelte";
 import TemplateMessage from "$lib/components/TemplateMessage.svelte";
-import { state } from "$lib/state.svelte";
+import WizardStep from "./WizardStep.svelte";
 
 const message =
 	"Hallo an Alle!\n\n" +
@@ -13,12 +11,10 @@ const message =
 	"LG";
 </script>
 
-<Step num={3} title="Semester über das Verfahren informieren" bind:open={state.open[2]} bind:done={state.done[2]} ondone={() => state.openNext(2)}>
-    <StepContent>
-        <p class="description">
-            Schick diese Nachricht in eure Semestergruppe, bevor du das Google
-            Forms rausschickst.
-        </p>
-        <TemplateMessage {message} />
-    </StepContent>
-</Step>
+<WizardStep index={2} title="Semester über das Verfahren informieren">
+    <p class="description">
+        Schick diese Nachricht in eure Semestergruppe, bevor du das Google Forms
+        rausschickst.
+    </p>
+    <TemplateMessage {message} />
+</WizardStep>

@@ -185,3 +185,32 @@ describe("reset", () => {
 		expect(state.capacities.every((c) => c === DEFAULT_CAPACITY)).toBe(true);
 	});
 });
+
+describe("lottery seed", () => {
+	it("draws a seed when none is stored", async () => {
+		const state = await freshState();
+		expect(state.lotterySeed).toMatch(/^[A-Z2-9]{6}$/);
+	});
+
+	it("keeps the stored seed, so a reload cannot change a published draw", async () => {
+		save({ version: VERSION, lotterySeed: "ABC234" });
+		const state = await freshState();
+		expect(state.lotterySeed).toBe("ABC234");
+	});
+
+	it("persists the seed it drew", async () => {
+		const state = await freshState();
+		const drawn = state.lotterySeed;
+		state.link = "https://example.test/viewform";
+		await tick();
+		const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+		expect(stored.lotterySeed).toBe(drawn);
+	});
+
+	it("draws a new seed on reset, since that starts a new semester", async () => {
+		const state = await freshState();
+		const before = state.lotterySeed;
+		state.reset();
+		expect(state.lotterySeed).not.toBe(before);
+	});
+});

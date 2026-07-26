@@ -23,32 +23,41 @@ bun run test:unit  # vitest watch mode
 src/
 ├── lib/
 │   ├── algorithm/
-│   │   ├── index.ts          # solve(): builds an LP string, runs HiGHS, maps columns back
-│   │   └── types.ts          # SolveResult { solution, score, spread }
-│   ├── components/           # presentational: Step, StepContent, TemplateMessage
+│   │   ├── index.ts          # solve(): size-weighted LP via HiGHS, then a lottery tie-break
+│   │   └── types.ts          # SolveResult { solution, score, spread, studentSpread }
+│   ├── components/           # presentational: Step, StepContent, Alert, CopyButton
 │   ├── clipboard.ts          # copyText(), reports failure instead of rejecting
 │   ├── config.ts             # slot layout constants, the single source of truth
 │   ├── distribution.ts       # pure helpers around a solved distribution
+│   ├── lottery.ts            # seeded draw that breaks ties between equally fair results
 │   ├── parser.ts             # parseChoices() CSV to Group[], buildSlots()
+│   ├── solver-client.ts      # SolverClient: worker lifecycle, progress, timeout
 │   ├── solver.worker.ts      # Web Worker wrapper around solve()
 │   ├── state.svelte.ts       # state singleton, runes + localStorage persistence
-│   └── styles/app.css        # reset, design tokens, shared .field and .inline-arrow
+│   └── styles/app.css        # reset, design tokens, .field, .inline-arrow, [data-rank]
 └── routes/
     ├── +page.svelte          # renders the 10 steps in order
     ├── AppHeader.svelte
-    └── _steps/Step*.svelte   # one file per step, index 0-9
+    └── _steps/
+        ├── WizardStep.svelte # binds one step to state.open/done by zero-based index
+        ├── Step*.svelte      # one file per step, index 0-9
+        └── StepAlgorithm/    # the one step with private sub-components
 
 tests/
 ├── fixtures/*.csv            # real Google Forms exports, imported with ?raw
 ├── algorithm.spec.ts         # solver correctness (browser project)
 ├── benchmark.spec.ts         # score quality + timing (browser project)
 ├── distribution.spec.ts      # pure result helpers (node project)
+├── lottery.spec.ts           # seeded draw (node project)
 ├── parser.spec.ts            # CSV parsing (node project)
 └── state.svelte.spec.ts      # persistence and restore (browser project)
 ```
 
-Data flows one way: CSV, parseChoices(), appState.parsedGroups, solver.worker.ts, solve(),
-SolveResult, groupByTimeSlot() rendered in StepAlgorithm.svelte.
+Data flows one way: CSV, parseChoices(), appState.parsedGroups, SolverClient, solver.worker.ts,
+solve(), SolveResult, groupByTimeSlot() rendered in StepAlgorithm/.
+
+A step file holds its German copy, its own state and its styles. It wraps its body in
+WizardStep, which owns the open/done wiring so no step repeats the index three times.
 
 All tests live in tests/, never beside the source file. Components stay thin: anything worth
 testing belongs in parser.ts, distribution.ts or algorithm/, which the specs import via $lib.
@@ -70,6 +79,3 @@ Background on how the app works, read when relevant:
 - .claude/context/domain.md, slot layout, CSV format and parse failure modes
 - .claude/context/solver.md, LP formulation, worker lifecycle and algorithm history
 - .claude/context/state.md, state singleton, persistence and the step pattern
-
-Two earlier planning documents, PLAN.md and FINDINGS.md, have been removed. Both were
-completed or outdated. Their still-relevant content is in .claude/context/.
