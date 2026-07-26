@@ -30,6 +30,7 @@ src/
 │   ├── config.ts             # slot layout constants, the single source of truth
 │   ├── distribution.ts       # pure helpers around a solved distribution
 │   ├── lottery.ts            # seeded draw that breaks ties between equally fair results
+│   ├── messages.ts           # the three copyable German chat messages
 │   ├── parser.ts             # parseChoices() CSV to Group[], buildSlots()
 │   ├── solver-client.ts      # SolverClient: worker lifecycle, progress, timeout
 │   ├── solver.worker.ts      # Web Worker wrapper around solve()
@@ -49,6 +50,7 @@ tests/
 ├── benchmark.spec.ts         # score quality + timing (browser project)
 ├── distribution.spec.ts      # pure result helpers (node project)
 ├── lottery.spec.ts           # seeded draw (node project)
+├── messages.spec.ts          # template placeholders and interpolation (node project)
 ├── parser.spec.ts            # CSV parsing (node project)
 └── state.svelte.spec.ts      # persistence and restore (browser project)
 ```
@@ -56,8 +58,10 @@ tests/
 Data flows one way: CSV, parseChoices(), appState.parsedGroups, SolverClient, solver.worker.ts,
 solve(), SolveResult, groupByTimeSlot() rendered in StepAlgorithm/.
 
-A step file holds its German copy, its own state and its styles. It wraps its body in
-WizardStep, which owns the open/done wiring so no step repeats the index three times.
+A step file holds its own state, its styles and the German copy that is only shown in the
+page: headings, descriptions, list items, labels. The three long messages the organizer
+copies into the semester chat live in messages.ts instead. It wraps its body in WizardStep,
+which owns the open/done wiring so no step repeats the index three times.
 
 All tests live in tests/, never beside the source file. Components stay thin: anything worth
 testing belongs in parser.ts, distribution.ts or algorithm/, which the specs import via $lib.

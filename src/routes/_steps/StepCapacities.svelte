@@ -1,4 +1,5 @@
 <script lang="ts">
+import { ChevronRight } from "@lucide/svelte";
 import {
 	DEFAULT_CAPACITY,
 	NUM_TIME_SLOTS,
@@ -14,20 +15,19 @@ let defaultCapacity = $state(DEFAULT_CAPACITY);
 <WizardStep index={8} title="Kapazitäten einstellen">
     <p class="description">
         Prüfe in KLIPS, ob Voranmeldungen Plätze in einzelnen Rotationsgruppen
-        belegen, und passe die Kapazitäten entsprechend an.
+        belegen, und passe die Kapazitäten an.
     </p>
 
     <ol>
-        <li>Öffne KLIPS und navigiere zu „Generalanmeldung".</li>
-        <li>Wähle dein Semester aus und klicke auf „weiter".</li>
+        <li>KLIPS öffnen <ChevronRight size={12} class="inline-arrow" /> „Generalanmeldung“.</li>
+        <li>Semester auswählen <ChevronRight size={12} class="inline-arrow" /> „weiter“.</li>
         <li>
-            Klappe „Studiengruppe 1" auf. Dort siehst du für jede
-            Rotationsgruppe, wie viele Plätze noch verfügbar sind (z.&nbsp;B.
-            „Verfügbare Plätze: 5").
+            „Studiengruppe 1“ aufklappen. Dort steht pro Rotationsgruppe, wie
+            viele Plätze frei sind (z.&nbsp;B. „Verfügbare Plätze: 5“).
         </li>
         <li>
-            Gruppen mit weniger als 6 freien Plätzen haben Voranmeldungen. Trage
-            die jeweilige Anzahl unten ein.
+            Weniger als {DEFAULT_CAPACITY} freie Plätze heißt: dort gibt es
+            Voranmeldungen. Trag die freie Anzahl unten ein.
         </li>
     </ol>
 

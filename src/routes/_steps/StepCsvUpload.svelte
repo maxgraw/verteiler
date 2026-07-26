@@ -61,9 +61,7 @@ function reset() {
     title="CSV hochladen"
     checkDisabled={!appState.parsedGroups}
 >
-    <p class="description">
-        Lade die heruntergeladene CSV-Datei aus Schritt 7 hoch.
-    </p>
+    <p class="description">Lade die CSV-Datei aus Schritt 7 hoch.</p>
 
     {#if appState.parsedGroups}
         <div class="success-area">

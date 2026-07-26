@@ -1,12 +1,10 @@
 <script lang="ts">
 import TemplateMessage from "$lib/components/TemplateMessage.svelte";
+import { reminderMessage } from "$lib/messages";
 import { state } from "$lib/state.svelte";
 import WizardStep from "./WizardStep.svelte";
 
-const message = $derived(
-	`Friendly reminder: bitte noch bis ${state.tag || "[TAG]"}, ${state.uhrzeit || "[UHRZEIT]"} Uhr ins Google Forms eintragen für die Rotationsgruppen 😊 ` +
-		"Nicht eingetragene Personen werden bei der Verteilung nicht berücksichtigt und müssen Restplätze nehmen.",
-);
+const message = $derived(reminderMessage(state.tag, state.uhrzeit));
 </script>
 
 <WizardStep index={4} title="Einen Tag vor Deadline: Erinnerung schicken">

@@ -79,15 +79,15 @@ const zeitslots = $derived(
 
 <WizardStep index={9} title="Verteilung berechnen" checkDisabled={!solveResult}>
     <p class="description">
-        Starte die Berechnung. Der Algorithmus verteilt alle Gruppen möglichst
-        nach ihren Wunsch-Zeitslots und zählt dabei Studierende, nicht Gruppen:
-        eine Sechsergruppe wiegt sechsmal so viel wie eine Einzelperson.
+        Der Algorithmus verteilt alle Gruppen möglichst nach ihren
+        Wunsch-Zeitslots und zählt dabei Studierende, nicht Gruppen: eine
+        Sechsergruppe wiegt sechsmal so viel wie eine Einzelperson.
     </p>
 
     <p class="lottery-note">
-        Gleichwertige Verteilungen werden per Los entschieden, mit dem Startwert
-        <code>{appState.lotterySeed}</code>. Er steht in der Deadline-Nachricht
-        aus Schritt 4 und liegt damit vor dem Ergebnis fest.
+        Sind mehrere Verteilungen gleich fair, entscheidet ein Los mit dem
+        Startwert <code>{appState.lotterySeed}</code> — derselbe, der in der
+        Deadline-Nachricht aus Schritt 4 steht.
     </p>
 
     <button

@@ -24,8 +24,9 @@ let { spread, studentSpread }: Props = $props();
 
 {#if spread[3] > 0}
     <Alert variant="warning">
-        {spread[3]} Gruppe(n) mit {studentSpread[3]} Studierenden konnten keinem
-        Wunsch-Zeitslot zugewiesen werden und benötigen manuelle Nachbearbeitung.
+        Ohne Wunsch-Zeitslot: {spread[3]}
+        {spread[3] === 1 ? 'Gruppe' : 'Gruppen'} ({studentSpread[3]} Studierende).
+        Bitte manuell nachbearbeiten.
     </Alert>
 {/if}
 

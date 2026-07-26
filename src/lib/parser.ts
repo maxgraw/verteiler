@@ -199,8 +199,10 @@ export function parseChoices(csvText: string): ParseResult {
 		}
 
 		if (memberNames.length !== size) {
+			const label = memberNames.length === 1 ? "Mitglied" : "Mitglieder";
 			warnings.push(
-				`Zeile ${rowNum}: Gruppengröße ${size}, aber ${memberNames.length} Mitglied(er) angegeben.`,
+				`Zeile ${rowNum}: Gruppengröße ${size}, aber ${memberNames.length} ${label} angegeben — ` +
+					`Eintrag übernommen, gerechnet wird mit ${size} Plätzen.`,
 			);
 		}
 

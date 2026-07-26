@@ -3,7 +3,7 @@ import type { Solution } from "./algorithm/types";
 import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "./config";
 
 /** Labels for the four preference ranks, indexed the same way as SolveResult.spread. */
-export const SPREAD_LABELS = ["1. Wahl", "2. Wahl", "3. Wahl", "Kein Match"];
+export const SPREAD_LABELS = ["1. Wahl", "2. Wahl", "3. Wahl", "Kein Wunsch"];
 
 /**
  * Rank of a time slot within a group's preferences: 0, 1 or 2, and 3 for no match.

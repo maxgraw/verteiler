@@ -17,13 +17,13 @@ import { state } from "$lib/state.svelte";
 
     <div class="intro">
         <p>
-            Diese App führt euch Schritt für Schritt durch den gesamten Prozess
-            – vom Erstellen des Google-Formulars bis zur fertigen
-            Gruppenverteilung. Folgt einfach den Schritten der Reihe nach.
+            Diese App führt Schritt für Schritt durch den ganzen Prozess, vom
+            Google Forms bis zur fertigen Gruppenverteilung. Arbeite die
+            Schritte einfach der Reihe nach ab.
         </p>
         <p class="save-note">
-            Euer Fortschritt wird automatisch auf diesem Gerät gespeichert und bleibt nach dem
-            Schließen des Browsers erhalten.
+            Dein Fortschritt wird auf diesem Gerät gespeichert und bleibt nach dem Schließen
+            des Browsers erhalten.
         </p>
     </div>
 </header>
