@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { tick } from 'svelte';
-import { TOTAL_SLOTS, DEFAULT_CAPACITY } from './config';
-import { STORAGE_KEY, VERSION, VerteilerState } from './state.svelte';
+import { TOTAL_SLOTS, DEFAULT_CAPACITY } from '$lib/config';
+import { STORAGE_KEY, VERSION, VerteilerState } from '$lib/state.svelte';
 
 /**
  * A new instance restores from localStorage exactly like a page load does.

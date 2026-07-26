@@ -49,7 +49,7 @@ StepAlgorithm.svelte owns the lifecycle, and each guard exists for a reason:
 
 The pure parts of all that (sanitizeCapacities, checkCapacity, groupByTimeSlot,
 formatDistribution, toUserMessage) live in distribution.ts and are covered by
-distribution.spec.ts. Keep new logic there rather than in the component.
+tests/distribution.spec.ts. Keep new logic there rather than in the component.
 
 ## History
 

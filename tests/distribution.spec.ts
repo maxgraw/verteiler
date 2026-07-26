@@ -6,10 +6,10 @@ import {
     rankOf,
     sanitizeCapacities,
     toUserMessage,
-} from './distribution';
-import { buildSlots } from './parser';
-import type { Group } from './parser';
-import type { Solution } from './algorithm/types';
+} from '$lib/distribution';
+import { buildSlots } from '$lib/parser';
+import type { Group } from '$lib/parser';
+import type { Solution } from '$lib/algorithm/types';
 
 function makeGroup(id: number, size: number, choices: number[], currentSelection: number): Group {
     return { id, size, members: `Gruppe ${id}`, choices, currentSelection };

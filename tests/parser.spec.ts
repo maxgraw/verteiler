@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseChoices, buildSlots } from './parser';
+import { parseChoices, buildSlots } from '$lib/parser';
 
 const HEADER = 'Zeitstempel,E-Mail-Adresse,Gruppengröße,Mitglieder,1. Wahl,2. Wahl,3. Wahl';
 

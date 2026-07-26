@@ -26,6 +26,8 @@ Für die Browser-Tests wird Chromium über Playwright benötigt:
 bunx playwright install chromium
 ```
 
+Der Anwendungscode liegt in `src/`, alle Tests und ihre CSV-Fixtures in `tests/`.
+
 ## Wie die Verteilung berechnet wird
 
 Ein Semester hat 8 Zeitslots mit je 4 parallelen Rotationsgruppen, also 32 Plätze mit

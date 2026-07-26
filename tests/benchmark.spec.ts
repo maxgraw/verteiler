@@ -7,11 +7,11 @@
  * Run with: bun run test (client project, Chromium)
  */
 import { describe, it, expect } from 'vitest';
-import { solve } from './index';
-import { parseChoices, buildSlots } from '../parser';
+import { solve } from '$lib/algorithm';
+import { parseChoices, buildSlots } from '$lib/parser';
 
-import realistischCsv from '../../test/realistisch.csv?raw';
-import engpassCsv from '../../test/engpass.csv?raw';
+import realistischCsv from './fixtures/realistisch.csv?raw';
+import engpassCsv from './fixtures/engpass.csv?raw';
 
 const NUM_TIME_SLOTS = 8;
 const SLOTS_PER_TIME_SLOT = 4;

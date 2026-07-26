@@ -16,13 +16,12 @@ export default defineConfig({
 						provider: playwright(),
 						instances: [{ browser: 'chromium', headless: true }]
 					},
-					// algorithm files run here: require browser APIs (performance, Web Workers)
+					// these need browser APIs: performance, Web Workers, Wasm, localStorage
 					include: [
-						'src/**/*.svelte.{test,spec}.{js,ts}',
-						'src/lib/algorithm/index.spec.ts',
-						'src/lib/algorithm/benchmark.spec.ts',
-					],
-					exclude: ['src/lib/server/**']
+						'tests/**/*.svelte.{test,spec}.{js,ts}',
+						'tests/algorithm.spec.ts',
+						'tests/benchmark.spec.ts',
+					]
 				}
 			},
 
@@ -31,11 +30,11 @@ export default defineConfig({
 				test: {
 					name: 'server',
 					environment: 'node',
-					include: ['src/**/*.{test,spec}.{js,ts}'],
+					include: ['tests/**/*.{test,spec}.{js,ts}'],
 					exclude: [
-						'src/**/*.svelte.{test,spec}.{js,ts}',
-						'src/lib/algorithm/index.spec.ts',
-						'src/lib/algorithm/benchmark.spec.ts',
+						'tests/**/*.svelte.{test,spec}.{js,ts}',
+						'tests/algorithm.spec.ts',
+						'tests/benchmark.spec.ts',
 					]
 				}
 			}

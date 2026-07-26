@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { solve } from "../algorithm";
-import { buildSlots } from "../parser";
-import type { Group, Slot } from "../parser";
+import { solve } from "$lib/algorithm";
+import { buildSlots } from "$lib/parser";
+import type { Group, Slot } from "$lib/parser";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

@@ -24,9 +24,7 @@ src/
 ├── lib/
 │   ├── algorithm/
 │   │   ├── index.ts          # solve(): builds an LP string, runs HiGHS, maps columns back
-│   │   ├── types.ts          # SolveResult { solution, score, spread }
-│   │   ├── index.spec.ts     # correctness + structural guarantees (browser project)
-│   │   └── benchmark.spec.ts # score quality + wall-clock timing (browser project)
+│   │   └── types.ts          # SolveResult { solution, score, spread }
 │   ├── components/           # presentational: Step, StepContent, TemplateMessage
 │   ├── clipboard.ts          # copyText(), reports failure instead of rejecting
 │   ├── config.ts             # slot layout constants, the single source of truth
@@ -35,18 +33,25 @@ src/
 │   ├── solver.worker.ts      # Web Worker wrapper around solve()
 │   ├── state.svelte.ts       # state singleton, runes + localStorage persistence
 │   └── styles/app.css        # reset, design tokens, shared .field and .inline-arrow
-├── routes/
-│   ├── +page.svelte          # renders the 10 steps in order
-│   ├── AppHeader.svelte
-│   └── _steps/Step*.svelte   # one file per step, index 0-9
-└── test/*.csv                # fixtures, also imported by benchmark.spec.ts via ?raw
+└── routes/
+    ├── +page.svelte          # renders the 10 steps in order
+    ├── AppHeader.svelte
+    └── _steps/Step*.svelte   # one file per step, index 0-9
+
+tests/
+├── fixtures/*.csv            # real Google Forms exports, imported with ?raw
+├── algorithm.spec.ts         # solver correctness (browser project)
+├── benchmark.spec.ts         # score quality + timing (browser project)
+├── distribution.spec.ts      # pure result helpers (node project)
+├── parser.spec.ts            # CSV parsing (node project)
+└── state.svelte.spec.ts      # persistence and restore (browser project)
 ```
 
 Data flows one way: CSV, parseChoices(), appState.parsedGroups, solver.worker.ts, solve(),
 SolveResult, groupByTimeSlot() rendered in StepAlgorithm.svelte.
 
-Components stay thin. Anything worth testing lives in parser.ts, distribution.ts or
-algorithm/, next to a spec file.
+All tests live in tests/, never beside the source file. Components stay thin: anything worth
+testing belongs in parser.ts, distribution.ts or algorithm/, which the specs import via $lib.
 
 ## Rules
 
