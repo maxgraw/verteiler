@@ -22,8 +22,8 @@
             Gruppenverteilung. Folgt einfach den Schritten der Reihe nach.
         </p>
         <p class="save-note">
-            Euer Fortschritt wird automatisch gespeichert und bleibt nach dem
-            Schließen des Browsers erhalten – aber nur auf diesem Gerät.
+            Euer Fortschritt wird automatisch auf diesem Gerät gespeichert und bleibt nach dem
+            Schließen des Browsers erhalten.
         </p>
     </div>
 </header>
