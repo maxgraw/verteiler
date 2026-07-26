@@ -100,21 +100,21 @@
                 <button class="reset-btn" onclick={reset}>Entfernen</button>
             </div>
         {:else}
-            <div
-                class="upload-area"
-                tabindex="0"
-                class:drag-over={dragOver}
-                ondrop={handleDrop}
-                ondragover={handleDragOver}
-                ondragleave={handleDragLeave}
-            >
+            <div class="upload-area" class:drag-over={dragOver}>
                 <input
                     type="file"
                     id="csv-input"
                     accept=".csv"
                     onchange={handleFileChange}
                 />
-                <label for="csv-input">
+                <!-- Drag handlers sit on the label: it is the visible drop target and
+                     reaches the keyboard through its associated file input. -->
+                <label
+                    for="csv-input"
+                    ondrop={handleDrop}
+                    ondragover={handleDragOver}
+                    ondragleave={handleDragLeave}
+                >
                     <svg
                         class="upload-icon"
                         viewBox="0 0 24 24"
