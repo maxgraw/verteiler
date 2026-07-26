@@ -14,6 +14,7 @@ import { buildSlots } from "$lib/parser";
 import { SolverClient } from "$lib/solver-client";
 import type { SolveResult } from "$lib/algorithm/types";
 import { state as appState } from "$lib/state.svelte";
+import { STEPS } from "$lib/steps";
 import WizardStep from "../WizardStep.svelte";
 import SpreadSummary from "./SpreadSummary.svelte";
 import TimeSlotList from "./TimeSlotList.svelte";
@@ -28,7 +29,7 @@ onDestroy(() => solver.dispose());
 
 // Prewarm worker when capacities step is completed
 $effect(() => {
-	if (appState.done[8]) solver.prewarm();
+	if (appState.done[STEPS.capacities]) solver.prewarm();
 });
 
 // Clear results when CSV is removed or state is reset
@@ -77,7 +78,7 @@ const zeitslots = $derived(
 );
 </script>
 
-<WizardStep index={9} title="Verteilung berechnen" checkDisabled={!solveResult}>
+<WizardStep index={STEPS.algorithm} title="Verteilung berechnen" checkDisabled={!solveResult}>
     <p class="description">
         Der Algorithmus verteilt alle Gruppen möglichst nach ihren
         Wunsch-Zeitslots und zählt dabei Studierende, nicht Gruppen: eine
@@ -87,7 +88,7 @@ const zeitslots = $derived(
     <p class="lottery-note">
         Sind mehrere Verteilungen gleich fair, entscheidet ein Los mit dem
         Startwert <code>{appState.lotterySeed}</code> — derselbe, der in der
-        Deadline-Nachricht aus Schritt 4 steht.
+        Deadline-Nachricht aus Schritt {STEPS.deadlineMessage + 1} steht.
     </p>
 
     <button

@@ -3,6 +3,7 @@ import { NUM_TIME_SLOTS } from "$lib/config";
 import {
 	announceMessage,
 	deadlineMessage,
+	formIntroMessage,
 	reminderMessage,
 } from "$lib/messages";
 
@@ -17,6 +18,26 @@ const filled = {
 describe("announceMessage", () => {
 	it("names the number of time slots from the config", () => {
 		expect(announceMessage).toContain(`der ${NUM_TIME_SLOTS} Zeitslots`);
+	});
+});
+
+describe("formIntroMessage", () => {
+	it("carries the deadline, so the form description cannot go stale", () => {
+		const message = formIntroMessage("Montag", "01.12.2025", "18:00");
+		expect(message).toContain("Montag, den 01.12.2025 um 18:00 Uhr");
+	});
+
+	it("names the member field exactly as the form labels it", () => {
+		expect(formIntroMessage("Montag", "01.12.2025", "18:00")).toContain(
+			"„Gruppenmitglieder mit Vor- und Nachname“",
+		);
+	});
+
+	it("falls back to placeholders", () => {
+		const message = formIntroMessage("", "", "");
+		expect(message).toContain("[TAG]");
+		expect(message).toContain("[DATUM]");
+		expect(message).toContain("[UHRZEIT]");
 	});
 });
 

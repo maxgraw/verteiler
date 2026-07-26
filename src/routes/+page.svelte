@@ -1,12 +1,12 @@
 <script lang="ts">
 import AppHeader from "./AppHeader.svelte";
 import StepFormsCopy from "./_steps/StepFormsCopy.svelte";
+import StepDeadline from "./_steps/StepDeadline.svelte";
 import StepFormsUrl from "./_steps/StepFormsUrl.svelte";
 import StepAnnounce from "./_steps/StepAnnounce.svelte";
-import StepFormsLink from "./_steps/StepFormsLink.svelte";
+import StepDeadlineMessage from "./_steps/StepDeadlineMessage.svelte";
 import StepReminder from "./_steps/StepReminder.svelte";
-import StepFormsClose from "./_steps/StepFormsClose.svelte";
-import StepCsvDownload from "./_steps/StepCsvDownload.svelte";
+import StepExport from "./_steps/StepExport.svelte";
 import StepCsvUpload from "./_steps/StepCsvUpload.svelte";
 import StepCapacities from "./_steps/StepCapacities.svelte";
 import StepAlgorithm from "./_steps/StepAlgorithm/StepAlgorithm.svelte";
@@ -15,14 +15,16 @@ import StepAlgorithm from "./_steps/StepAlgorithm/StepAlgorithm.svelte";
 <AppHeader />
 
 <main>
+    <!-- The order has to match STEPS in $lib/steps. Three phases: prepare the form,
+         message the semester, evaluate the answers. -->
     <ol>
         <li><StepFormsCopy /></li>
+        <li><StepDeadline /></li>
         <li><StepFormsUrl /></li>
         <li><StepAnnounce /></li>
-        <li><StepFormsLink /></li>
+        <li><StepDeadlineMessage /></li>
         <li><StepReminder /></li>
-        <li><StepFormsClose /></li>
-        <li><StepCsvDownload /></li>
+        <li><StepExport /></li>
         <li><StepCsvUpload /></li>
         <li><StepCapacities /></li>
         <li><StepAlgorithm /></li>

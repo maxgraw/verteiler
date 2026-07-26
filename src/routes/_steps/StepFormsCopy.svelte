@@ -1,11 +1,12 @@
 <script lang="ts">
+import { STEPS } from "$lib/steps";
 import WizardStep from "./WizardStep.svelte";
 
 const FORMS_COPY_URL =
 	"https://docs.google.com/forms/d/1NPfygE5n_37uiPebmw23j0SxaCU02rDuR3uaqfaO304/copy";
 </script>
 
-<WizardStep index={0} title="Eigene Google Forms Kopie erstellen">
+<WizardStep index={STEPS.formsCopy} title="Eigene Google Forms Kopie erstellen">
     <p class="description">
         Leg eine eigene Kopie des Formulars in deinem Google Drive an. Jedes
         Semester braucht eine eigene, damit sich die Antworten nicht vermischen.

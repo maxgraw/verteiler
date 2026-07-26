@@ -60,9 +60,9 @@ never buys a better slot for a lucky group at someone else's expense. The frozen
 recomputed from the assignment rather than read off ObjectiveValue, which comes back as a
 float and would need a tolerance.
 
-The seed lives in state.lotterySeed, is drawn once, persists, and is printed into the deadline
-message in StepFormsLink so it is public before the form closes. reset() draws a new one,
-since that starts a new semester.
+The seed lives in state.lotterySeed, is drawn once, persists, and is printed into
+deadlineMessage in messages.ts so it is public before the form closes. reset() draws a new
+one, since that starts a new semester.
 
 ## Worker lifecycle
 

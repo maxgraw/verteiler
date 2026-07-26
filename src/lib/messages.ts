@@ -27,6 +27,25 @@ Ich habe einen Vorschlag, wie wir die Verteilung der Rotationsgruppen semesterin
 
 LG`;
 
+/**
+ * Goes into the form description itself, where the students see it before answering. The
+ * deadline is repeated here on purpose: the form is often opened without the chat message
+ * at hand.
+ */
+export function formIntroMessage(
+	tag: string,
+	datum: string,
+	uhrzeit: string,
+): string {
+	return `Hallo liebe Studierende,
+
+bitte füllt das Google Forms vollständig bis ${tag || "[TAG]"}, den ${datum || "[DATUM]"} um ${uhrzeit || "[UHRZEIT]"} Uhr aus. Gebt alle Gruppenmitglieder mit Vor- und Nachnamen im Feld „Gruppenmitglieder mit Vor- und Nachname“ an.
+
+Ihr kommt garantiert mit den Leuten aus eurer Gruppe zusammen. Nicht garantiert ist, dass jede Gruppe eine ihrer drei Wahlen bekommt: bewerben sich zu viele auf denselben Zeitslot, kann nicht jeder Wunsch erfüllt werden. Der Algorithmus findet aber die bestmögliche Lösung für alle.
+
+Liebe Grüße`;
+}
+
 export function deadlineMessage({
 	tag,
 	datum,

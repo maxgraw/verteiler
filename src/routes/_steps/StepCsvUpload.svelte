@@ -3,6 +3,7 @@ import { FileText, Upload } from "@lucide/svelte";
 import Alert from "$lib/components/Alert.svelte";
 import { parseChoices } from "$lib/parser";
 import { state as appState } from "$lib/state.svelte";
+import { STEPS } from "$lib/steps";
 import WizardStep from "./WizardStep.svelte";
 
 let error = $state("");
@@ -57,11 +58,13 @@ function reset() {
 </script>
 
 <WizardStep
-    index={7}
+    index={STEPS.csvUpload}
     title="CSV hochladen"
     checkDisabled={!appState.parsedGroups}
 >
-    <p class="description">Lade die CSV-Datei aus Schritt 7 hoch.</p>
+    <p class="description">
+        Lade die CSV-Datei aus Schritt {STEPS.formsExport + 1} hoch.
+    </p>
 
     {#if appState.parsedGroups}
         <div class="success-area">

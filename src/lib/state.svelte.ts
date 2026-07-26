@@ -1,38 +1,28 @@
 import type { Group } from "./parser.js";
 import { DEFAULT_CAPACITY, TOTAL_SLOTS } from "./config.js";
 import { generateSeed } from "./lottery.js";
+import { STEP_COUNT } from "./steps.js";
 
 export const STORAGE_KEY = "verteiler";
 
-/** Bump whenever the persisted shape changes, so old data is discarded rather than half-restored. */
-export const VERSION = 1;
+/**
+ * Bump whenever the persisted shape changes, so old data is discarded rather than
+ * half-restored. Version 2 renumbered the steps: the flags still fit, but they would
+ * describe the wrong steps.
+ */
+export const VERSION = 2;
+
+/** Only the first step starts open, the rest unfold as the organizer works through them. */
+const freshOpen = (): boolean[] => [
+	true,
+	...Array<boolean>(STEP_COUNT - 1).fill(false),
+];
+const freshDone = (): boolean[] => Array<boolean>(STEP_COUNT).fill(false);
 
 /** Exported for tests. Application code uses the `state` singleton below. */
 export class VerteilerState {
-	open = $state([
-		true,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-	]);
-	done = $state([
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-		false,
-	]);
+	open = $state(freshOpen());
+	done = $state(freshDone());
 	capacities = $state<number[]>(Array(TOTAL_SLOTS).fill(DEFAULT_CAPACITY));
 	link = $state("");
 	datum = $state("");
@@ -154,30 +144,8 @@ export class VerteilerState {
 		this.link = "";
 		this.datum = "";
 		this.uhrzeit = "";
-		this.open = [
-			true,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-		];
-		this.done = [
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-		];
+		this.open = freshOpen();
+		this.done = freshDone();
 		this.capacities = Array(TOTAL_SLOTS).fill(DEFAULT_CAPACITY);
 		this.csvFileName = "";
 		this.parsedGroups = null;

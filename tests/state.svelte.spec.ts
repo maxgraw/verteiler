@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { tick } from "svelte";
 import { TOTAL_SLOTS, DEFAULT_CAPACITY } from "$lib/config";
 import { STORAGE_KEY, VERSION, VerteilerState } from "$lib/state.svelte";
+import { STEP_COUNT } from "$lib/steps";
 
 /**
  * A new instance restores from localStorage exactly like a page load does.
@@ -64,7 +65,7 @@ describe("restore from localStorage", () => {
 	it("pads a short done array up to the current step count", async () => {
 		save({ version: VERSION, done: [true, true] });
 		const state = await freshState();
-		expect(state.done).toHaveLength(10);
+		expect(state.done).toHaveLength(STEP_COUNT);
 		expect(state.done.slice(0, 2)).toEqual([true, true]);
 		expect(state.done.slice(2).every((d) => d === false)).toBe(true);
 	});
@@ -72,7 +73,7 @@ describe("restore from localStorage", () => {
 	it("truncates an over-long open array to the current step count", async () => {
 		save({ version: VERSION, open: Array(20).fill(true) });
 		const state = await freshState();
-		expect(state.open).toHaveLength(10);
+		expect(state.open).toHaveLength(STEP_COUNT);
 	});
 
 	it("ignores a capacities array of the wrong length", async () => {
@@ -149,7 +150,7 @@ describe("openNext", () => {
 		const state = await freshState();
 		const last = state.open.length - 1;
 		expect(() => state.openNext(last)).not.toThrow();
-		expect(state.open).toHaveLength(10);
+		expect(state.open).toHaveLength(STEP_COUNT);
 	});
 });
 

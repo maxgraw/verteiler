@@ -1,8 +1,9 @@
 # Verteiler
 
 Single-page SvelteKit app that assigns student groups to university rotation time slots
-based on ranked preferences. Semester organizers walk through 10 steps: create a Google
-Form, collect responses, upload the CSV export, set capacities, solve, copy results.
+based on ranked preferences. Semester organizers walk through 10 steps in three phases:
+prepare the Google Form, message the semester, then evaluate the answers by uploading the
+CSV export, setting capacities, solving and copying the result.
 
 Everything runs client-side. There is no backend, no database and no network call at
 runtime. The uploaded CSV never leaves the browser.
@@ -35,13 +36,14 @@ src/
 │   ├── solver-client.ts      # SolverClient: worker lifecycle, progress, timeout
 │   ├── solver.worker.ts      # Web Worker wrapper around solve()
 │   ├── state.svelte.ts       # state singleton, runes + localStorage persistence
+│   ├── steps.ts              # STEPS, the wizard order and the only place it is written down
 │   └── styles/app.css        # reset, design tokens, .field, .inline-arrow, [data-rank]
 └── routes/
-    ├── +page.svelte          # renders the 10 steps in order
+    ├── +page.svelte          # renders the 10 steps in the order STEPS defines
     ├── AppHeader.svelte
     └── _steps/
         ├── WizardStep.svelte # binds one step to state.open/done by zero-based index
-        ├── Step*.svelte      # one file per step, index 0-9
+        ├── Step*.svelte      # one file per step, each passing its STEPS entry
         └── StepAlgorithm/    # the one step with private sub-components
 
 tests/
@@ -52,6 +54,7 @@ tests/
 ├── lottery.spec.ts           # seeded draw (node project)
 ├── messages.spec.ts          # template placeholders and interpolation (node project)
 ├── parser.spec.ts            # CSV parsing (node project)
+├── steps.spec.ts             # STEPS indices stay unique and gapless (node project)
 └── state.svelte.spec.ts      # persistence and restore (browser project)
 ```
 
@@ -59,9 +62,12 @@ Data flows one way: CSV, parseChoices(), appState.parsedGroups, SolverClient, so
 solve(), SolveResult, groupByTimeSlot() rendered in StepAlgorithm/.
 
 A step file holds its own state, its styles and the German copy that is only shown in the
-page: headings, descriptions, list items, labels. The three long messages the organizer
-copies into the semester chat live in messages.ts instead. It wraps its body in WizardStep,
-which owns the open/done wiring so no step repeats the index three times.
+page: headings, descriptions, list items, labels. The four long copyable messages live in
+messages.ts instead. It wraps its body in WizardStep, which owns the open/done wiring so no
+step repeats the index three times.
+
+Never write a step position as a literal, not as an index and not inside German copy. Take it
+from STEPS in steps.ts, which is also where reordering happens.
 
 All tests live in tests/, never beside the source file. Components stay thin: anything worth
 testing belongs in parser.ts, distribution.ts or algorithm/, which the specs import via $lib.

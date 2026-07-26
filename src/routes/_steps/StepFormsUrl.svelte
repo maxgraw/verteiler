@@ -1,5 +1,6 @@
 <script lang="ts">
 import { state } from "$lib/state.svelte";
+import { STEPS } from "$lib/steps";
 import WizardStep from "./WizardStep.svelte";
 
 const isValidLink = $derived(
@@ -19,7 +20,7 @@ const linkError = $derived.by(() => {
 </script>
 
 <WizardStep
-    index={1}
+    index={STEPS.formsUrl}
     title="Formular veröffentlichen und Link speichern"
     checkDisabled={!isValidLink}
 >
@@ -29,7 +30,6 @@ const linkError = $derived.by(() => {
         <li>Im nächsten Dialog „Teilnehmerlink kopieren“ klicken.</li>
         <li>Link hier einfügen.</li>
     </ol>
-    <small class="hint">Der Link wird später automatisch in die Nachrichten eingefügt.</small>
     <div class="field">
         <label for="forms-url">Google Forms Link</label>
         {#if isValidLink}

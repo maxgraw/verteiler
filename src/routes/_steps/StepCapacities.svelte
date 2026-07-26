@@ -7,12 +7,13 @@ import {
 	TOTAL_SLOTS,
 } from "$lib/config";
 import { state as appState } from "$lib/state.svelte";
+import { STEPS } from "$lib/steps";
 import WizardStep from "./WizardStep.svelte";
 
 let defaultCapacity = $state(DEFAULT_CAPACITY);
 </script>
 
-<WizardStep index={8} title="Kapazitäten einstellen">
+<WizardStep index={STEPS.capacities} title="Kapazitäten einstellen">
     <p class="description">
         Prüfe in KLIPS, ob Voranmeldungen Plätze in einzelnen Rotationsgruppen
         belegen, und passe die Kapazitäten an.
