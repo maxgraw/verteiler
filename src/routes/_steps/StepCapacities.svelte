@@ -2,12 +2,14 @@
     import Step from "$lib/components/Step.svelte";
     import StepContent from "$lib/components/StepContent.svelte";
     import { state as appState } from "$lib/state.svelte";
+    import {
+        DEFAULT_CAPACITY,
+        NUM_TIME_SLOTS,
+        SLOTS_PER_TIME_SLOT,
+        TOTAL_SLOTS,
+    } from "$lib/config";
 
-    const NUM_TIME_SLOTS = 8;
-    const SLOTS_PER_TIME_SLOT = 4;
-    const TOTAL_SLOTS = NUM_TIME_SLOTS * SLOTS_PER_TIME_SLOT;
-
-    let defaultCapacity = $state(6);
+    let defaultCapacity = $state(DEFAULT_CAPACITY);
 </script>
 
 <Step

@@ -16,6 +16,8 @@ maximizing minimizes total penalty.
 Constraints: assign_g puts each group in exactly one slot; cap_s keeps the summed group sizes
 in a slot within its capacity.
 
+rankOf lives in distribution.ts so the solver and the results view score a slot identically.
+
 Two details that look like bugs but are not. Zero coefficients are skipped when building the
 objective, which can leave it empty when every group answered "Egal", hence the 0 x_0_0
 fallback that LP format requires. And time_limit is 30 seconds with "Time limit reached"
@@ -44,6 +46,10 @@ StepAlgorithm.svelte owns the lifecycle, and each guard exists for a reason:
   solver's own infeasibility error means nothing to the user
 - capacities clamped to finite and at least 1 before buildSlots, since the min=1 HTML
   attribute is only advisory
+
+The pure parts of all that (sanitizeCapacities, checkCapacity, groupByTimeSlot,
+formatDistribution, toUserMessage) live in distribution.ts and are covered by
+distribution.spec.ts. Keep new logic there rather than in the component.
 
 ## History
 

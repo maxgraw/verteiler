@@ -1,7 +1,9 @@
 <script lang="ts">
     import { Image } from '@lucide/svelte';
+    import { base } from '$app/paths';
 
     interface Props {
+        /** Path below the site root, e.g. /images/forms-link.png */
         src: string;
         label?: string;
     }
@@ -9,7 +11,7 @@
     let { src, label = 'Screenshot anzeigen' }: Props = $props();
 </script>
 
-<a href={src} target="_blank" rel="noopener" class="image-hint">
+<a href="{base}{src}" target="_blank" rel="noopener" class="image-hint">
     <Image size={12} />
     {label}
 </a>

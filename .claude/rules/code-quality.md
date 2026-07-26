@@ -13,6 +13,5 @@ StepCsvUpload.svelte are the known baseline. Do not add new ones.
 Keep logic out of components. Parsing belongs in parser.ts, solving in algorithm/, shared
 state in state.svelte.ts. Components wire those together and render.
 
-Constants that describe the slot layout (NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT and the derived
-32) are duplicated in parser.ts, StepCapacities.svelte, StepAlgorithm.svelte and
-state.svelte.ts. Change all four together.
+The slot layout constants live in src/lib/config.ts (NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT,
+TOTAL_SLOTS, DEFAULT_CAPACITY). Import them, never redeclare them locally.

@@ -1,12 +1,16 @@
 import type { Group } from './parser.js';
+import { DEFAULT_CAPACITY, TOTAL_SLOTS } from './config.js';
 
-const STORAGE_KEY = 'verteiler';
-const VERSION = 1;
+export const STORAGE_KEY = 'verteiler';
 
-class VerteilerState {
+/** Bump whenever the persisted shape changes, so old data is discarded rather than half-restored. */
+export const VERSION = 1;
+
+/** Exported for tests. Application code uses the `state` singleton below. */
+export class VerteilerState {
     open = $state([true, false, false, false, false, false, false, false, false, false]);
     done = $state([false, false, false, false, false, false, false, false, false, false]);
-    capacities = $state<number[]>(Array(32).fill(6));
+    capacities = $state<number[]>(Array(TOTAL_SLOTS).fill(DEFAULT_CAPACITY));
     link = $state('');
     datum = $state('');
     uhrzeit = $state('');
@@ -40,7 +44,7 @@ class VerteilerState {
                     if (uhrzeit) this.uhrzeit = uhrzeit;
                     if (open) this.open = open.concat(Array(this.open.length).fill(false)).slice(0, this.open.length);
                     if (done) this.done = done.concat(Array(this.done.length).fill(false)).slice(0, this.done.length);
-                    if (capacities && Array.isArray(capacities) && capacities.length === 32) this.capacities = capacities;
+                    if (capacities && Array.isArray(capacities) && capacities.length === TOTAL_SLOTS) this.capacities = capacities;
                     if (csvFileName) this.csvFileName = csvFileName;
                     if (parsedGroups) this.parsedGroups = parsedGroups;
                     if (parseWarnings) this.parseWarnings = parseWarnings;
@@ -71,7 +75,7 @@ class VerteilerState {
         this.uhrzeit = '';
         this.open = [true, false, false, false, false, false, false, false, false, false];
         this.done = [false, false, false, false, false, false, false, false, false, false];
-        this.capacities = Array(32).fill(6);
+        this.capacities = Array(TOTAL_SLOTS).fill(DEFAULT_CAPACITY);
         this.csvFileName = '';
         this.parsedGroups = null;
         this.parseWarnings = [];

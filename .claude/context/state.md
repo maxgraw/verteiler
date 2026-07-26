@@ -1,7 +1,9 @@
 # State and steps
 
 src/lib/state.svelte.ts exports one VerteilerState instance as state, imported by step
-components as appState. It holds the open[10] and done[10] accordion flags, capacities[32],
+components as appState. The class itself is exported too, but only for tests: the singleton
+is built once per module load, so specs construct their own instance to exercise the
+localStorage restore. It holds the open[10] and done[10] accordion flags, capacities[32],
 the deadline fields (link, datum, uhrzeit) and the parsed CSV (csvFileName, parsedGroups,
 parseWarnings). tag, formattedDatum and deadlineComplete are derived on the class.
 

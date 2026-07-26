@@ -3,12 +3,17 @@
     import StepContent from "$lib/components/StepContent.svelte";
     import { state as appState } from "$lib/state.svelte";
     import { buildSlots } from "$lib/parser";
-    import type { SolveResult, Solution } from "$lib/algorithm/types";
-    import type { Group } from "$lib/parser";
-
-    const NUM_TIME_SLOTS = 8;
-    const SLOTS_PER_TIME_SLOT = 4;
-    const SPREAD_LABELS = ["1. Wahl", "2. Wahl", "3. Wahl", "Kein Match"];
+    import type { SolveResult } from "$lib/algorithm/types";
+    import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "$lib/config";
+    import {
+        SPREAD_LABELS,
+        checkCapacity,
+        formatDistribution,
+        groupByTimeSlot,
+        sanitizeCapacities,
+        toUserMessage,
+    } from "$lib/distribution";
+    import { copyText } from "$lib/clipboard";
 
     let running = $state(false);
     let statusMessage = $state("");
@@ -40,15 +45,6 @@
         }
     });
 
-    function toUserMessage(e: unknown): string {
-        const msg = e instanceof Error ? e.message : String(e);
-        if (msg.includes("Infeasible") || msg.includes("feasible"))
-            return "Keine gültige Verteilung möglich. Prüfe ob die Kapazitäten ausreichen.";
-        if (msg.includes("Zeitüberschreitung"))
-            return msg;
-        return `Unbekannter Fehler. Bitte Seite neu laden und erneut versuchen. (${msg})`;
-    }
-
     async function run() {
         if (!appState.parsedGroups) return;
         error = "";
@@ -56,18 +52,12 @@
         running = true;
         statusMessage = "Starte…";
 
-        const safeCapacities = appState.capacities.map((c) =>
-            Number.isFinite(c) && c >= 1 ? c : 1,
-        );
-        const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, safeCapacities);
+        const capacities = sanitizeCapacities(appState.capacities);
+        const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, capacities);
 
-        const totalStudents = appState.parsedGroups.reduce(
-            (s, g) => s + g.size,
-            0,
-        );
-        const totalCapacity = safeCapacities.reduce((a, b) => a + b, 0);
-        if (totalStudents > totalCapacity) {
-            error = `Nicht genug Kapazität: ${totalStudents} Studierende, aber nur ${totalCapacity} Plätze verfügbar. Bitte Kapazitäten erhöhen.`;
+        const capacityError = checkCapacity(appState.parsedGroups, capacities);
+        if (capacityError) {
+            error = capacityError;
             running = false;
             return;
         }
@@ -108,46 +98,21 @@
         }
     }
 
-    function choiceRank(group: Group, solution: Solution): number {
-        const ts = solution.occupancy[group.currentSelection].timeSlot;
-        for (let k = 0; k < group.choices.length; k++) {
-            if (group.choices[k] === -1 || ts === group.choices[k]) return k;
-        }
-        return 3;
-    }
-
-    const zeitslots = $derived.by(() => {
-        if (!solveResult) return [];
-        const { solution } = solveResult;
-        return Array.from({ length: NUM_TIME_SLOTS }, (_, t) => {
-            const groups = solution.groups
-                .filter(
-                    (g) =>
-                        solution.occupancy[g.currentSelection].timeSlot === t,
-                )
-                .map((g) => ({ ...g, rank: choiceRank(g, solution) }));
-            return {
-                num: t + 1,
-                label: `Gruppe ${t * 4 + 1}–${(t + 1) * 4}`,
-                groups,
-                studentCount: groups.reduce((sum, g) => sum + g.size, 0),
-            };
-        });
-    });
+    const zeitslots = $derived(
+        solveResult ? groupByTimeSlot(solveResult.solution) : [],
+    );
 
     let copied = $state(false);
+    let copyFailed = $state(false);
 
-    function copyResults() {
-        const lines: string[] = [];
-        for (const zs of zeitslots) {
-            lines.push(`Zeitslot ${zs.num} (${zs.label}):`);
-            for (const g of zs.groups) lines.push(`  ${g.members}`);
-            lines.push("");
-        }
-        navigator.clipboard.writeText(lines.join("\n").trim()).then(() => {
-            copied = true;
-            setTimeout(() => (copied = false), 2000);
-        });
+    async function copyResults() {
+        const ok = await copyText(formatDistribution(zeitslots));
+        copied = ok;
+        copyFailed = !ok;
+        setTimeout(() => {
+            copied = false;
+            copyFailed = false;
+        }, 2000);
     }
 </script>
 
@@ -233,7 +198,13 @@
                 </div>
 
                 <button class="copy-btn" onclick={copyResults}>
-                    {copied ? "Kopiert ✓" : "Ergebnisse kopieren"}
+                    {#if copyFailed}
+                        Kopieren nicht möglich
+                    {:else if copied}
+                        Kopiert ✓
+                    {:else}
+                        Ergebnisse kopieren
+                    {/if}
                 </button>
             </div>
         {/if}

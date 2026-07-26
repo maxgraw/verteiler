@@ -70,11 +70,6 @@
         line-height: 1.6;
     }
 
-    :global(.arrow) {
-        color: var(--color-text-faint);
-        flex-shrink: 0;
-    }
-
     .save-note {
         font-size: var(--text-xs) !important;
         color: var(--color-text-subtle) !important;

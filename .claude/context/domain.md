@@ -18,8 +18,14 @@ Google Forms export, columns 0-based:
 3 Mitglieder, comma-separated names, non-empty
 4-6 1./2./3. Wahl, either "Gruppe X-Y" or "Egal"
 
-parseChoices sniffs comma vs semicolon from the first line, strips a BOM, and hand-parses
-quoted cells including doubled quotes. Fewer than 7 header columns is a fatal error.
+parseChoices sniffs comma vs semicolon from the first non-empty line, strips a BOM, and
+hand-parses quoted cells including doubled quotes. Fewer than 7 header columns is a fatal
+error.
+
+The scanner walks the whole text rather than splitting on newlines first, so a quoted field
+may contain newlines. Google Forms produces those whenever someone types the member names
+one per line. Member names are then split on commas and newlines alike and rejoined as a
+comma-separated list, so the stored string and the member count are both correct either way.
 
 ## Slot labels
 

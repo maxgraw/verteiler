@@ -242,6 +242,57 @@ describe('parseChoices', () => {
             const { groups } = parseChoices(crlfCsv);
             expect(groups).toHaveLength(1);
         });
+
+        it('ignores blank lines between rows', () => {
+            const withBlanks = [
+                HEADER,
+                '',
+                row(1, 'Anna', 'Gruppe 1-4', 'Gruppe 5-8', 'Gruppe 9-12'),
+                '   ',
+                row(1, 'Ben', 'Gruppe 5-8', 'Gruppe 1-4', 'Gruppe 9-12'),
+                '',
+            ].join('\n');
+            const { groups, warnings } = parseChoices(withBlanks);
+            expect(groups).toHaveLength(2);
+            expect(warnings).toHaveLength(0);
+        });
+    });
+
+    describe('newlines inside quoted fields', () => {
+        it('keeps a group whose member names span multiple lines', () => {
+            const csvText = `${HEADER}\n01.01.2025 10:00:00,test@test.de,2,"Anna Müller\nBen Schmidt",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12`;
+            const { groups } = parseChoices(csvText);
+            expect(groups).toHaveLength(1);
+        });
+
+        it('normalises newline-separated names to a comma-separated list', () => {
+            const csvText = `${HEADER}\n01.01.2025 10:00:00,test@test.de,3,"Anna Müller\nBen Schmidt\nClara Weber",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12`;
+            const { groups } = parseChoices(csvText);
+            expect(groups[0].members).toBe('Anna Müller, Ben Schmidt, Clara Weber');
+        });
+
+        it('counts newline-separated names correctly, so no size warning is raised', () => {
+            const csvText = `${HEADER}\n01.01.2025 10:00:00,test@test.de,3,"Anna\nBen\nClara",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12`;
+            const { warnings } = parseChoices(csvText);
+            expect(warnings).toHaveLength(0);
+        });
+
+        it('handles CRLF inside a quoted field', () => {
+            const csvText = `${HEADER}\r\n01.01.2025 10:00:00,test@test.de,2,"Anna\r\nBen",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12`;
+            const { groups, warnings } = parseChoices(csvText);
+            expect(groups[0].members).toBe('Anna, Ben');
+            expect(warnings).toHaveLength(0);
+        });
+
+        it('does not let a multi-line row swallow the following row', () => {
+            const csvText =
+                `${HEADER}\n` +
+                `01.01.2025 10:00:00,a@test.de,2,"Anna\nBen",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12\n` +
+                `01.01.2025 10:05:00,b@test.de,1,Clara,Gruppe 5-8,Gruppe 1-4,Gruppe 9-12`;
+            const { groups, warnings } = parseChoices(csvText);
+            expect(groups.map((g) => g.members)).toEqual(['Anna, Ben', 'Clara']);
+            expect(warnings).toHaveLength(0);
+        });
     });
 });
 

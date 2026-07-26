@@ -1,3 +1,5 @@
+import { NUM_TIME_SLOTS } from './config';
+
 export interface Slot {
     /** Unique index of this slot */
     id: number;
@@ -29,7 +31,6 @@ export interface ParseResult {
 
 const DONT_CARE_WORD = 'Egal';
 const MIN_COLUMNS = 7;
-const NUM_TIME_SLOTS = 8;
 
 function detectSeparator(firstLine: string): ',' | ';' {
     const commas = (firstLine.match(/,/g) ?? []).length;
@@ -37,40 +38,53 @@ function detectSeparator(firstLine: string): ',' | ';' {
     return semicolons > commas ? ';' : ',';
 }
 
+/**
+ * Split CSV text into rows of trimmed cells.
+ *
+ * Scans the whole text rather than splitting on newlines first, so a quoted
+ * field may span multiple lines. Google Forms produces those whenever someone
+ * types the member names one per line. Blank rows are dropped.
+ */
 function parseCSVText(text: string): string[][] {
     const clean = text.replace(/^\uFEFF/, '');
-    const lines = clean.split(/\r?\n/);
-    const nonEmpty = lines.filter((l) => l.trim() !== '');
-    if (nonEmpty.length === 0) return [];
+    const firstLine = clean.split(/\r?\n/).find((l) => l.trim() !== '');
+    if (firstLine === undefined) return [];
 
-    const sep = detectSeparator(nonEmpty[0]);
+    const sep = detectSeparator(firstLine);
     const rows: string[][] = [];
 
-    for (const line of nonEmpty) {
-        const row: string[] = [];
-        let inQuote = false;
-        let cell = '';
-        for (let i = 0; i < line.length; i++) {
-            const ch = line[i];
-            if (ch === '"') {
-                if (inQuote && line[i + 1] === '"') {
-                    cell += '"';
-                    i++;
-                } else {
-                    inQuote = !inQuote;
-                }
-            } else if (ch === sep && !inQuote) {
-                row.push(cell.trim());
-                cell = '';
+    let row: string[] = [];
+    let cell = '';
+    let inQuote = false;
+
+    for (let i = 0; i < clean.length; i++) {
+        const ch = clean[i];
+
+        if (ch === '"') {
+            if (inQuote && clean[i + 1] === '"') {
+                cell += '"';
+                i++;
             } else {
-                cell += ch;
+                inQuote = !inQuote;
             }
+        } else if (ch === sep && !inQuote) {
+            row.push(cell.trim());
+            cell = '';
+        } else if ((ch === '\n' || ch === '\r') && !inQuote) {
+            if (ch === '\r' && clean[i + 1] === '\n') i++;
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = '';
+        } else {
+            cell += ch;
         }
-        row.push(cell.trim());
-        rows.push(row);
     }
 
-    return rows;
+    row.push(cell.trim());
+    rows.push(row);
+
+    return rows.filter((r) => r.some((c) => c !== ''));
 }
 
 /**
@@ -139,7 +153,12 @@ export function parseChoices(csvText: string): ParseResult {
             continue;
         }
 
-        const members = row[3].trim();
+        // Names may be comma- or newline-separated depending on how the form was filled in
+        const memberNames = row[3]
+            .split(/[,\r\n]+/)
+            .map((m) => m.trim())
+            .filter(Boolean);
+        const members = memberNames.join(', ');
         if (!members) {
             warnings.push(`Zeile ${rowNum}: Keine Mitgliedernamen angegeben — Eintrag übersprungen.`);
             continue;
@@ -165,10 +184,9 @@ export function parseChoices(csvText: string): ParseResult {
             warnings.push(`Zeile ${rowNum}: Doppelte Zeitslot-Präferenz — Eintrag dennoch übernommen.`);
         }
 
-        const memberCount = members.split(',').filter((m) => m.trim()).length;
-        if (memberCount !== size) {
+        if (memberNames.length !== size) {
             warnings.push(
-                `Zeile ${rowNum}: Gruppengröße ${size}, aber ${memberCount} Mitglied(er) angegeben.`
+                `Zeile ${rowNum}: Gruppengröße ${size}, aber ${memberNames.length} Mitglied(er) angegeben.`
             );
         }
 

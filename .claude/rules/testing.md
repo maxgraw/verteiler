@@ -4,9 +4,13 @@ bun run test runs vitest once across the two projects defined in vite.config.ts.
 
 client runs in real Chromium via Playwright. It covers src/**/*.svelte.{test,spec}.{js,ts}
 plus algorithm/index.spec.ts and algorithm/benchmark.spec.ts, which need performance, Web
-Workers and Wasm.
+Workers and Wasm. state.svelte.spec.ts lands here because it needs localStorage.
 
-server runs in node and covers everything else.
+server runs in node and covers everything else, currently parser.spec.ts and
+distribution.spec.ts.
+
+Prefer the node project. Logic that needs a browser to be tested usually belongs in a pure
+module instead, which is why distribution.ts exists.
 
 The include and exclude lists are maintained by hand and mirror each other. A new spec that
 touches the solver, Wasm or the DOM must be added to the client include and to the server

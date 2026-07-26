@@ -2,17 +2,11 @@ import loadHighs from 'highs';
 import wasmUrl from 'highs/runtime?url';
 import type { Group, Slot } from '../parser';
 import type { SolveResult, Solution } from './types';
+import { rankOf } from '../distribution';
 
 const PENALTIES = [0, -1, -5, -100] as const;
 
 const highsInstance = loadHighs({ locateFile: () => wasmUrl });
-
-function rankOf(group: Group, timeslot: number): number {
-  for (let k = 0; k < group.choices.length; k++) {
-    if (group.choices[k] === -1 || group.choices[k] === timeslot) return k;
-  }
-  return 3;
-}
 
 function varName(g: number, s: number): string {
   return `x_${g}_${s}`;
@@ -25,7 +19,7 @@ function buildLP(groups: Group[], slots: Slot[]): string {
   let objLine = '';
   for (let g = 0; g < groups.length; g++) {
     for (let s = 0; s < slots.length; s++) {
-      const coef = PENALTIES[rankOf(groups[g], slots[s].timeSlot)];
+      const coef = PENALTIES[rankOf(groups[g].choices, slots[s].timeSlot)];
       if (coef === 0) continue;
       const name = varName(g, s);
       if (objLine === '') {
@@ -76,7 +70,7 @@ function buildResult(groups: Group[], slots: Slot[], assignment: number[]): Solv
     solution.occupancy[s].amount += groups[gi].size;
     if (!solution.invAllocation[s]) solution.invAllocation[s] = [];
     solution.invAllocation[s].push(gi);
-    const rank = rankOf(groups[gi], slots[s].timeSlot);
+    const rank = rankOf(groups[gi].choices, slots[s].timeSlot);
     score += PENALTIES[rank];
     spread[rank]++;
   }

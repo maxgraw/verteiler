@@ -2,12 +2,12 @@
     import type { Snippet } from "svelte";
 
     interface Props {
+        /** 1-based number shown to the user; state indices are 0-based */
         num: number;
         title: string;
-        tool?: boolean;
-        tag?: string;
         done?: boolean;
         open?: boolean;
+        /** Blocks the done checkbox until the step's precondition is met */
         checkDisabled?: boolean;
         ondone?: () => void;
         children: Snippet;
@@ -16,8 +16,6 @@
     let {
         num,
         title,
-        tool = false,
-        tag,
         done = $bindable(false),
         open = $bindable(false),
         checkDisabled = false,
@@ -31,7 +29,7 @@
     }
 </script>
 
-<details class="step" data-tool={tool} data-done={done} bind:open>
+<details class="step" data-done={done} bind:open>
     <summary class="step-header">
         <input
             class="step-checkbox"
@@ -46,9 +44,6 @@
             <span class="step-num">{num}</span>
             <span class="step-content">{title}</span>
         </div>
-        {#if tag}
-            <span class="step-tag">{tag}</span>
-        {/if}
     </summary>
     <div class="step-body">
         {@render children()}
@@ -90,14 +85,6 @@
         background: var(--color-bg-subtle);
     }
 
-    .step[data-tool="true"] .step-header {
-        background: var(--color-primary-bg);
-    }
-
-    .step[data-tool="true"] .step-header:hover {
-        background: var(--color-primary-border);
-    }
-
     .step-checkbox {
         width: 1.1rem;
         height: 1.1rem;
@@ -131,22 +118,8 @@
     }
 
 
-    .step-tag {
-        font-size: var(--text-xs);
-        font-weight: 600;
-        padding: 0.1rem var(--space-2);
-        border-radius: var(--radius-full);
-        background: var(--color-primary-bg);
-        color: var(--color-primary);
-        border: 1px solid var(--color-primary-border);
-    }
-
     .step-body {
         padding: 0 var(--space-4) var(--space-4);
         border-top: 1px solid var(--color-border);
-    }
-
-    .step[data-tool="true"] .step-body {
-        border-top-color: var(--color-primary-border);
     }
 </style>

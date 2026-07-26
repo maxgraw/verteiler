@@ -28,11 +28,13 @@ src/
 │   │   ├── index.spec.ts     # correctness + structural guarantees (browser project)
 │   │   └── benchmark.spec.ts # score quality + wall-clock timing (browser project)
 │   ├── components/           # presentational: Step, StepContent, TemplateMessage
+│   ├── clipboard.ts          # copyText(), reports failure instead of rejecting
+│   ├── config.ts             # slot layout constants, the single source of truth
+│   ├── distribution.ts       # pure helpers around a solved distribution
 │   ├── parser.ts             # parseChoices() CSV to Group[], buildSlots()
-│   ├── parser.spec.ts        # (node project)
 │   ├── solver.worker.ts      # Web Worker wrapper around solve()
 │   ├── state.svelte.ts       # state singleton, runes + localStorage persistence
-│   └── styles/app.css        # reset + design tokens
+│   └── styles/app.css        # reset, design tokens, shared .field and .inline-arrow
 ├── routes/
 │   ├── +page.svelte          # renders the 10 steps in order
 │   ├── AppHeader.svelte
@@ -41,7 +43,10 @@ src/
 ```
 
 Data flows one way: CSV, parseChoices(), appState.parsedGroups, solver.worker.ts, solve(),
-SolveResult rendered in StepAlgorithm.svelte.
+SolveResult, groupByTimeSlot() rendered in StepAlgorithm.svelte.
+
+Components stay thin. Anything worth testing lives in parser.ts, distribution.ts or
+algorithm/, next to a spec file.
 
 ## Rules
 
@@ -61,4 +66,5 @@ Background on how the app works, read when relevant:
 - .claude/context/solver.md, LP formulation, worker lifecycle and algorithm history
 - .claude/context/state.md, state singleton, persistence and the step pattern
 
-PLAN.md is a completed robustness checklist, kept for history and not a to-do list.
+Two earlier planning documents, PLAN.md and FINDINGS.md, have been removed. Both were
+completed or outdated. Their still-relevant content is in .claude/context/.

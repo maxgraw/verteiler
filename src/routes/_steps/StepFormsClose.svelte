@@ -21,11 +21,3 @@
         </ol>
     </StepContent>
 </Step>
-
-<style>
-    :global(.inline-arrow) {
-        display: inline;
-        vertical-align: middle;
-        color: var(--color-text-faint);
-    }
-</style>

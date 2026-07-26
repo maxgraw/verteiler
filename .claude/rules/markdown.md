@@ -2,7 +2,8 @@
 
 Plain text as much as possible.
 
-No emoji anywhere: markdown, code, comments, commit messages, UI strings.
+No emoji in markdown, code, comments or commit messages. German UI copy is exempt; the
+reminder message in StepReminder.svelte uses one deliberately.
 
 Avoid bold, italics, tables and blockquotes unless they carry real meaning. Prefer plain
 sentences and simple dash lists.

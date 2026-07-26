@@ -155,3 +155,42 @@ body {
     color: var(--color-text);
     padding: var(--space-8) var(--space-4) var(--space-16);
 }
+
+/* Labelled form field, shared by the deadline and Forms-link steps */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.field label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.field input {
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-base);
+    background: var(--color-bg-subtle);
+    width: 100%;
+}
+
+.field input:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+}
+
+.field input:user-invalid {
+    border-color: var(--color-error);
+    background: var(--color-error-bg);
+}
+
+/* Lucide chevron used inline inside instruction lists */
+.inline-arrow {
+    display: inline;
+    vertical-align: middle;
+    color: var(--color-text-faint);
+}

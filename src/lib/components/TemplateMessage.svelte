@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { copyText } from '$lib/clipboard';
+
     interface Props {
         message: string;
         disabled?: boolean;
@@ -7,19 +9,29 @@
     let { message, disabled = false }: Props = $props();
 
     let copied = $state(false);
+    let copyFailed = $state(false);
 
-    function copy() {
-        navigator.clipboard.writeText(message).then(() => {
-            copied = true;
-            setTimeout(() => (copied = false), 2000);
-        });
+    async function copy() {
+        const ok = await copyText(message);
+        copied = ok;
+        copyFailed = !ok;
+        setTimeout(() => {
+            copied = false;
+            copyFailed = false;
+        }, 2000);
     }
 </script>
 
 <div class="template">
     <div class="body">{message}</div>
     <button class="copy-btn" onclick={copy} {disabled}>
-        {copied ? 'Kopiert ✓' : 'Nachricht kopieren'}
+        {#if copyFailed}
+            Kopieren nicht möglich
+        {:else if copied}
+            Kopiert ✓
+        {:else}
+            Nachricht kopieren
+        {/if}
     </button>
 </div>
 
