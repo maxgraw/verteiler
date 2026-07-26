@@ -15,8 +15,6 @@ import StepAlgorithm from "./_steps/StepAlgorithm/StepAlgorithm.svelte";
 <AppHeader />
 
 <main>
-    <!-- The order has to match STEPS in $lib/steps. Three phases: prepare the form,
-         message the semester, evaluate the answers. -->
     <ol>
         <li><StepFormsCopy /></li>
         <li><StepDeadline /></li>
