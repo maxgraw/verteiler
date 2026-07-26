@@ -1,63 +1,63 @@
 <script lang="ts">
-    import Step from "$lib/components/Step.svelte";
-    import StepContent from "$lib/components/StepContent.svelte";
-    import { state as appState } from "$lib/state.svelte";
-    import { parseChoices } from "$lib/parser";
+import Step from "$lib/components/Step.svelte";
+import StepContent from "$lib/components/StepContent.svelte";
+import { state as appState } from "$lib/state.svelte";
+import { parseChoices } from "$lib/parser";
 
-    let error = $state("");
-    let dragOver = $state(false);
+let error = $state("");
+let dragOver = $state(false);
 
-    const studentCount = $derived(
-        appState.parsedGroups?.reduce((sum, g) => sum + g.size, 0) ?? 0,
-    );
+const studentCount = $derived(
+	appState.parsedGroups?.reduce((sum, g) => sum + g.size, 0) ?? 0,
+);
 
-    async function processFile(file: File) {
-        error = "";
-        appState.csvFileName = file.name;
-        appState.parsedGroups = null;
-        appState.parseWarnings = [];
-        try {
-            const { groups, warnings } = parseChoices(await file.text());
-            appState.parsedGroups = groups;
-            if (groups.length > 80) {
-                warnings.unshift(
-                    `Ungewöhnlich viele Gruppen (${groups.length}). Bitte prüfen ob die richtige Datei hochgeladen wurde.`,
-                );
-            }
-            appState.parseWarnings = warnings;
-        } catch (e) {
-            error = e instanceof Error ? e.message : "Unbekannter Fehler";
-            appState.csvFileName = "";
-        }
-    }
+async function processFile(file: File) {
+	error = "";
+	appState.csvFileName = file.name;
+	appState.parsedGroups = null;
+	appState.parseWarnings = [];
+	try {
+		const { groups, warnings } = parseChoices(await file.text());
+		appState.parsedGroups = groups;
+		if (groups.length > 80) {
+			warnings.unshift(
+				`Ungewöhnlich viele Gruppen (${groups.length}). Bitte prüfen ob die richtige Datei hochgeladen wurde.`,
+			);
+		}
+		appState.parseWarnings = warnings;
+	} catch (e) {
+		error = e instanceof Error ? e.message : "Unbekannter Fehler";
+		appState.csvFileName = "";
+	}
+}
 
-    async function handleFileChange(e: Event) {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (file) await processFile(file);
-    }
+async function handleFileChange(e: Event) {
+	const file = (e.target as HTMLInputElement).files?.[0];
+	if (file) await processFile(file);
+}
 
-    async function handleDrop(e: DragEvent) {
-        e.preventDefault();
-        dragOver = false;
-        const file = e.dataTransfer?.files?.[0];
-        if (file) await processFile(file);
-    }
+async function handleDrop(e: DragEvent) {
+	e.preventDefault();
+	dragOver = false;
+	const file = e.dataTransfer?.files?.[0];
+	if (file) await processFile(file);
+}
 
-    function handleDragOver(e: DragEvent) {
-        e.preventDefault();
-        dragOver = true;
-    }
+function handleDragOver(e: DragEvent) {
+	e.preventDefault();
+	dragOver = true;
+}
 
-    function handleDragLeave() {
-        dragOver = false;
-    }
+function handleDragLeave() {
+	dragOver = false;
+}
 
-    function reset() {
-        error = "";
-        appState.csvFileName = "";
-        appState.parsedGroups = null;
-        appState.parseWarnings = [];
-    }
+function reset() {
+	error = "";
+	appState.csvFileName = "";
+	appState.parsedGroups = null;
+	appState.parseWarnings = [];
+}
 </script>
 
 <Step

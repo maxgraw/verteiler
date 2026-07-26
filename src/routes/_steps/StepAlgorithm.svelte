@@ -1,119 +1,119 @@
 <script lang="ts">
-    import Step from "$lib/components/Step.svelte";
-    import StepContent from "$lib/components/StepContent.svelte";
-    import { state as appState } from "$lib/state.svelte";
-    import { buildSlots } from "$lib/parser";
-    import type { SolveResult } from "$lib/algorithm/types";
-    import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "$lib/config";
-    import {
-        SPREAD_LABELS,
-        checkCapacity,
-        formatDistribution,
-        groupByTimeSlot,
-        sanitizeCapacities,
-        toUserMessage,
-    } from "$lib/distribution";
-    import { copyText } from "$lib/clipboard";
+import Step from "$lib/components/Step.svelte";
+import StepContent from "$lib/components/StepContent.svelte";
+import { state as appState } from "$lib/state.svelte";
+import { buildSlots } from "$lib/parser";
+import type { SolveResult } from "$lib/algorithm/types";
+import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "$lib/config";
+import {
+	SPREAD_LABELS,
+	checkCapacity,
+	formatDistribution,
+	groupByTimeSlot,
+	sanitizeCapacities,
+	toUserMessage,
+} from "$lib/distribution";
+import { copyText } from "$lib/clipboard";
 
-    let running = $state(false);
-    let statusMessage = $state("");
-    let solveResult = $state<SolveResult | null>(null);
-    let error = $state("");
+let running = $state(false);
+let statusMessage = $state("");
+let solveResult = $state<SolveResult | null>(null);
+let error = $state("");
 
-    let worker: Worker | null = null;
+let worker: Worker | null = null;
 
-    function getWorker(): Worker {
-        if (!worker) {
-            worker = new Worker(
-                new URL("../../lib/solver.worker.ts", import.meta.url),
-                { type: "module" },
-            );
-        }
-        return worker;
-    }
+function getWorker(): Worker {
+	if (!worker) {
+		worker = new Worker(
+			new URL("../../lib/solver.worker.ts", import.meta.url),
+			{ type: "module" },
+		);
+	}
+	return worker;
+}
 
-    // Prewarm worker when capacities step is completed
-    $effect(() => {
-        if (appState.done[8]) getWorker();
-    });
+// Prewarm worker when capacities step is completed
+$effect(() => {
+	if (appState.done[8]) getWorker();
+});
 
-    // Clear results when CSV is removed or state is reset
-    $effect(() => {
-        if (!appState.parsedGroups) {
-            solveResult = null;
-            error = "";
-        }
-    });
+// Clear results when CSV is removed or state is reset
+$effect(() => {
+	if (!appState.parsedGroups) {
+		solveResult = null;
+		error = "";
+	}
+});
 
-    async function run() {
-        if (!appState.parsedGroups) return;
-        error = "";
-        solveResult = null;
-        running = true;
-        statusMessage = "Starte…";
+async function run() {
+	if (!appState.parsedGroups) return;
+	error = "";
+	solveResult = null;
+	running = true;
+	statusMessage = "Starte…";
 
-        const capacities = sanitizeCapacities(appState.capacities);
-        const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, capacities);
+	const capacities = sanitizeCapacities(appState.capacities);
+	const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, capacities);
 
-        const capacityError = checkCapacity(appState.parsedGroups, capacities);
-        if (capacityError) {
-            error = capacityError;
-            running = false;
-            return;
-        }
+	const capacityError = checkCapacity(appState.parsedGroups, capacities);
+	if (capacityError) {
+		error = capacityError;
+		running = false;
+		return;
+	}
 
-        try {
-            solveResult = await new Promise<SolveResult>((resolve, reject) => {
-                const w = getWorker();
+	try {
+		solveResult = await new Promise<SolveResult>((resolve, reject) => {
+			const w = getWorker();
 
-                const timeout = setTimeout(() => {
-                    worker?.terminate();
-                    worker = null;
-                    reject(new Error("Zeitüberschreitung: Berechnung dauerte zu lange."));
-                }, 60_000);
+			const timeout = setTimeout(() => {
+				worker?.terminate();
+				worker = null;
+				reject(new Error("Zeitüberschreitung: Berechnung dauerte zu lange."));
+			}, 60_000);
 
-                w.onmessage = (e) => {
-                    if (e.data.type === "status") {
-                        statusMessage = e.data.message;
-                    } else if (e.data.type === "result") {
-                        clearTimeout(timeout);
-                        resolve(e.data.data);
-                    } else if (e.data.type === "error") {
-                        clearTimeout(timeout);
-                        reject(new Error(e.data.message));
-                    }
-                };
-                w.onerror = (e) => {
-                    clearTimeout(timeout);
-                    worker = null;
-                    reject(new Error(e.message ?? "Worker-Fehler"));
-                };
-                w.postMessage({ groups: $state.snapshot(appState.parsedGroups), slots });
-            });
-        } catch (e) {
-            error = toUserMessage(e);
-        } finally {
-            running = false;
-            statusMessage = "";
-        }
-    }
+			w.onmessage = (e) => {
+				if (e.data.type === "status") {
+					statusMessage = e.data.message;
+				} else if (e.data.type === "result") {
+					clearTimeout(timeout);
+					resolve(e.data.data);
+				} else if (e.data.type === "error") {
+					clearTimeout(timeout);
+					reject(new Error(e.data.message));
+				}
+			};
+			w.onerror = (e) => {
+				clearTimeout(timeout);
+				worker = null;
+				reject(new Error(e.message ?? "Worker-Fehler"));
+			};
+			w.postMessage({ groups: $state.snapshot(appState.parsedGroups), slots });
+		});
+	} catch (e) {
+		error = toUserMessage(e);
+	} finally {
+		running = false;
+		statusMessage = "";
+	}
+}
 
-    const zeitslots = $derived(
-        solveResult ? groupByTimeSlot(solveResult.solution) : [],
-    );
+const zeitslots = $derived(
+	solveResult ? groupByTimeSlot(solveResult.solution) : [],
+);
 
-    let copied = $state(false);
-    let copyFailed = $state(false);
+let copied = $state(false);
+let copyFailed = $state(false);
 
-    async function copyResults() {
-        const ok = await copyText(formatDistribution(zeitslots));
-        copied = ok;
-        copyFailed = !ok;
-        setTimeout(() => {
-            copied = false;
-            copyFailed = false;
-        }, 2000);
-    }
+async function copyResults() {
+	const ok = await copyText(formatDistribution(zeitslots));
+	copied = ok;
+	copyFailed = !ok;
+	setTimeout(() => {
+		copied = false;
+		copyFailed = false;
+	}, 2000);
+}
 </script>
 
 <Step

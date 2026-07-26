@@ -1,32 +1,32 @@
 <script lang="ts">
-    import type { Snippet } from "svelte";
+import type { Snippet } from "svelte";
 
-    interface Props {
-        /** 1-based number shown to the user; state indices are 0-based */
-        num: number;
-        title: string;
-        done?: boolean;
-        open?: boolean;
-        /** Blocks the done checkbox until the step's precondition is met */
-        checkDisabled?: boolean;
-        ondone?: () => void;
-        children: Snippet;
-    }
+interface Props {
+	/** 1-based number shown to the user; state indices are 0-based */
+	num: number;
+	title: string;
+	done?: boolean;
+	open?: boolean;
+	/** Blocks the done checkbox until the step's precondition is met */
+	checkDisabled?: boolean;
+	ondone?: () => void;
+	children: Snippet;
+}
 
-    let {
-        num,
-        title,
-        done = $bindable(false),
-        open = $bindable(false),
-        checkDisabled = false,
-        ondone,
-        children,
-    }: Props = $props();
+let {
+	num,
+	title,
+	done = $bindable(false),
+	open = $bindable(false),
+	checkDisabled = false,
+	ondone,
+	children,
+}: Props = $props();
 
-    function onCheckboxChange() {
-        open = !done;
-        if (done) ondone?.();
-    }
+function onCheckboxChange() {
+	open = !done;
+	if (done) ondone?.();
+}
 </script>
 
 <details class="step" data-done={done} bind:open>

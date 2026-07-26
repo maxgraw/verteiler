@@ -1,23 +1,23 @@
 <script lang="ts">
-    import Step from '$lib/components/Step.svelte';
-    import StepContent from '$lib/components/StepContent.svelte';
-    import ImageHint from '$lib/components/ImageHint.svelte';
-    import { state } from '$lib/state.svelte';
+import Step from "$lib/components/Step.svelte";
+import StepContent from "$lib/components/StepContent.svelte";
+import ImageHint from "$lib/components/ImageHint.svelte";
+import { state } from "$lib/state.svelte";
 
-    const isValidLink = $derived(
-        state.link.startsWith('https://docs.google.com/forms/') &&
-            state.link.includes('/viewform'),
-    );
-    const linkError = $derived.by(() => {
-        if (state.link.length === 0) return '';
-        if (!state.link.startsWith('https://docs.google.com/forms/'))
-            return 'Das sieht nicht wie ein Google Forms Link aus. Der Link muss mit https://docs.google.com/forms/ beginnen.';
-        if (state.link.includes('/edit') || state.link.includes('/copy'))
-            return 'Das ist kein Teilnehmerlink. Bitte den Link über "Veröffentlichen" und dann "Teilnehmerlink kopieren" holen - er enthält /viewform.';
-        if (!state.link.includes('/viewform'))
-            return 'Bitte den Teilnehmerlink einfügen. Er enthält /viewform und ist über "Veröffentlichen" und dann "Teilnehmerlink kopieren" erreichbar.';
-        return '';
-    });
+const isValidLink = $derived(
+	state.link.startsWith("https://docs.google.com/forms/") &&
+		state.link.includes("/viewform"),
+);
+const linkError = $derived.by(() => {
+	if (state.link.length === 0) return "";
+	if (!state.link.startsWith("https://docs.google.com/forms/"))
+		return "Das sieht nicht wie ein Google Forms Link aus. Der Link muss mit https://docs.google.com/forms/ beginnen.";
+	if (state.link.includes("/edit") || state.link.includes("/copy"))
+		return 'Das ist kein Teilnehmerlink. Bitte den Link über "Veröffentlichen" und dann "Teilnehmerlink kopieren" holen - er enthält /viewform.';
+	if (!state.link.includes("/viewform"))
+		return 'Bitte den Teilnehmerlink einfügen. Er enthält /viewform und ist über "Veröffentlichen" und dann "Teilnehmerlink kopieren" erreichbar.';
+	return "";
+});
 </script>
 
 <Step

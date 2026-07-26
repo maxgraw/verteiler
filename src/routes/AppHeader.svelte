@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { state } from "$lib/state.svelte";
+import { state } from "$lib/state.svelte";
 </script>
 
 <header>

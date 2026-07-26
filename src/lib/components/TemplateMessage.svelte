@@ -1,25 +1,25 @@
 <script lang="ts">
-    import { copyText } from '$lib/clipboard';
+import { copyText } from "$lib/clipboard";
 
-    interface Props {
-        message: string;
-        disabled?: boolean;
-    }
+interface Props {
+	message: string;
+	disabled?: boolean;
+}
 
-    let { message, disabled = false }: Props = $props();
+let { message, disabled = false }: Props = $props();
 
-    let copied = $state(false);
-    let copyFailed = $state(false);
+let copied = $state(false);
+let copyFailed = $state(false);
 
-    async function copy() {
-        const ok = await copyText(message);
-        copied = ok;
-        copyFailed = !ok;
-        setTimeout(() => {
-            copied = false;
-            copyFailed = false;
-        }, 2000);
-    }
+async function copy() {
+	const ok = await copyText(message);
+	copied = ok;
+	copyFailed = !ok;
+	setTimeout(() => {
+		copied = false;
+		copyFailed = false;
+	}, 2000);
+}
 </script>
 
 <div class="template">

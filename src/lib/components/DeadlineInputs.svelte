@@ -1,13 +1,10 @@
 <script lang="ts">
-    interface Props {
-        datum?: string;
-        uhrzeit?: string;
-    }
+interface Props {
+	datum?: string;
+	uhrzeit?: string;
+}
 
-    let {
-        datum = $bindable(''),
-        uhrzeit = $bindable(''),
-    }: Props = $props();
+let { datum = $bindable(""), uhrzeit = $bindable("") }: Props = $props();
 </script>
 
 <div class="inputs">

@@ -1,9 +1,9 @@
 <script lang="ts">
-    import Step from '$lib/components/Step.svelte';
-    import StepContent from '$lib/components/StepContent.svelte';
-    import ImageHint from '$lib/components/ImageHint.svelte';
-    import { ChevronRight } from '@lucide/svelte';
-    import { state } from '$lib/state.svelte';
+import Step from "$lib/components/Step.svelte";
+import StepContent from "$lib/components/StepContent.svelte";
+import ImageHint from "$lib/components/ImageHint.svelte";
+import { ChevronRight } from "@lucide/svelte";
+import { state } from "$lib/state.svelte";
 </script>
 
 <Step num={6} title="Formular nach Deadline schließen" bind:open={state.open[5]} bind:done={state.done[5]} ondone={() => state.openNext(5)}>

@@ -1,7 +1,7 @@
 <script lang="ts">
-    import "$lib/styles/app.css";
+import "$lib/styles/app.css";
 
-    let { children } = $props();
+let { children } = $props();
 </script>
 
 <svelte:head>

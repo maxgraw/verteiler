@@ -1,15 +1,15 @@
 <script lang="ts">
-    import Step from "$lib/components/Step.svelte";
-    import StepContent from "$lib/components/StepContent.svelte";
-    import { state as appState } from "$lib/state.svelte";
-    import {
-        DEFAULT_CAPACITY,
-        NUM_TIME_SLOTS,
-        SLOTS_PER_TIME_SLOT,
-        TOTAL_SLOTS,
-    } from "$lib/config";
+import Step from "$lib/components/Step.svelte";
+import StepContent from "$lib/components/StepContent.svelte";
+import { state as appState } from "$lib/state.svelte";
+import {
+	DEFAULT_CAPACITY,
+	NUM_TIME_SLOTS,
+	SLOTS_PER_TIME_SLOT,
+	TOTAL_SLOTS,
+} from "$lib/config";
 
-    let defaultCapacity = $state(DEFAULT_CAPACITY);
+let defaultCapacity = $state(DEFAULT_CAPACITY);
 </script>
 
 <Step
