@@ -167,7 +167,7 @@ describe("parseChoices", () => {
 			const bad = `01.01.2025 10:00:00,test@test.de,3,,Gruppe 9-12,Gruppe 5-8,Gruppe 13-16`;
 			const { groups, warnings } = parseChoices(csv(bad, valid));
 			expect(groups).toHaveLength(1);
-			expect(warnings.some((w) => w.includes("Mitglied"))).toBe(true);
+			expect(warnings.some((w) => w.includes("Keine Namen"))).toBe(true);
 		});
 
 		it("skips and warns on unrecognised choice value", () => {

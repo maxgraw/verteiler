@@ -35,7 +35,7 @@ export function checkCapacity(
 	const students = groups.reduce((sum, g) => sum + g.size, 0);
 	const capacity = capacities.reduce((sum, c) => sum + c, 0);
 	if (students > capacity) {
-		return `Nicht genug Kapazität: ${students} Studierende, aber nur ${capacity} Plätze verfügbar. Bitte Kapazitäten erhöhen.`;
+		return `Nicht genug Kapazität: ${students} Studierende, aber nur ${capacity} Plätze. Bitte Kapazitäten erhöhen.`;
 	}
 	return null;
 }
@@ -83,8 +83,8 @@ export function formatDistribution(timeSlots: TimeSlotView[]): string {
 export function toUserMessage(e: unknown): string {
 	const msg = e instanceof Error ? e.message : String(e);
 	if (msg.includes("Infeasible") || msg.includes("feasible")) {
-		return "Keine gültige Verteilung möglich. Prüfe ob die Kapazitäten ausreichen.";
+		return "Keine gültige Verteilung möglich. Prüf, ob die Kapazitäten ausreichen.";
 	}
 	if (msg.includes("Zeitüberschreitung")) return msg;
-	return `Unbekannter Fehler. Bitte Seite neu laden und erneut versuchen. (${msg})`;
+	return `Unbekannter Fehler. Bitte Seite neu laden und nochmal versuchen. (${msg})`;
 }

@@ -13,5 +13,11 @@ The three copyable chat messages live in messages.ts, not in the step files, and
 semester with ihr. Everything shown in the page itself addresses the single organizer with du.
 
 Call the form Google Forms throughout, not Google Form or Google Formular. Quote UI elements
-of other tools with German quotation marks („Antworten“), not ASCII ones. Use an em dash for
-asides, never a hyphen.
+of other tools with German quotation marks („Antworten“), not ASCII ones.
+
+Keep every string short. Prefer two plain sentences over one with a subclause, and cut words
+that carry nothing: bestmöglich becomes best, manuell becomes von Hand, "Bitte prüfe, ob die
+richtige Datei hochgeladen wurde" becomes "Ist das die richtige Datei?".
+
+No em dash anywhere in user-facing German. Where one held an aside, end the sentence and start
+a new one, or use a colon when the second half explains the first.

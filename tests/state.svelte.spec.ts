@@ -62,6 +62,22 @@ describe("restore from localStorage", () => {
 		expect(state.link).toBe("");
 	});
 
+	it("reports nothing outdated when storage is empty or current", async () => {
+		expect((await freshState()).outdated).toBe(false);
+		save({ version: VERSION, link: "https://example.test/viewform" });
+		expect((await freshState()).outdated).toBe(false);
+	});
+
+	it("flags a payload from another version as outdated", async () => {
+		save({ version: VERSION + 1 });
+		expect((await freshState()).outdated).toBe(true);
+	});
+
+	it("flags corrupt JSON as outdated too, since the remedy is the same", async () => {
+		localStorage.setItem(STORAGE_KEY, "{not json");
+		expect((await freshState()).outdated).toBe(true);
+	});
+
 	it("pads a short done array up to the current step count", async () => {
 		save({ version: VERSION, done: [true, true] });
 		const state = await freshState();
@@ -97,6 +113,15 @@ describe("persistence", () => {
 		const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
 		expect(stored.version).toBe(VERSION);
 		expect(stored.link).toBe("https://example.test/viewform");
+	});
+
+	it("leaves an outdated payload untouched instead of overwriting it", async () => {
+		const stale = JSON.stringify({ version: VERSION + 1, link: "alt" });
+		localStorage.setItem(STORAGE_KEY, stale);
+		const state = await freshState();
+		state.link = "https://example.test/viewform";
+		await tick();
+		expect(localStorage.getItem(STORAGE_KEY)).toBe(stale);
 	});
 
 	it("round-trips through a reload", async () => {
@@ -184,6 +209,21 @@ describe("reset", () => {
 		expect(state.open.slice(1).every((o) => o === false)).toBe(true);
 		expect(state.done.every((d) => d === false)).toBe(true);
 		expect(state.capacities.every((c) => c === DEFAULT_CAPACITY)).toBe(true);
+	});
+
+	it("clears an outdated save and starts persisting again", async () => {
+		save({ version: VERSION + 1, link: "alt" });
+		const state = await freshState();
+		expect(state.outdated).toBe(true);
+
+		state.reset();
+		expect(state.outdated).toBe(false);
+
+		state.link = "https://example.test/viewform";
+		await tick();
+		const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+		expect(stored.version).toBe(VERSION);
+		expect(stored.link).toBe("https://example.test/viewform");
 	});
 });
 

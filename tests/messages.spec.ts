@@ -12,7 +12,6 @@ const filled = {
 	datum: "01.12.2025",
 	uhrzeit: "18:00",
 	link: "https://docs.google.com/forms/d/e/abc/viewform",
-	lotterySeed: "K7M2P9",
 };
 
 describe("announceMessage", () => {
@@ -42,11 +41,10 @@ describe("formIntroMessage", () => {
 });
 
 describe("deadlineMessage", () => {
-	it("inserts deadline, link and lottery seed", () => {
+	it("inserts deadline and link", () => {
 		const message = deadlineMessage(filled);
 		expect(message).toContain("Montag, den 01.12.2025 um 18:00 Uhr");
 		expect(message).toContain(filled.link);
-		expect(message).toContain("Startwert K7M2P9");
 	});
 
 	it("marks missing fields as placeholders instead of leaving gaps", () => {
@@ -56,10 +54,9 @@ describe("deadlineMessage", () => {
 		expect(message).not.toContain("[UHRZEIT]");
 	});
 
-	// The seed has to be public before the form closes, otherwise the tie-break
-	// cannot be checked afterwards.
-	it("publishes the seed in the message that goes out before the deadline", () => {
-		expect(deadlineMessage(filled)).toMatch(/Losverfahren.*K7M2P9/);
+	// The form now closes on its own, so the message may not promise anything weaker.
+	it("states that the form closes by itself", () => {
+		expect(deadlineMessage(filled)).toContain("schließt zur Deadline automatisch");
 	});
 });
 

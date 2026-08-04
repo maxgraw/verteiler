@@ -1,4 +1,5 @@
 <script lang="ts">
+import Alert from "$lib/components/Alert.svelte";
 import { state } from "$lib/state.svelte";
 </script>
 
@@ -15,15 +16,29 @@ import { state } from "$lib/state.svelte";
         >
     </div>
 
+    {#if state.outdated}
+        <Alert variant="warning">
+            <p>
+                Auf diesem Gerät liegt ein gespeicherter Fortschritt aus einer
+                älteren Version dieser App. Er lässt sich nicht weiterverwenden,
+                und bis du zurücksetzt wird nichts Neues gespeichert.
+            </p>
+            <div>
+                <button class="outdated-btn" onclick={() => state.reset()}>
+                    Zurücksetzen und neu starten
+                </button>
+            </div>
+        </Alert>
+    {/if}
+
     <div class="intro">
         <p>
-            Diese App führt Schritt für Schritt durch den ganzen Prozess, vom
-            Google Forms bis zur fertigen Gruppenverteilung. Arbeite die
-            Schritte einfach der Reihe nach ab.
+            Diese App führt vom Google Forms bis zur fertigen
+            Gruppenverteilung. Arbeite die Schritte der Reihe nach ab.
         </p>
         <p class="save-note">
-            Dein Fortschritt wird auf diesem Gerät gespeichert und bleibt nach dem Schließen
-            des Browsers erhalten.
+            Dein Fortschritt wird auf diesem Gerät gespeichert und übersteht das
+            Schließen des Browsers.
         </p>
     </div>
 </header>
@@ -93,5 +108,21 @@ import { state } from "$lib/state.svelte";
     .reset-btn:hover {
         color: var(--color-error);
         border-color: var(--color-error);
+    }
+
+    .outdated-btn {
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: inherit;
+        background: none;
+        padding: var(--space-1) var(--space-3);
+        border: 1px solid var(--color-warning-border);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: background var(--transition-fast);
+    }
+
+    .outdated-btn:hover {
+        background: var(--color-warning-border);
     }
 </style>

@@ -8,8 +8,8 @@ const FORMS_COPY_URL =
 
 <WizardStep index={STEPS.formsCopy} title="Eigene Google Forms Kopie erstellen">
     <p class="description">
-        Leg eine eigene Kopie des Formulars in deinem Google Drive an. Jedes
-        Semester braucht eine eigene, damit sich die Antworten nicht vermischen.
+        Leg eine Kopie des Formulars in deinem Google Drive an. Jedes Semester
+        braucht eine eigene, sonst vermischen sich die Antworten.
     </p>
     <a
         class="action"
@@ -20,7 +20,7 @@ const FORMS_COPY_URL =
         Google Forms Kopie erstellen
     </a>
     <small class="hint">
-        Google fragt nach, ob du eine Kopie erstellen möchtest — einfach
+        Google fragt nach, ob du eine Kopie erstellen möchtest. Einfach
         bestätigen.
     </small>
 </WizardStep>

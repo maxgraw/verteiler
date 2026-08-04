@@ -13,7 +13,6 @@ const message = $derived(
 		datum: state.formattedDatum,
 		uhrzeit: state.uhrzeit,
 		link: state.link,
-		lotterySeed: state.lotterySeed,
 	}),
 );
 </script>

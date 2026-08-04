@@ -15,8 +15,8 @@ let defaultCapacity = $state(DEFAULT_CAPACITY);
 
 <WizardStep index={STEPS.capacities} title="Kapazitäten einstellen">
     <p class="description">
-        Prüfe in KLIPS, ob Voranmeldungen Plätze in einzelnen Rotationsgruppen
-        belegen, und passe die Kapazitäten an.
+        Prüf in KLIPS, ob Voranmeldungen Plätze belegen, und passe die
+        Kapazitäten an.
     </p>
 
     <ol>

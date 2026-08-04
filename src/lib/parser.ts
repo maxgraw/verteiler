@@ -131,13 +131,13 @@ export function parseChoices(csvText: string): ParseResult {
 	}
 	if (records.length < 2) {
 		throw new Error(
-			"Die CSV enthält nur eine Kopfzeile — es wurden keine Einträge gefunden.",
+			"Die CSV enthält nur eine Kopfzeile, aber keine Einträge.",
 		);
 	}
 	if (records[0].length < MIN_COLUMNS) {
 		throw new Error(
-			`Ungültiges Format: Die Kopfzeile hat nur ${records[0].length} Spalten, erwartet werden mindestens ${MIN_COLUMNS}. ` +
-				"Bitte prüfe, ob die richtige Google-Forms-CSV ausgewählt wurde.",
+			`Ungültiges Format: Die Kopfzeile hat ${records[0].length} Spalten, erwartet werden ${MIN_COLUMNS}. ` +
+				"Bitte prüfe, ob du die richtige CSV ausgewählt hast.",
 		);
 	}
 
@@ -150,7 +150,7 @@ export function parseChoices(csvText: string): ParseResult {
 
 		if (row.length < MIN_COLUMNS) {
 			warnings.push(
-				`Zeile ${rowNum}: Zu wenige Spalten (${row.length}) — Eintrag übersprungen.`,
+				`Zeile ${rowNum}: Nur ${row.length} Spalten. Eintrag übersprungen.`,
 			);
 			continue;
 		}
@@ -158,7 +158,7 @@ export function parseChoices(csvText: string): ParseResult {
 		const size = parseInt(row[2], 10);
 		if (isNaN(size) || size < 1 || size > 6) {
 			warnings.push(
-				`Zeile ${rowNum}: Ungültige Gruppengröße "${row[2]}" — Eintrag übersprungen.`,
+				`Zeile ${rowNum}: Ungültige Gruppengröße "${row[2]}". Eintrag übersprungen.`,
 			);
 			continue;
 		}
@@ -171,7 +171,7 @@ export function parseChoices(csvText: string): ParseResult {
 		const members = memberNames.join(", ");
 		if (!members) {
 			warnings.push(
-				`Zeile ${rowNum}: Keine Mitgliedernamen angegeben — Eintrag übersprungen.`,
+				`Zeile ${rowNum}: Keine Namen angegeben. Eintrag übersprungen.`,
 			);
 			continue;
 		}
@@ -182,7 +182,7 @@ export function parseChoices(csvText: string): ParseResult {
 			const parsed = parseChoiceCell(row[4 + c]);
 			if (parsed === null) {
 				warnings.push(
-					`Zeile ${rowNum}: Wahl ${c + 1} "${row[4 + c]}" konnte nicht gelesen werden — Eintrag übersprungen.`,
+					`Zeile ${rowNum}: Wahl ${c + 1} "${row[4 + c]}" nicht lesbar. Eintrag übersprungen.`,
 				);
 				choiceError = true;
 				break;
@@ -194,15 +194,15 @@ export function parseChoices(csvText: string): ParseResult {
 		const uniqueSlots = new Set(choices.filter((c) => c !== -1));
 		if (uniqueSlots.size < choices.filter((c) => c !== -1).length) {
 			warnings.push(
-				`Zeile ${rowNum}: Doppelte Zeitslot-Präferenz — Eintrag dennoch übernommen.`,
+				`Zeile ${rowNum}: Doppelte Zeitslot-Wahl. Eintrag trotzdem übernommen.`,
 			);
 		}
 
 		if (memberNames.length !== size) {
 			const label = memberNames.length === 1 ? "Mitglied" : "Mitglieder";
 			warnings.push(
-				`Zeile ${rowNum}: Gruppengröße ${size}, aber ${memberNames.length} ${label} angegeben — ` +
-					`Eintrag übernommen, gerechnet wird mit ${size} Plätzen.`,
+				`Zeile ${rowNum}: Gruppengröße ${size}, aber ${memberNames.length} ${label} angegeben. ` +
+					`Gerechnet wird mit ${size} Plätzen.`,
 			);
 		}
 
@@ -224,7 +224,7 @@ export function parseChoices(csvText: string): ParseResult {
 	// Goes first: it questions the file as a whole, so it outranks the per-row notes.
 	if (groups.length > IMPLAUSIBLE_GROUP_COUNT) {
 		warnings.unshift(
-			`Ungewöhnlich viele Gruppen (${groups.length}). Bitte prüfen ob die richtige Datei hochgeladen wurde.`,
+			`Ungewöhnlich viele Gruppen (${groups.length}). Ist das die richtige Datei?`,
 		);
 	}
 

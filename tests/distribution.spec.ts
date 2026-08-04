@@ -169,7 +169,7 @@ describe("toUserMessage", () => {
 			new Error("No feasible solution found (status: Infeasible)."),
 		);
 		expect(message).toBe(
-			"Keine gültige Verteilung möglich. Prüfe ob die Kapazitäten ausreichen.",
+			"Keine gültige Verteilung möglich. Prüf, ob die Kapazitäten ausreichen.",
 		);
 	});
 
@@ -180,7 +180,7 @@ describe("toUserMessage", () => {
 
 	it("wraps an unknown error and keeps the original text for debugging", () => {
 		expect(toUserMessage(new Error("boom"))).toBe(
-			"Unbekannter Fehler. Bitte Seite neu laden und erneut versuchen. (boom)",
+			"Unbekannter Fehler. Bitte Seite neu laden und nochmal versuchen. (boom)",
 		);
 	});
 

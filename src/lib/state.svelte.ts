@@ -12,6 +12,21 @@ export const STORAGE_KEY = "verteiler";
  */
 export const VERSION = 3;
 
+/** Fields are optional because a stored payload is untrusted input, not a guarantee. */
+interface SavedState {
+	version?: number;
+	link?: string;
+	datum?: string;
+	uhrzeit?: string;
+	open?: boolean[];
+	done?: boolean[];
+	csvFileName?: string;
+	parsedGroups?: Group[] | null;
+	parseWarnings?: string[];
+	capacities?: number[];
+	lotterySeed?: string;
+}
+
 /** Only the first step starts open, the rest unfold as the organizer works through them. */
 const freshOpen = (): boolean[] => [
 	true,
@@ -39,6 +54,13 @@ export class VerteilerState {
 	parsedGroups = $state<Group[] | null>(null);
 	parseWarnings = $state<string[]>([]);
 
+	/**
+	 * True when localStorage holds a payload this build cannot use, either written by a
+	 * different VERSION or no longer parseable. Persistence stays off while this is set,
+	 * so the old payload survives until the organizer has seen the warning and reset.
+	 */
+	outdated = $state(false);
+
 	readonly tag = $derived(
 		this.datum
 			? new Date(`${this.datum}T12:00`).toLocaleDateString("de-DE", {
@@ -55,51 +77,22 @@ export class VerteilerState {
 
 	constructor() {
 		if (typeof localStorage !== "undefined") {
-			try {
-				const saved = localStorage.getItem(STORAGE_KEY);
-				if (saved) {
-					const parsed = JSON.parse(saved);
-					if (parsed.version !== VERSION) return;
-					const {
-						link,
-						datum,
-						uhrzeit,
-						open,
-						done,
-						csvFileName,
-						parsedGroups,
-						parseWarnings,
-						capacities,
-						lotterySeed,
-					} = parsed;
-					if (link) this.link = link;
-					if (datum) this.datum = datum;
-					if (uhrzeit) this.uhrzeit = uhrzeit;
-					if (open)
-						this.open = open
-							.concat(Array(this.open.length).fill(false))
-							.slice(0, this.open.length);
-					if (done)
-						this.done = done
-							.concat(Array(this.done.length).fill(false))
-							.slice(0, this.done.length);
-					if (
-						capacities &&
-						Array.isArray(capacities) &&
-						capacities.length === TOTAL_SLOTS
-					)
-						this.capacities = capacities;
-					if (csvFileName) this.csvFileName = csvFileName;
-					if (parsedGroups) this.parsedGroups = parsedGroups;
-					if (parseWarnings) this.parseWarnings = parseWarnings;
-					if (lotterySeed) this.lotterySeed = lotterySeed;
+			const saved = localStorage.getItem(STORAGE_KEY);
+			if (saved) {
+				try {
+					const parsed: SavedState | null = JSON.parse(saved);
+					if (parsed?.version === VERSION) this.#restore(parsed);
+					else this.outdated = true;
+				} catch {
+					this.outdated = true;
 				}
-			} catch {}
+			}
 		}
 
 		$effect.root(() => {
 			$effect(() => {
 				const {
+					outdated,
 					link,
 					datum,
 					uhrzeit,
@@ -111,6 +104,7 @@ export class VerteilerState {
 					capacities,
 					lotterySeed,
 				} = this;
+				if (outdated) return;
 				localStorage.setItem(
 					STORAGE_KEY,
 					JSON.stringify({
@@ -131,6 +125,39 @@ export class VerteilerState {
 		});
 	}
 
+	/** Applies a payload already confirmed to carry the current VERSION. */
+	#restore(parsed: SavedState) {
+		const {
+			link,
+			datum,
+			uhrzeit,
+			open,
+			done,
+			csvFileName,
+			parsedGroups,
+			parseWarnings,
+			capacities,
+			lotterySeed,
+		} = parsed;
+		if (link) this.link = link;
+		if (datum) this.datum = datum;
+		if (uhrzeit) this.uhrzeit = uhrzeit;
+		if (open)
+			this.open = open
+				.concat(Array(this.open.length).fill(false))
+				.slice(0, this.open.length);
+		if (done)
+			this.done = done
+				.concat(Array(this.done.length).fill(false))
+				.slice(0, this.done.length);
+		if (capacities && Array.isArray(capacities) && capacities.length === TOTAL_SLOTS)
+			this.capacities = capacities;
+		if (csvFileName) this.csvFileName = csvFileName;
+		if (parsedGroups) this.parsedGroups = parsedGroups;
+		if (parseWarnings) this.parseWarnings = parseWarnings;
+		if (lotterySeed) this.lotterySeed = lotterySeed;
+	}
+
 	/**
 	 * Opens the next step after step i completes.
 	 * @param i - Zero-based index of the completed step
@@ -139,8 +166,15 @@ export class VerteilerState {
 		if (i + 1 < this.open.length) this.open[i + 1] = true;
 	};
 
-	/** Clears all inputs and resets the workflow to the beginning. */
+	/**
+	 * Clears all inputs and resets the workflow to the beginning. Also the only way out of
+	 * an outdated save: the stored payload is dropped and the persistence effect writes a
+	 * fresh one in the current shape. Nothing is migrated.
+	 */
 	reset = () => {
+		if (typeof localStorage !== "undefined")
+			localStorage.removeItem(STORAGE_KEY);
+		this.outdated = false;
 		this.link = "";
 		this.datum = "";
 		this.uhrzeit = "";

@@ -17,8 +17,8 @@ const deadlineLabel = $derived(
     checkDisabled={!state.deadlineComplete}
 >
     <p class="description">
-        Damit schließt das Formular pünktlich von selbst und nach der Deadline
-        kommt nichts mehr nach.
+        So schließt das Formular pünktlich von selbst. Nach der Deadline kommt
+        nichts mehr nach.
     </p>
     <ol>
         <li>Oben rechts den Button anklicken, der jetzt „Veröffentlicht“ heißt.</li>
@@ -27,10 +27,10 @@ const deadlineLabel = $derived(
             „Abschlussdatum oder Antwortlimit festlegen“ klicken.
         </li>
         <li>Als Zeitpunkt {deadlineLabel} auswählen und bestätigen.</li>
-        <li>„Speichern“ klicken — und danach ein zweites Mal „Speichern“.</li>
+        <li>„Speichern“ klicken. Danach ein zweites Mal „Speichern“.</li>
     </ol>
     <small class="hint">
-        Der zweite Klick auf „Speichern“ ist wichtig: ohne ihn wird der
-        Abschlusszeitpunkt nicht übernommen.
+        Der zweite Klick ist wichtig. Ohne ihn wird der Abschlusszeitpunkt nicht
+        übernommen.
     </small>
 </WizardStep>

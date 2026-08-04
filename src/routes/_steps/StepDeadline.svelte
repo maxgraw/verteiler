@@ -18,8 +18,8 @@ const message = $derived(
     checkDisabled={!state.deadlineComplete}
 >
     <p class="description">
-        Leg die Deadline fest. Sie steht danach im Formular selbst und in allen
-        Nachrichten an das Semester.
+        Leg die Deadline fest. Sie steht danach im Formular und in allen
+        Nachrichten ans Semester.
     </p>
     <DeadlineInputs bind:datum={state.datum} bind:uhrzeit={state.uhrzeit} />
     <p class="description">

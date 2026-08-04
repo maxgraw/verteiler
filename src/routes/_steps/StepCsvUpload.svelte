@@ -63,7 +63,7 @@ function reset() {
     checkDisabled={!appState.parsedGroups}
 >
     <p class="description">
-        Lade die CSV-Datei aus Schritt {STEPS.formsExport + 1} hoch.
+        Lad die CSV-Datei aus Schritt {STEPS.formsExport + 1} hoch.
     </p>
 
     {#if appState.parsedGroups}

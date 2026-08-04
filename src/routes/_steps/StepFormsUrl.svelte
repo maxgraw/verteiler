@@ -30,7 +30,7 @@ const linkError = $derived.by(() => {
             Oben rechts „Veröffentlichen“ klicken und im Dialog unten nochmal
             „Veröffentlichen“ bestätigen.
         </li>
-        <li>Der Teilnehmerlink erscheint danach oben rechts — kopieren.</li>
+        <li>Der Teilnehmerlink erscheint danach oben rechts. Kopieren.</li>
         <li>Link hier einfügen.</li>
     </ol>
     <div class="field">
