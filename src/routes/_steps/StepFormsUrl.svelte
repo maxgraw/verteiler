@@ -12,9 +12,9 @@ const linkError = $derived.by(() => {
 	if (!state.link.startsWith("https://docs.google.com/forms/"))
 		return "Das sieht nicht wie ein Google Forms Link aus. Der Link muss mit https://docs.google.com/forms/ beginnen.";
 	if (state.link.includes("/edit") || state.link.includes("/copy"))
-		return "Das ist kein Teilnehmerlink. Hol ihn über „Veröffentlichen“ und dann „Teilnehmerlink kopieren“ — er enthält /viewform.";
+		return "Das ist kein Teilnehmerlink. Er enthält /viewform und erscheint nach dem Veröffentlichen oben rechts.";
 	if (!state.link.includes("/viewform"))
-		return "Bitte den Teilnehmerlink einfügen. Er enthält /viewform und steht unter „Veröffentlichen“ und dann „Teilnehmerlink kopieren“.";
+		return "Bitte den Teilnehmerlink einfügen. Er enthält /viewform und erscheint nach dem Veröffentlichen oben rechts.";
 	return "";
 });
 </script>
@@ -26,8 +26,11 @@ const linkError = $derived.by(() => {
 >
     <ol>
         <li>Kopiertes Google Forms öffnen.</li>
-        <li>Oben rechts „Veröffentlichen“ klicken und im Dialog bestätigen.</li>
-        <li>Im nächsten Dialog „Teilnehmerlink kopieren“ klicken.</li>
+        <li>
+            Oben rechts „Veröffentlichen“ klicken und im Dialog unten nochmal
+            „Veröffentlichen“ bestätigen.
+        </li>
+        <li>Der Teilnehmerlink erscheint danach oben rechts — kopieren.</li>
         <li>Link hier einfügen.</li>
     </ol>
     <div class="field">

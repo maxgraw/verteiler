@@ -10,13 +10,14 @@ export const STEPS = {
 	formsCopy: 0,
 	deadline: 1,
 	formsUrl: 2,
-	announce: 3,
-	deadlineMessage: 4,
-	reminder: 5,
-	formsExport: 6,
-	csvUpload: 7,
-	capacities: 8,
-	algorithm: 9,
+	formsClose: 3,
+	announce: 4,
+	deadlineMessage: 5,
+	reminder: 6,
+	formsExport: 7,
+	csvUpload: 8,
+	capacities: 9,
+	algorithm: 10,
 } as const;
 
 /** Length of state.open and state.done. */

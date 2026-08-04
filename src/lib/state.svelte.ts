@@ -8,9 +8,9 @@ export const STORAGE_KEY = "verteiler";
 /**
  * Bump whenever the persisted shape changes, so old data is discarded rather than
  * half-restored. Version 2 renumbered the steps: the flags still fit, but they would
- * describe the wrong steps.
+ * describe the wrong steps. Version 3 inserted formsClose, shifting everything after it.
  */
-export const VERSION = 2;
+export const VERSION = 3;
 
 /** Only the first step starts open, the rest unfold as the organizer works through them. */
 const freshOpen = (): boolean[] => [

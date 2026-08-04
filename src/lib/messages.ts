@@ -59,7 +59,7 @@ ich bitte euch, eure Rotationsgruppen-Wünsche bis ${tag || "[TAG]"}, den ${datu
 
 ${link || "[LINK]"}
 
-Das Formular bleibt bis zur Deadline offen, danach läuft der Algorithmus. Wer sich bis dahin nicht eingetragen hat, kann nicht mehr berücksichtigt werden.
+Das Formular bleibt bis zur Deadline offen. Wer sich bis dahin nicht eingetragen hat, kann nicht mehr berücksichtigt werden.
 
 Ein paar Hinweise:
 - Es handelt sich NICHT um First-come-first-serve, also kein Stress!
@@ -68,12 +68,10 @@ Ein paar Hinweise:
 - Auch Alleinanmeldungen laufen über das Formular. Vorangemeldete Personen tragen sich NICHT ein.
 - Wenn ihr euch vertan habt: NICHT nochmal eintragen, sondern mir eine Nachricht schicken.
 - Die 1./2./3. Wahl ist entsprechend gewichtet, garantiert ist aber keine davon. Die Gruppe bleibt in jedem Fall zusammen.
-- Sind mehrere Verteilungen gleich fair, entscheidet ein Losverfahren mit dem Startwert ${lotterySeed}, den ich hiermit vorab veröffentliche.
 
-Bei Fragen gerne melden!`;
+Bei Fragen gerne melden`;
 }
 
-// The emoji is deliberate: this is the one intentionally informal message.
 export function reminderMessage(tag: string, uhrzeit: string): string {
-	return `Friendly reminder: bitte bis ${tag || "[TAG]"}, ${uhrzeit || "[UHRZEIT]"} Uhr eure Rotationsgruppen-Wünsche ins Google Forms eintragen 😊 Wer nicht eingetragen ist, wird bei der Verteilung nicht berücksichtigt und muss Restplätze nehmen.`;
+	return `Friendly reminder: bitte bis ${tag || "[TAG]"}, ${uhrzeit || "[UHRZEIT]"} Uhr eure Rotationsgruppen-Wünsche ins Google Forms eintragen. Wer nicht eingetragen ist, wird bei der Verteilung nicht berücksichtigt und muss Restplätze nehmen.`;
 }

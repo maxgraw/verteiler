@@ -3,7 +3,7 @@ import { STEPS } from "$lib/steps";
 import WizardStep from "./WizardStep.svelte";
 
 const FORMS_COPY_URL =
-	"https://docs.google.com/forms/d/1NPfygE5n_37uiPebmw23j0SxaCU02rDuR3uaqfaO304/copy";
+	"https://docs.google.com/forms/d/13oux7VrZFFxIAUZCyxJtmoHIj5jGD5b1vGvqLmjKYOk/copy";
 </script>
 
 <WizardStep index={STEPS.formsCopy} title="Eigene Google Forms Kopie erstellen">

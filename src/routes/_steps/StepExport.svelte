@@ -4,19 +4,18 @@ import { STEPS } from "$lib/steps";
 import WizardStep from "./WizardStep.svelte";
 </script>
 
-<WizardStep
-    index={STEPS.formsExport}
-    title="Formular schließen und Antworten exportieren"
->
+<WizardStep index={STEPS.formsExport} title="Antworten exportieren">
     <p class="description">
-        Beides passiert im Reiter „Antworten“: erst keine neuen Antworten mehr
-        annehmen, dann die vorhandenen als CSV herunterladen.
+        Durch den Abschlusszeitpunkt aus Schritt {STEPS.formsClose + 1} hat sich das
+        Formular schon selbst geschlossen. Prüf das kurz, dann lad die Antworten
+        als CSV herunter.
     </p>
     <ol>
         <li>Google Forms öffnen <ChevronRight size={12} class="inline-arrow" /> Reiter „Antworten“.</li>
         <li>
-            Den Schalter „Antworten möglich“ deaktivieren, bis „Antworten werden nicht
-            akzeptiert“ erscheint.
+            Prüfen, dass „Antworten werden nicht akzeptiert“ steht. Falls doch noch
+            angenommen wird, oben rechts über „Veröffentlicht“ die Option „Antworten
+            möglich“ ausschalten.
         </li>
         <li>
             Oben rechts das Dreipunkt-Menü ⋮ öffnen
