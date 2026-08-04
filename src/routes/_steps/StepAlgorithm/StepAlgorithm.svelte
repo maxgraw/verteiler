@@ -85,11 +85,6 @@ const zeitslots = $derived(
         Sechsergruppe wiegt sechsmal so viel wie eine Einzelperson.
     </p>
 
-    <p class="lottery-note">
-        Sind mehrere Verteilungen gleich fair, entscheidet ein Los mit dem
-        Startwert <code>{appState.lotterySeed}</code>.
-    </p>
-
     <button
         class="run-btn"
         onclick={run}
@@ -150,21 +145,6 @@ const zeitslots = $derived(
         display: flex;
         flex-direction: column;
         gap: var(--space-4);
-    }
-
-    .lottery-note {
-        font-size: var(--text-xs);
-        color: var(--color-text-subtle);
-        line-height: 1.6;
-    }
-
-    .lottery-note code {
-        font-weight: 700;
-        color: var(--color-text);
-        background: var(--color-bg-subtle);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-sm);
-        padding: 0 var(--space-1);
     }
 
     .progress-info {
