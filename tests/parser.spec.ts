@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parseChoices, buildSlots } from "$lib/parser";
+import ohneEmailCsv from "./fixtures/ohne_email.csv?raw";
 
 const HEADER =
 	"Zeitstempel,E-Mail-Adresse,Gruppengröße,Mitglieder,1. Wahl,2. Wahl,3. Wahl";
@@ -277,6 +278,37 @@ describe("parseChoices", () => {
 				`${HEADER}\n01.01.2025 10:00:00,test@test.de,1,"Max ""der Große"" Müller",Gruppe 1-4,Gruppe 5-8,Gruppe 9-12`,
 			);
 			expect(groups[0].members).toBe('Max "der Große" Müller');
+		});
+	});
+
+	describe("column layout", () => {
+		// Real export of the template form, which does not collect E-Mail addresses
+		it("parses an export without the E-Mail column", () => {
+			const { groups, warnings } = parseChoices(ohneEmailCsv);
+			expect(warnings).toHaveLength(0);
+			expect(groups).toHaveLength(2);
+			expect(groups[0].size).toBe(5);
+			expect(groups[1].members).toBe(
+				"Joel Schneider, Benedikt Wieland, Max Graw, Tarik Ciftci",
+			);
+			expect(groups[1].choices).toEqual([2, 1, 3]);
+		});
+
+		it("ignores unknown columns between the known ones", () => {
+			const extra =
+				"Zeitstempel,Gruppengröße,Notiz,Mitglieder,1. Wahl,2. Wahl,3. Wahl\n" +
+				"01.01.2025 10:00:00,1,egal,Anna,Gruppe 9-12,Gruppe 5-8,Gruppe 13-16";
+			const { groups } = parseChoices(extra);
+			expect(groups[0].members).toBe("Anna");
+			expect(groups[0].choices).toEqual([2, 1, 3]);
+		});
+
+		it("throws when the header names no choice columns", () => {
+			expect(() =>
+				parseChoices(
+					"Zeitstempel,Gruppengröße,Mitglieder,A,B,C\n01.01.2025,1,Anna,1-4,5-8,9-12",
+				),
+			).toThrow();
 		});
 	});
 

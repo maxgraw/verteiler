@@ -1,6 +1,6 @@
 # Verteiler
 
-Single-page SvelteKit app that assigns student groups to university rotation time slots by ranked preference. Organizers walk through 11 steps in three phases: prepare the Google Forms, message the semester, then evaluate the answers by uploading the CSV export, setting capacities and solving.
+Single-page SvelteKit app that assigns student groups to university rotation time slots by ranked preference. Organizers walk through 10 steps in three phases: prepare the Google Forms, message the semester, then evaluate the answers by uploading the CSV export, setting capacities and solving.
 
 Everything runs client-side. No backend, no database, no network call at runtime. The
 uploaded CSV never leaves the browser.

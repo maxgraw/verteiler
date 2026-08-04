@@ -10,17 +10,21 @@ timeSlot, capacity over individual slots.
 
 ## CSV format
 
-Google Forms export, columns 0-based:
+Google Forms export. detectLayout resolves the columns from the header text, not from fixed
+positions, because a form only exports an E-Mail column when it asks for addresses and the
+question wording differs between form copies:
 
-0 Zeitstempel (ignored)
-1 E-Mail-Adresse (ignored)
-2 Gruppengröße, must parse to 1-6
-3 Mitglieder, comma-separated names, non-empty
-4-6 1./2./3. Wahl, either "Gruppe X-Y" or "Egal"
+- three columns matching /\bwahl\b/, each "Gruppe X-Y" or "Egal", ranked 1./2./3. by column
+  order
+- Gruppengröße, matching /anzahl|größe/, must parse to 1-6
+- Mitglieder, matching /name|mitglied/, comma- or newline-separated names, non-empty
+
+Größe is resolved first, because "Anzahl Gruppenmitglieder" matches both patterns. Everything
+else, timestamp and E-Mail among them, is ignored. A header where one of the five is missing
+is a fatal error.
 
 parseChoices sniffs comma vs semicolon from the first non-empty line, strips a BOM, and
-hand-parses quoted cells including doubled quotes. Fewer than 7 header columns is a fatal
-error.
+hand-parses quoted cells including doubled quotes.
 
 The scanner walks the whole text rather than splitting on newlines first, so a quoted field
 may contain newlines. Google Forms produces those whenever someone types the member names
@@ -38,8 +42,8 @@ always counts as a first-choice match.
 
 ## Parse failure modes
 
-Fatal, parseChoices throws and the upload is rejected: empty file, header only, too few
-header columns, or zero valid rows.
+Fatal, parseChoices throws and the upload is rejected: empty file, header only, an
+unrecognized header, or zero valid rows.
 
 Recoverable, a German warning is collected and the upload still succeeds: invalid group size,
 missing members, or an unreadable choice skip the row; a duplicate preference or a member

@@ -9,7 +9,7 @@ Parser warnings and solver errors reach the user directly, so they must read as 
 not as technical output. Include the 1-based row number in parser warnings (Zeile N) and say
 what happened to the row. Map raw solver errors through toUserMessage in StepAlgorithm.svelte.
 
-The three copyable chat messages live in messages.ts, not in the step files, and address the
+The copyable chat messages live in messages.ts, not in the step files, and address the
 semester with ihr. Everything shown in the page itself addresses the single organizer with du.
 
 Call the form Google Forms throughout, not Google Form or Google Formular. Quote UI elements

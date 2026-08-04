@@ -30,7 +30,38 @@ export interface ParseResult {
 }
 
 const DONT_CARE_WORD = "Egal";
-const MIN_COLUMNS = 7;
+
+/** Column positions parseChoices reads, resolved from the header row. */
+interface Layout {
+	size: number;
+	members: number;
+	/** Columns of the three choices, ranked by their position in the export */
+	choices: number[];
+}
+
+/**
+ * Resolve the columns by header text instead of by position. Google Forms only exports the
+ * E-Mail column when the form asks for addresses, so the same form yields a 6 or 7 column
+ * export, and the wording of the questions differs between form copies.
+ */
+function detectLayout(header: string[]): Layout | null {
+	// Auswahl does not match: \b requires a non-word character before Wahl.
+	const choices = header.flatMap((h, i) => (/\bwahl\b/i.test(h) ? [i] : []));
+	if (choices.length !== 3) return null;
+
+	// Resolved before members, because "Anzahl Gruppenmitglieder" matches both patterns.
+	const size = header.findIndex(
+		(h, i) => !choices.includes(i) && /anzahl|größe|grösse|groesse/i.test(h),
+	);
+	if (size === -1) return null;
+
+	const members = header.findIndex(
+		(h, i) => i !== size && !choices.includes(i) && /name|mitglied/i.test(h),
+	);
+	if (members === -1) return null;
+
+	return { size, members, choices };
+}
 
 /**
  * Above this many groups the organizer almost certainly picked the wrong export.
@@ -112,14 +143,9 @@ function parseChoiceCell(cell: string): number | null {
 /**
  * Parse the Google Forms CSV export into groups and warnings.
  *
- * Expected columns (0-based):
- *   0: Timestamp
- *   1: Email
- *   2: Gruppengröße (1–6)
- *   3: Mitglieder
- *   4: 1. Wahl  ("Gruppe X-Y" or "Egal")
- *   5: 2. Wahl
- *   6: 3. Wahl
+ * The header names the columns: a group size, the member names and three ranked choices,
+ * each "Gruppe X-Y" or "Egal". Every other column, timestamp and E-Mail among them, is
+ * ignored.
  *
  * @throws {Error} If the file is empty, has no data rows, or is missing required columns
  */
@@ -134,12 +160,16 @@ export function parseChoices(csvText: string): ParseResult {
 			"Die CSV enthält nur eine Kopfzeile, aber keine Einträge.",
 		);
 	}
-	if (records[0].length < MIN_COLUMNS) {
+	const layout = detectLayout(records[0]);
+	if (!layout) {
 		throw new Error(
-			`Ungültiges Format: Die Kopfzeile hat ${records[0].length} Spalten, erwartet werden ${MIN_COLUMNS}. ` +
-				"Bitte prüfe, ob du die richtige CSV ausgewählt hast.",
+			"Ungültiges Format: In der Kopfzeile fehlen Spalten. " +
+				"Erwartet werden Gruppengröße, Mitglieder und 1., 2. und 3. Wahl. " +
+				"Ist das die richtige CSV?",
 		);
 	}
+	const columnsNeeded =
+		Math.max(layout.size, layout.members, ...layout.choices) + 1;
 
 	const groups: Group[] = [];
 	const warnings: string[] = [];
@@ -148,23 +178,23 @@ export function parseChoices(csvText: string): ParseResult {
 		const row = records[i];
 		const rowNum = i + 1;
 
-		if (row.length < MIN_COLUMNS) {
+		if (row.length < columnsNeeded) {
 			warnings.push(
 				`Zeile ${rowNum}: Nur ${row.length} Spalten. Eintrag übersprungen.`,
 			);
 			continue;
 		}
 
-		const size = parseInt(row[2], 10);
+		const size = parseInt(row[layout.size], 10);
 		if (isNaN(size) || size < 1 || size > 6) {
 			warnings.push(
-				`Zeile ${rowNum}: Ungültige Gruppengröße "${row[2]}". Eintrag übersprungen.`,
+				`Zeile ${rowNum}: Ungültige Gruppengröße "${row[layout.size]}". Eintrag übersprungen.`,
 			);
 			continue;
 		}
 
 		// Names may be comma- or newline-separated depending on how the form was filled in
-		const memberNames = row[3]
+		const memberNames = row[layout.members]
 			.split(/[,\r\n]+/)
 			.map((m) => m.trim())
 			.filter(Boolean);
@@ -179,10 +209,11 @@ export function parseChoices(csvText: string): ParseResult {
 		const choices: number[] = [];
 		let choiceError = false;
 		for (let c = 0; c < 3; c++) {
-			const parsed = parseChoiceCell(row[4 + c]);
+			const cell = row[layout.choices[c]];
+			const parsed = parseChoiceCell(cell);
 			if (parsed === null) {
 				warnings.push(
-					`Zeile ${rowNum}: Wahl ${c + 1} "${row[4 + c]}" nicht lesbar. Eintrag übersprungen.`,
+					`Zeile ${rowNum}: Wahl ${c + 1} "${cell}" nicht lesbar. Eintrag übersprungen.`,
 				);
 				choiceError = true;
 				break;

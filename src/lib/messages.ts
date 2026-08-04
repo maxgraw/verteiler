@@ -1,9 +1,7 @@
-import { NUM_TIME_SLOTS } from "./config.js";
-
 /**
- * The three long German texts the organizer copies into the semester chat. They live here
- * rather than in the step components because they are long, parameterized and the only copy
- * in the app worth asserting on.
+ * The long German texts the organizer copies into the semester chat or the form itself. They
+ * live here rather than in the step components because they are long, parameterized and the
+ * only copy in the app worth asserting on.
  *
  * Missing deadline fields render as [TAG], [DATUM], [UHRZEIT] or [LINK]: the message stays
  * readable while the organizer fills the form, and an accidental copy is obviously incomplete.
@@ -18,12 +16,6 @@ export interface DeadlineFields {
 	/** Google Forms participant link */
 	link: string;
 }
-
-export const announceMessage = `Hallo an alle!
-
-Ich würde die Verteilung der Rotationsgruppen übernehmen. Über ein Google Forms gibt jede Gruppe drei der ${NUM_TIME_SLOTS} Zeitslots als 1., 2. und 3. Wahl an. Ein Algorithmus berechnet daraus die beste Verteilung fürs Semester.
-
-LG`;
 
 /**
  * Goes into the form description itself, where the students see it before answering. The

@@ -4,7 +4,6 @@ import StepFormsCopy from "./_steps/StepFormsCopy.svelte";
 import StepDeadline from "./_steps/StepDeadline.svelte";
 import StepFormsUrl from "./_steps/StepFormsUrl.svelte";
 import StepFormsClose from "./_steps/StepFormsClose.svelte";
-import StepAnnounce from "./_steps/StepAnnounce.svelte";
 import StepDeadlineMessage from "./_steps/StepDeadlineMessage.svelte";
 import StepReminder from "./_steps/StepReminder.svelte";
 import StepExport from "./_steps/StepExport.svelte";
@@ -21,7 +20,6 @@ import StepAlgorithm from "./_steps/StepAlgorithm/StepAlgorithm.svelte";
         <li><StepDeadline /></li>
         <li><StepFormsUrl /></li>
         <li><StepFormsClose /></li>
-        <li><StepAnnounce /></li>
         <li><StepDeadlineMessage /></li>
         <li><StepReminder /></li>
         <li><StepExport /></li>

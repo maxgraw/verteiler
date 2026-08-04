@@ -15,7 +15,6 @@ describe("STEPS", () => {
 		// The closing time can only be set once the form is published
 		expect(STEPS.formsUrl).toBeLessThan(STEPS.formsClose);
 		expect(STEPS.formsClose).toBeLessThan(STEPS.deadlineMessage);
-		expect(STEPS.announce).toBeLessThan(STEPS.deadlineMessage);
 		expect(STEPS.deadlineMessage).toBeLessThan(STEPS.reminder);
 		expect(STEPS.reminder).toBeLessThan(STEPS.formsExport);
 		expect(STEPS.formsExport).toBeLessThan(STEPS.csvUpload);

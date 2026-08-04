@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NUM_TIME_SLOTS } from "$lib/config";
 import {
-	announceMessage,
 	deadlineMessage,
 	formIntroMessage,
 	reminderMessage,
@@ -13,12 +11,6 @@ const filled = {
 	uhrzeit: "18:00",
 	link: "https://docs.google.com/forms/d/e/abc/viewform",
 };
-
-describe("announceMessage", () => {
-	it("names the number of time slots from the config", () => {
-		expect(announceMessage).toContain(`der ${NUM_TIME_SLOTS} Zeitslots`);
-	});
-});
 
 describe("formIntroMessage", () => {
 	it("carries the deadline, so the form description cannot go stale", () => {

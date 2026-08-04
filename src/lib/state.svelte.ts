@@ -9,8 +9,9 @@ export const STORAGE_KEY = "verteiler";
  * Bump whenever the persisted shape changes, so old data is discarded rather than
  * half-restored. Version 2 renumbered the steps: the flags still fit, but they would
  * describe the wrong steps. Version 3 inserted formsClose, shifting everything after it.
+ * Version 4 dropped the announce step, shifting everything after it.
  */
-export const VERSION = 3;
+export const VERSION = 4;
 
 /** Fields are optional because a stored payload is untrusted input, not a guarantee. */
 interface SavedState {
