@@ -3,6 +3,7 @@ import {
 	checkCapacity,
 	formatDistribution,
 	groupByTimeSlot,
+	groupRows,
 	rankOf,
 	sanitizeCapacities,
 	toUserMessage,
@@ -17,7 +18,8 @@ function makeGroup(
 	choices: number[],
 	currentSelection: number,
 ): Group {
-	return { id, size, members: `Gruppe ${id}`, choices, currentSelection };
+	// Named Team, so member names stay apart from the "Gruppe N" a row is assigned to
+	return { id, size, members: `Team ${id}`, choices, currentSelection };
 }
 
 /** Solution over 2 time slots of 2 slots each, so slot 0-1 are ts0 and slot 2-3 are ts1. */
@@ -141,25 +143,45 @@ describe("groupByTimeSlot", () => {
 	});
 });
 
-describe("formatDistribution", () => {
-	it("lists each time slot with its member names indented", () => {
+describe("groupRows", () => {
+	it("names the single rotation group, ordered by its number", () => {
 		const solution = makeSolution([
-			makeGroup(0, 2, [0, 1, -1], 0),
-			makeGroup(1, 2, [1, 0, -1], 2),
+			makeGroup(0, 2, [1, 0, -1], 2), // slot 2, so Gruppe 3
+			makeGroup(1, 2, [0, 1, -1], 0), // slot 0, so Gruppe 1
 		]);
-		const text = formatDistribution(groupByTimeSlot(solution, 2, 2));
-		expect(text).toBe(
-			"Zeitslot 1 (Gruppe 1–2):\n" +
-				"  Gruppe 0\n" +
-				"\n" +
-				"Zeitslot 2 (Gruppe 3–4):\n" +
-				"  Gruppe 1",
-		);
+		const rows = groupRows(groupByTimeSlot(solution, 2, 2));
+		expect(rows.map((r) => r.members)).toEqual(["Team 1", "Team 0"]);
+		expect(rows.map((r) => r.label)).toEqual(["Gruppe 1", "Gruppe 3"]);
 	});
 
-	it("keeps empty time slots visible but trims trailing blank lines", () => {
-		const text = formatDistribution(groupByTimeSlot(makeSolution([]), 2, 2));
-		expect(text).toBe("Zeitslot 1 (Gruppe 1–2):\n\nZeitslot 2 (Gruppe 3–4):");
+	it("carries the rank each group received", () => {
+		const solution = makeSolution([
+			makeGroup(0, 2, [0, 1, -1], 0),
+			makeGroup(1, 2, [0, 1, -1], 2),
+		]);
+		const rows = groupRows(groupByTimeSlot(solution, 2, 2));
+		expect(rows.map((r) => r.rank)).toEqual([0, 1]);
+	});
+
+	it("skips empty time slots", () => {
+		expect(groupRows(groupByTimeSlot(makeSolution([]), 2, 2))).toEqual([]);
+	});
+});
+
+describe("formatDistribution", () => {
+	it("writes one line per group with assignment and rank", () => {
+		const solution = makeSolution([
+			makeGroup(0, 2, [0, 1, -1], 0),
+			makeGroup(1, 2, [0, 1, -1], 2),
+		]);
+		const text = formatDistribution(groupRows(groupByTimeSlot(solution, 2, 2)));
+		expect(text).toBe("Team 0: Gruppe 1 (1. Wahl)\nTeam 1: Gruppe 3 (2. Wahl)");
+	});
+
+	it("names the missed preference instead of leaving the rank blank", () => {
+		const solution = makeSolution([makeGroup(0, 2, [0, 0, 0], 2)]);
+		const text = formatDistribution(groupRows(groupByTimeSlot(solution, 2, 2)));
+		expect(text).toBe("Team 0: Gruppe 3 (Kein Wunsch)");
 	});
 });
 

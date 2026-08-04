@@ -7,10 +7,12 @@ import {
 	checkCapacity,
 	formatDistribution,
 	groupByTimeSlot,
+	groupRows,
 	sanitizeCapacities,
 	toUserMessage,
 } from "$lib/distribution";
 import { buildSlots } from "$lib/parser";
+import { downloadDistributionPdf } from "$lib/pdf";
 import { SolverClient } from "$lib/solver-client";
 import type { SolveResult } from "$lib/algorithm/types";
 import { state as appState } from "$lib/state.svelte";
@@ -23,6 +25,7 @@ let running = $state(false);
 let statusMessage = $state("");
 let solveResult = $state<SolveResult | null>(null);
 let error = $state("");
+let pdfRunning = $state(false);
 
 const solver = new SolverClient();
 onDestroy(() => solver.dispose());
@@ -76,6 +79,24 @@ async function run() {
 const zeitslots = $derived(
 	solveResult ? groupByTimeSlot(solveResult.solution) : [],
 );
+const rows = $derived(groupRows(zeitslots));
+
+async function downloadPdf() {
+	if (!solveResult) return;
+	error = "";
+	pdfRunning = true;
+	try {
+		await downloadDistributionPdf(
+			rows,
+			solveResult.spread,
+			solveResult.studentSpread,
+		);
+	} catch {
+		error = "PDF konnte nicht erstellt werden. Bitte Seite neu laden.";
+	} finally {
+		pdfRunning = false;
+	}
+}
 </script>
 
 <WizardStep index={STEPS.algorithm} title="Verteilung berechnen" checkDisabled={!solveResult}>
@@ -112,10 +133,13 @@ const zeitslots = $derived(
             />
             <TimeSlotList timeSlots={zeitslots} />
             <CopyButton
-                text={formatDistribution(zeitslots)}
+                text={formatDistribution(rows)}
                 label="Ergebnisse kopieren"
                 variant="outlined"
             />
+            <button class="pdf-btn" onclick={downloadPdf} disabled={pdfRunning}>
+                {pdfRunning ? "PDF wird erstellt…" : "PDF herunterladen"}
+            </button>
         </div>
     {/if}
 </WizardStep>
@@ -145,6 +169,27 @@ const zeitslots = $derived(
         display: flex;
         flex-direction: column;
         gap: var(--space-4);
+    }
+
+    .pdf-btn {
+        width: 100%;
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: var(--color-primary);
+        border: 1px solid var(--color-primary-border);
+        border-radius: var(--radius-md);
+        background: var(--color-primary-bg);
+        transition: background var(--transition-fast);
+    }
+
+    .pdf-btn:hover:not(:disabled) {
+        background: var(--color-primary-border);
+    }
+
+    .pdf-btn:disabled {
+        color: var(--color-text-faint);
+        cursor: not-allowed;
     }
 
     .progress-info {

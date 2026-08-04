@@ -40,6 +40,16 @@ Gruppe 1-4 is 0, Gruppe 5-8 is 1, up to Gruppe 29-32 which is 7.
 first choice that is either -1 or equal to the time slot, so a group answering "Egal" first
 always counts as a first-choice match.
 
+## Result export
+
+Both exports list one row per group rather than one block per time slot: the time slot number
+is internal, the rotation group range is what the group picked in the form. groupRows flattens
+the time slot view, formatDistribution renders it for the clipboard and pdf.ts builds the PDF.
+
+downloadDistributionPdf imports jsPDF and jspdf-autotable on demand, so their ~120 KB gzipped
+only load when the organizer asks for the PDF. The built-in Helvetica is WinAnsi encoded,
+which covers umlauts, ß and the en dash in the slot labels, so no font has to be embedded.
+
 ## Parse failure modes
 
 Fatal, parseChoices throws and the upload is rejected: empty file, header only, an

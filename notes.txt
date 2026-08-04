@@ -1,7 +1,0 @@
-auch kurz google forms link valdidieren
-
-bei export (von ergebnissen). jede gruppe als eigene zeile. Zeitslots sind eher intern gedacht.
-
-pdf erstellen für ergebnisse.
-erstwunsch zweitwunsch etc.
-gruppen mit namen und zuteilung

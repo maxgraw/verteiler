@@ -29,6 +29,8 @@
 	},
 	"dependencies": {
 		"@lucide/svelte": "1.28.0",
-		"highs": "1.15.2"
+		"highs": "1.15.2",
+		"jspdf": "4.2.1",
+		"jspdf-autotable": "5.0.8"
 	}
 }

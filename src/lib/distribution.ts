@@ -68,15 +68,36 @@ export function groupByTimeSlot(
 	});
 }
 
+export interface GroupRow {
+	members: string;
+	/** Rotation group the group was assigned to, e.g. "Gruppe 6" */
+	label: string;
+	/** Preference rank, index into SPREAD_LABELS */
+	rank: number;
+}
+
+/**
+ * Flatten a distribution to one row per group, ordered by rotation group. The row names the
+ * single group the solver picked, not the range of four its time slot covers: the range is
+ * how the form asks, the number is what the students end up in. The time slot itself stays
+ * out, it is an internal index.
+ */
+export function groupRows(timeSlots: TimeSlotView[]): GroupRow[] {
+	return timeSlots
+		.flatMap((ts) => ts.groups)
+		.sort((a, b) => a.currentSelection - b.currentSelection)
+		.map((g) => ({
+			members: g.members,
+			label: `Gruppe ${g.currentSelection + 1}`,
+			rank: g.rank,
+		}));
+}
+
 /** Plain-text rendering of a distribution, for the copy-to-clipboard button. */
-export function formatDistribution(timeSlots: TimeSlotView[]): string {
-	const lines: string[] = [];
-	for (const ts of timeSlots) {
-		lines.push(`Zeitslot ${ts.num} (${ts.label}):`);
-		for (const g of ts.groups) lines.push(`  ${g.members}`);
-		lines.push("");
-	}
-	return lines.join("\n").trim();
+export function formatDistribution(rows: GroupRow[]): string {
+	return rows
+		.map((r) => `${r.members}: ${r.label} (${SPREAD_LABELS[r.rank]})`)
+		.join("\n");
 }
 
 /** Turn any solver or worker failure into a German message the organizer can act on. */

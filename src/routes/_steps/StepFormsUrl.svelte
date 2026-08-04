@@ -1,22 +1,11 @@
 <script lang="ts">
+import { formsLinkError, isFormsLink } from "$lib/forms-link";
 import { state } from "$lib/state.svelte";
 import { STEPS } from "$lib/steps";
 import WizardStep from "./WizardStep.svelte";
 
-const isValidLink = $derived(
-	state.link.startsWith("https://docs.google.com/forms/") &&
-		state.link.includes("/viewform"),
-);
-const linkError = $derived.by(() => {
-	if (state.link.length === 0) return "";
-	if (!state.link.startsWith("https://docs.google.com/forms/"))
-		return "Das sieht nicht wie ein Google Forms Link aus. Der Link muss mit https://docs.google.com/forms/ beginnen.";
-	if (state.link.includes("/edit") || state.link.includes("/copy"))
-		return "Das ist kein Teilnehmerlink. Er enthält /viewform und erscheint nach dem Veröffentlichen oben rechts.";
-	if (!state.link.includes("/viewform"))
-		return "Bitte den Teilnehmerlink einfügen. Er enthält /viewform und erscheint nach dem Veröffentlichen oben rechts.";
-	return "";
-});
+const isValidLink = $derived(isFormsLink(state.link));
+const linkError = $derived(formsLinkError(state.link));
 </script>
 
 <WizardStep
@@ -44,9 +33,9 @@ const linkError = $derived.by(() => {
             <input
                 type="url"
                 id="forms-url"
-                placeholder="https://docs.google.com/forms/..."
+                placeholder="https://forms.gle/..."
                 required
-                pattern="https://docs\.google\.com/forms/.*/viewform.*"
+                pattern="https://(forms\.gle/[A-Za-z0-9_-]+|docs\.google\.com/forms/.+/viewform.*)"
                 bind:value={state.link}
             />
             {#if linkError}
