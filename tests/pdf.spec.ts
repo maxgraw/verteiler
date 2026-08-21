@@ -1,25 +1,48 @@
 import { describe, expect, it } from "vitest";
 import type { GroupRow } from "$lib/distribution";
-import { distributionTable, spreadTable, summaryLine } from "$lib/pdf";
+import {
+	distributionTable,
+	rotationRows,
+	spreadTable,
+	summaryLine,
+} from "$lib/pdf";
 
 const rows: GroupRow[] = [
-	{ members: "Anna Müller, Ben Schmidt", label: "Gruppe 1–4", rank: 0 },
-	{ members: "Clara Weiß", label: "Gruppe 29–32", rank: 3 },
+	{ members: "Anna Müller, Ben Schmidt", num: 1, label: "Gruppe 1", rank: 0 },
+	{ members: "Clara Weiß", num: 32, label: "Gruppe 32", rank: 3 },
 ];
 
-describe("distributionTable", () => {
-	it("leads with the assignment, not with the names", () => {
-		const { head, body } = distributionTable(rows);
-		expect(head).toEqual(["Zuteilung", "Mitglieder", "Wahl"]);
-		expect(body[0]).toEqual([
-			"Gruppe 1–4",
-			"Anna Müller, Ben Schmidt",
-			"1. Wahl",
+const shared: GroupRow[] = [
+	{ members: "Anna Müller", num: 3, label: "Gruppe 3", rank: 0 },
+	{ members: "Ben Schmidt", num: 3, label: "Gruppe 3", rank: 1 },
+	{ members: "Clara Weiß", num: 4, label: "Gruppe 4", rank: 0 },
+];
+
+describe("rotationRows", () => {
+	it("collects the groups of a shared rotation group into one row", () => {
+		expect(rotationRows(shared)).toEqual([
+			{ num: 3, members: ["Anna Müller", "Ben Schmidt"] },
+			{ num: 4, members: ["Clara Weiß"] },
 		]);
 	});
 
-	it("spells out a missed preference instead of leaving the cell empty", () => {
-		expect(distributionTable(rows).body[1][2]).toBe("Kein Wunsch");
+	it("keeps one row per rotation group when none are shared", () => {
+		expect(rotationRows(rows).map((r) => r.num)).toEqual([1, 32]);
+	});
+});
+
+describe("distributionTable", () => {
+	it("leads with the rotation group number and drops the rank", () => {
+		const { head, body } = distributionTable(rows);
+		expect(head).toEqual(["Rotationsgruppe", "Namen"]);
+		expect(body[0]).toEqual(["1", "Anna Müller, Ben Schmidt"]);
+	});
+
+	it("names the number once and stacks the shared groups below it", () => {
+		expect(distributionTable(shared).body).toEqual([
+			["3", "Anna Müller\nBen Schmidt"],
+			["4", "Clara Weiß"],
+		]);
 	});
 });
 
@@ -37,11 +60,11 @@ describe("spreadTable", () => {
 });
 
 describe("summaryLine", () => {
-	it("counts groups and students", () => {
-		expect(summaryLine(rows, 7)).toBe("2 Gruppen, 7 Studierende");
+	it("counts rotation groups, not applicant groups", () => {
+		expect(summaryLine(shared, 7)).toBe("2 Rotationsgruppen, 7 Studierende");
 	});
 
-	it("keeps the singular for a single group", () => {
-		expect(summaryLine([rows[0]], 2)).toBe("1 Gruppe, 2 Studierende");
+	it("keeps the singular for a single rotation group", () => {
+		expect(summaryLine([rows[0]], 2)).toBe("1 Rotationsgruppe, 2 Studierende");
 	});
 });

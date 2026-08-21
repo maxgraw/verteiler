@@ -1,10 +1,11 @@
-import type { SolveResult } from "./algorithm/types";
+import type { Guarantee, SolveResult } from "./algorithm/types";
 import type { Group, Slot } from "./parser";
 
 export interface SolveRequest {
 	groups: Group[];
 	slots: Slot[];
 	lotterySeed?: string;
+	guarantees?: Guarantee[];
 }
 
 /** Everything the worker posts back. Shared so the two sides cannot drift apart. */
@@ -13,8 +14,14 @@ export type WorkerMessage =
 	| { type: "result"; data: SolveResult }
 	| { type: "error"; message: string };
 
-/** A run this long is stuck, not slow. Aborting beats leaving the organizer waiting. */
-const TIMEOUT_MS = 60_000;
+/**
+ * A run this long is stuck, not slow. Aborting beats leaving the organizer waiting.
+ *
+ * Has to stay above the solver's own budget, which is three solves: 30 s to optimise,
+ * 15 s to prove it, 30 s to break ties. Below that the client would cut off runs the
+ * solver was still allowed to finish.
+ */
+const TIMEOUT_MS = 120_000;
 
 /**
  * Owns the solver worker across runs.

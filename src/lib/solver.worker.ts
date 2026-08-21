@@ -6,10 +6,11 @@ function post(message: WorkerMessage) {
 }
 
 self.onmessage = async (e: MessageEvent<SolveRequest>) => {
-	const { groups, slots, lotterySeed } = e.data;
+	const { groups, slots, lotterySeed, guarantees } = e.data;
 	try {
 		const result = await solve(groups, slots, {
 			lotterySeed,
+			guarantees,
 			onProgress: (message) => post({ type: "status", message }),
 		});
 		post({ type: "result", data: result });

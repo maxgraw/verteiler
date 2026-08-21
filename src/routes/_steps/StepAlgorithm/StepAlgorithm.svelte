@@ -5,10 +5,14 @@ import CopyButton from "$lib/components/CopyButton.svelte";
 import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "$lib/config";
 import {
 	checkCapacity,
+	checkGuarantees,
 	formatDistribution,
 	groupByTimeSlot,
 	groupRows,
+	guaranteeSummary,
 	sanitizeCapacities,
+	solveCaveat,
+	SPREAD_LABELS,
 	toUserMessage,
 } from "$lib/distribution";
 import { buildSlots } from "$lib/parser";
@@ -18,6 +22,7 @@ import type { SolveResult } from "$lib/algorithm/types";
 import { state as appState } from "$lib/state.svelte";
 import { STEPS } from "$lib/steps";
 import WizardStep from "../WizardStep.svelte";
+import GuaranteePicker from "./GuaranteePicker.svelte";
 import SpreadSummary from "./SpreadSummary.svelte";
 import TimeSlotList from "./TimeSlotList.svelte";
 
@@ -55,14 +60,26 @@ async function run() {
 		return;
 	}
 
+	const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, capacities);
+	const guaranteeError = checkGuarantees(
+		appState.parsedGroups,
+		slots,
+		appState.guarantees,
+	);
+	if (guaranteeError) {
+		error = guaranteeError;
+		return;
+	}
+
 	running = true;
 	statusMessage = "Starte…";
 	try {
 		solveResult = await solver.run(
 			{
 				groups: $state.snapshot(appState.parsedGroups),
-				slots: buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, capacities),
+				slots,
 				lotterySeed: appState.lotterySeed,
+				guarantees: $state.snapshot(appState.guarantees),
 			},
 			(message) => {
 				statusMessage = message;
@@ -80,6 +97,10 @@ const zeitslots = $derived(
 	solveResult ? groupByTimeSlot(solveResult.solution) : [],
 );
 const rows = $derived(groupRows(zeitslots));
+const caveat = $derived(solveResult ? solveCaveat(solveResult) : null);
+const guaranteeNote = $derived(
+	solveResult ? guaranteeSummary(solveResult) : null,
+);
 
 async function downloadPdf() {
 	if (!solveResult) return;
@@ -114,6 +135,13 @@ async function downloadPdf() {
         Verteilung berechnen
     </button>
 
+    {#if appState.parsedGroups}
+        <GuaranteePicker
+            groups={appState.parsedGroups}
+            bind:guarantees={appState.guarantees}
+        />
+    {/if}
+
     {#if running}
         <div class="progress-info">
             <span class="spinner"></span>
@@ -131,6 +159,26 @@ async function downloadPdf() {
                 spread={solveResult.spread}
                 studentSpread={solveResult.studentSpread}
             />
+            {#if caveat}
+                <Alert variant="warning">{caveat}</Alert>
+            {/if}
+            {#if guaranteeNote}
+                <Alert variant="warning">
+                    {guaranteeNote}
+                    {#if solveResult.displaced.length}
+                        <ul class="displaced">
+                            {#each solveResult.displaced as d}
+                                <li>
+                                    <span class="displaced-members">{d.members}</span>
+                                    <span class="displaced-move">
+                                        {SPREAD_LABELS[d.from]} → {SPREAD_LABELS[d.to]}
+                                    </span>
+                                </li>
+                            {/each}
+                        </ul>
+                    {/if}
+                </Alert>
+            {/if}
             <TimeSlotList timeSlots={zeitslots} />
             <CopyButton
                 text={formatDistribution(rows)}
@@ -163,6 +211,31 @@ async function downloadPdf() {
     .run-btn:disabled {
         background: var(--color-primary-disabled);
         cursor: not-allowed;
+    }
+
+    .displaced {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        margin-top: var(--space-2);
+        font-size: var(--text-xs);
+    }
+
+    .displaced li {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-2);
+    }
+
+    .displaced-members {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .displaced-move {
+        flex-shrink: 0;
+        font-weight: 600;
     }
 
     .results {

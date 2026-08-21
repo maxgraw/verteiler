@@ -18,16 +18,30 @@ let { timeSlots }: Props = $props();
                     {zs.label} · {zs.studentCount} Studierende
                 </span>
             </div>
-            <ul class="group-list">
-                {#each zs.groups as g}
-                    <li class="group-row">
-                        <span class="group-members">{g.members}</span>
-                        <span class="choice-badge" data-rank={g.rank}>
-                            {SPREAD_LABELS[g.rank]}
+            {#each zs.rotationGroups as rg}
+                <div class="rotation">
+                    <div class="rotation-header">
+                        <span class="rotation-title">Gruppe {rg.num}</span>
+                        <span class="rotation-meta">
+                            {#if rg.groups.length === 0}
+                                frei
+                            {:else}
+                                {rg.studentCount} von {rg.capacity} Plätzen
+                            {/if}
                         </span>
-                    </li>
-                {/each}
-            </ul>
+                    </div>
+                    <ul class="group-list">
+                        {#each rg.groups as g}
+                            <li class="group-row">
+                                <span class="group-members">{g.members}</span>
+                                <span class="choice-badge" data-rank={g.rank}>
+                                    {SPREAD_LABELS[g.rank]}
+                                </span>
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
+            {/each}
         </div>
     {/each}
 </div>
@@ -64,23 +78,47 @@ let { timeSlots }: Props = $props();
         color: var(--color-text-subtle);
     }
 
+    .rotation {
+        padding: var(--space-2) 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .rotation:last-child {
+        border-bottom: none;
+    }
+
+    .rotation-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-2);
+        padding: 0 var(--space-3);
+        font-size: var(--text-xs);
+    }
+
+    .rotation-title {
+        font-weight: 600;
+        color: var(--color-text-secondary);
+    }
+
+    .rotation-meta {
+        color: var(--color-text-faint);
+    }
+
     .group-list {
         display: flex;
         flex-direction: column;
     }
 
+    /* Indented past the rotation group header, so the members read as its contents
+       rather than as rotation groups of their own. */
     .group-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: var(--space-2);
-        padding: var(--space-2) var(--space-3);
+        padding: var(--space-1) var(--space-3) var(--space-1) var(--space-6);
         font-size: var(--text-sm);
-        border-bottom: 1px solid var(--color-border);
-    }
-
-    .group-row:last-child {
-        border-bottom: none;
     }
 
     .group-members {

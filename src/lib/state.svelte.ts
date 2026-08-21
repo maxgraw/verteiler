@@ -1,4 +1,5 @@
 import type { Group } from "./parser.js";
+import type { Guarantee } from "./algorithm/types.js";
 import { DEFAULT_CAPACITY, TOTAL_SLOTS } from "./config.js";
 import { generateSeed } from "./lottery.js";
 import { STEP_COUNT } from "./steps.js";
@@ -26,6 +27,7 @@ interface SavedState {
 	parseWarnings?: string[];
 	capacities?: number[];
 	lotterySeed?: string;
+	guarantees?: Guarantee[];
 }
 
 /** Only the first step starts open, the rest unfold as the organizer works through them. */
@@ -54,6 +56,13 @@ export class VerteilerState {
 	csvFileName = $state("");
 	parsedGroups = $state<Group[] | null>(null);
 	parseWarnings = $state<string[]>([]);
+
+	/**
+	 * Groups pinned to a rank by hand. Indices point into parsedGroups, so a new upload
+	 * clears them: the same index would mean a different group. Additive field, so an
+	 * older saved state simply has none and needs no VERSION bump.
+	 */
+	guarantees = $state<Guarantee[]>([]);
 
 	/**
 	 * True when localStorage holds a payload this build cannot use, either written by a
@@ -104,6 +113,7 @@ export class VerteilerState {
 					parseWarnings,
 					capacities,
 					lotterySeed,
+					guarantees,
 				} = this;
 				if (outdated) return;
 				localStorage.setItem(
@@ -120,6 +130,7 @@ export class VerteilerState {
 						parseWarnings,
 						capacities,
 						lotterySeed,
+						guarantees,
 					}),
 				);
 			});
@@ -139,6 +150,7 @@ export class VerteilerState {
 			parseWarnings,
 			capacities,
 			lotterySeed,
+			guarantees,
 		} = parsed;
 		if (link) this.link = link;
 		if (datum) this.datum = datum;
@@ -157,6 +169,7 @@ export class VerteilerState {
 		if (parsedGroups) this.parsedGroups = parsedGroups;
 		if (parseWarnings) this.parseWarnings = parseWarnings;
 		if (lotterySeed) this.lotterySeed = lotterySeed;
+		if (guarantees && Array.isArray(guarantees)) this.guarantees = guarantees;
 	}
 
 	/**
@@ -185,6 +198,7 @@ export class VerteilerState {
 		this.csvFileName = "";
 		this.parsedGroups = null;
 		this.parseWarnings = [];
+		this.guarantees = [];
 		this.lotterySeed = generateSeed();
 	};
 }

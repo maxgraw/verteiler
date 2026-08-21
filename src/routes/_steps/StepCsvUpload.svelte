@@ -18,6 +18,8 @@ async function processFile(file: File) {
 	appState.csvFileName = file.name;
 	appState.parsedGroups = null;
 	appState.parseWarnings = [];
+	// Guarantees point at group indices, which mean something else in a new file
+	appState.guarantees = [];
 	try {
 		const { groups, warnings } = parseChoices(await file.text());
 		appState.parsedGroups = groups;
@@ -54,6 +56,7 @@ function reset() {
 	appState.csvFileName = "";
 	appState.parsedGroups = null;
 	appState.parseWarnings = [];
+	appState.guarantees = [];
 }
 </script>
 

@@ -41,22 +41,49 @@ const TABLE_STYLE = {
 };
 
 /**
- * Header and body of the result table, in the order the columns are printed. The assignment
- * leads: it is what the reader scans for, the names only matter once the row is found.
+ * One row per rotation group: the number once, its members below each other. Several
+ * applicant groups can share a rotation group, and on paper the reader wants the group
+ * they walk into, not who applied together.
+ */
+export interface RotationRow {
+	/** 1-based rotation group number */
+	num: number;
+	/** Member lists of the applicant groups sharing this rotation group, in solver order */
+	members: string[];
+}
+
+/** Fold the per-group rows into one entry per rotation group, keeping their order. */
+export function rotationRows(rows: GroupRow[]): RotationRow[] {
+	const out: RotationRow[] = [];
+	for (const row of rows) {
+		const last = out[out.length - 1];
+		if (last && last.num === row.num) last.members.push(row.members);
+		else out.push({ num: row.num, members: [row.members] });
+	}
+	return out;
+}
+
+/**
+ * Header and body of the result table. The rank each group got is left out: the spread
+ * above already says how the wishes worked out, and per group it only invites comparison.
  */
 export function distributionTable(rows: GroupRow[]): {
 	head: string[];
 	body: string[][];
 } {
 	return {
-		head: ["Zuteilung", "Mitglieder", "Wahl"],
-		body: rows.map((r) => [r.label, r.members, SPREAD_LABELS[r.rank]]),
+		head: ["Rotationsgruppe", "Namen"],
+		body: rotationRows(rows).map((r) => [
+			String(r.num),
+			r.members.join("\n"),
+		]),
 	};
 }
 
 export function summaryLine(rows: GroupRow[], studentCount: number): string {
-	const groupWord = rows.length === 1 ? "Gruppe" : "Gruppen";
-	return `${rows.length} ${groupWord}, ${studentCount} Studierende`;
+	const count = rotationRows(rows).length;
+	const groupWord = count === 1 ? "Rotationsgruppe" : "Rotationsgruppen";
+	return `${count} ${groupWord}, ${studentCount} Studierende`;
 }
 
 /**
@@ -146,12 +173,7 @@ export async function downloadDistributionPdf(
 		head: [head],
 		body,
 		columnStyles: {
-			0: { cellWidth: 62 },
-			2: { cellWidth: 66 },
-		},
-		didParseCell: (data) => {
-			if (data.section !== "body" || data.column.index !== 2) return;
-			data.cell.styles.textColor = RANK_COLORS[rows[data.row.index].rank];
+			0: { cellWidth: 84, textColor: MUTED },
 		},
 	});
 

@@ -1,16 +1,21 @@
 import { describe, it, expect } from "vitest";
 import {
+	allowedTimeSlots,
 	checkCapacity,
+	checkGuarantees,
+	findGroups,
 	formatDistribution,
+	guaranteeSummary,
 	groupByTimeSlot,
 	groupRows,
 	rankOf,
 	sanitizeCapacities,
+	solveCaveat,
 	toUserMessage,
 } from "$lib/distribution";
 import { buildSlots } from "$lib/parser";
 import type { Group } from "$lib/parser";
-import type { Solution } from "$lib/algorithm/types";
+import type { Solution, SolveResult } from "$lib/algorithm/types";
 
 function makeGroup(
 	id: number,
@@ -103,7 +108,7 @@ describe("groupByTimeSlot", () => {
 		const solution = makeSolution([makeGroup(0, 3, [0, 1, -1], 0)]);
 		const view = groupByTimeSlot(solution, 2, 2);
 		expect(view).toHaveLength(2);
-		expect(view[1].groups).toEqual([]);
+		expect(view[1].rotationGroups.flatMap((rg) => rg.groups)).toEqual([]);
 		expect(view[1].studentCount).toBe(0);
 	});
 
@@ -113,8 +118,8 @@ describe("groupByTimeSlot", () => {
 			makeGroup(1, 4, [1, 0, -1], 2), // slot 2 is time slot 1
 		]);
 		const view = groupByTimeSlot(solution, 2, 2);
-		expect(view[0].groups.map((g) => g.id)).toEqual([0]);
-		expect(view[1].groups.map((g) => g.id)).toEqual([1]);
+		expect(view[0].rotationGroups.flatMap((rg) => rg.groups.map((g) => g.id))).toEqual([0]);
+		expect(view[1].rotationGroups.flatMap((rg) => rg.groups.map((g) => g.id))).toEqual([1]);
 	});
 
 	it("sums student counts per time slot", () => {
@@ -132,14 +137,48 @@ describe("groupByTimeSlot", () => {
 			makeGroup(1, 4, [0, 1, -1], 2), // got time slot 1, its 2nd choice
 		]);
 		const view = groupByTimeSlot(solution, 2, 2);
-		expect(view[0].groups[0].rank).toBe(0);
-		expect(view[1].groups[0].rank).toBe(1);
+		expect(view[0].rotationGroups[0].groups[0].rank).toBe(0);
+		expect(view[1].rotationGroups[0].groups[0].rank).toBe(1);
 	});
 
 	it("numbers time slots from 1 and labels their rotation group range", () => {
 		const view = groupByTimeSlot(makeSolution([]), 2, 4);
 		expect(view.map((v) => v.num)).toEqual([1, 2]);
 		expect(view.map((v) => v.label)).toEqual(["Gruppe 1–4", "Gruppe 5–8"]);
+	});
+
+	it("numbers rotation groups continuously across time slots", () => {
+		const view = groupByTimeSlot(makeSolution([]), 2, 2);
+		const nums = view.flatMap((v) => v.rotationGroups.map((rg) => rg.num));
+		expect(nums).toEqual([1, 2, 3, 4]);
+	});
+
+	it("keeps an unused rotation group, so its free places stay visible", () => {
+		const solution = makeSolution([makeGroup(0, 3, [0, 1, -1], 0)]);
+		const view = groupByTimeSlot(solution, 2, 2);
+		expect(view[0].rotationGroups[1].groups).toEqual([]);
+		expect(view[0].rotationGroups[1].studentCount).toBe(0);
+		expect(view[0].rotationGroups[1].capacity).toBe(6);
+	});
+
+	it("collects groups that share one rotation group under it", () => {
+		const solution = makeSolution([
+			makeGroup(0, 5, [0, 1, -1], 0),
+			makeGroup(1, 1, [0, 1, -1], 0),
+		]);
+		const view = groupByTimeSlot(solution, 2, 2);
+		expect(view[0].rotationGroups[0].groups.map((g) => g.id)).toEqual([0, 1]);
+		expect(view[0].rotationGroups[0].studentCount).toBe(6);
+	});
+
+	it("leaves out a group that was never assigned", () => {
+		const solution: Solution = {
+			occupancy: buildSlots(2, 2, [6, 6, 6, 6]),
+			groups: [makeGroup(0, 3, [0, 1, -1], -1)],
+			invAllocation: {},
+		};
+		const view = groupByTimeSlot(solution, 2, 2);
+		expect(view.flatMap((v) => v.rotationGroups.flatMap((rg) => rg.groups))).toEqual([]);
 	});
 });
 
@@ -161,6 +200,15 @@ describe("groupRows", () => {
 		]);
 		const rows = groupRows(groupByTimeSlot(solution, 2, 2));
 		expect(rows.map((r) => r.rank)).toEqual([0, 1]);
+	});
+
+	it("gives both groups of a shared rotation group the same number", () => {
+		const solution = makeSolution([
+			makeGroup(0, 5, [0, 1, -1], 0),
+			makeGroup(1, 1, [0, 1, -1], 0),
+		]);
+		const rows = groupRows(groupByTimeSlot(solution, 2, 2));
+		expect(rows.map((r) => r.label)).toEqual(["Gruppe 1", "Gruppe 1"]);
 	});
 
 	it("skips empty time slots", () => {
@@ -185,6 +233,181 @@ describe("formatDistribution", () => {
 	});
 });
 
+/** A proven, fully decided result. Each case below weakens exactly one claim. */
+function makeResult(overrides: Partial<SolveResult> = {}): SolveResult {
+	return {
+		solution: makeSolution([]),
+		score: 0,
+		spread: [0, 0, 0, 0],
+		studentSpread: [0, 0, 0, 0],
+		optimality: "proven",
+		fairnessValue: 0,
+		lotteryComplete: true,
+		guaranteeCost: null,
+		displaced: [],
+		...overrides,
+	};
+}
+
+describe("allowedTimeSlots", () => {
+	it("allows only the first choice at rank 0", () => {
+		expect(allowedTimeSlots([3, 5, 7], 0)).toEqual([3]);
+	});
+
+	it("allows the first two choices at rank 1", () => {
+		expect(allowedTimeSlots([3, 5, 7], 1)).toEqual([3, 5]);
+	});
+
+	it("collapses a repeated choice instead of listing it twice", () => {
+		expect(allowedTimeSlots([3, 3, 7], 1)).toEqual([3]);
+	});
+
+	it("returns null for Egal, which any time slot already satisfies", () => {
+		expect(allowedTimeSlots([-1, 5, 7], 0)).toBeNull();
+		expect(allowedTimeSlots([3, -1, 7], 1)).toBeNull();
+	});
+
+	it("ignores an Egal that sits below the guaranteed rank", () => {
+		expect(allowedTimeSlots([3, -1, 7], 0)).toEqual([3]);
+	});
+});
+
+describe("checkGuarantees", () => {
+	it("passes when every guarantee fits", () => {
+		const groups = [makeGroup(0, 3, [0, 1, -1], -1)];
+		const slots = buildSlots(2, 2, [6, 6, 6, 6]);
+		expect(checkGuarantees(groups, slots, [{ groupId: 0, maxRank: 0 }])).toBeNull();
+	});
+
+	it("passes an empty list", () => {
+		expect(checkGuarantees([], buildSlots(2, 2, [6, 6, 6, 6]), [])).toBeNull();
+	});
+
+	it("rejects a group too large for any rotation group it may take", () => {
+		const groups = [makeGroup(0, 5, [0, 1, -1], -1)];
+		const slots = buildSlots(2, 2, [3, 3, 6, 6]);
+		const message = checkGuarantees(groups, slots, [{ groupId: 0, maxRank: 0 }]);
+		expect(message).toContain("5 Mitglieder");
+	});
+
+	it("rejects more guaranteed students than a time slot can hold", () => {
+		// Each group fits a single slot, so only the time slot total is short
+		const groups = [
+			makeGroup(0, 3, [0, 1, -1], -1),
+			makeGroup(1, 3, [0, 1, -1], -1),
+			makeGroup(2, 3, [0, 1, -1], -1),
+		];
+		const slots = buildSlots(2, 2, [4, 4, 6, 6]);
+		const message = checkGuarantees(groups, slots, [
+			{ groupId: 0, maxRank: 0 },
+			{ groupId: 1, maxRank: 0 },
+			{ groupId: 2, maxRank: 0 },
+		]);
+		expect(message).toContain("Zeitslot 1");
+	});
+
+	it("does not count a guarantee that two time slots could absorb", () => {
+		const groups = [
+			makeGroup(0, 4, [0, 1, -1], -1),
+			makeGroup(1, 4, [0, 1, -1], -1),
+		];
+		const slots = buildSlots(2, 2, [3, 3, 6, 6]);
+		expect(
+			checkGuarantees(groups, slots, [
+				{ groupId: 0, maxRank: 1 },
+				{ groupId: 1, maxRank: 1 },
+			]),
+		).toBeNull();
+	});
+
+	it("rejects a guarantee pointing at a group that is gone", () => {
+		const slots = buildSlots(2, 2, [6, 6, 6, 6]);
+		expect(checkGuarantees([], slots, [{ groupId: 4, maxRank: 0 }])).toContain(
+			"nicht mehr gibt",
+		);
+	});
+});
+
+describe("findGroups", () => {
+	const groups = [
+		{ id: 0, size: 2, members: "Anna Müller, Ben Schmidt", choices: [0], currentSelection: -1 },
+		{ id: 1, size: 1, members: "Clara Weiß", choices: [0], currentSelection: -1 },
+	];
+
+	it("finds a group by part of a member name", () => {
+		expect(findGroups(groups, "schmidt").map((g) => g.id)).toEqual([0]);
+	});
+
+	it("ignores umlauts, so a plain keyboard still finds the name", () => {
+		expect(findGroups(groups, "muller").map((g) => g.id)).toEqual([0]);
+		expect(findGroups(groups, "weiss").map((g) => g.id)).toEqual([1]);
+	});
+
+	it("stays quiet below two characters, which would match everything", () => {
+		expect(findGroups(groups, "a")).toEqual([]);
+	});
+
+	it("caps the result list", () => {
+		expect(findGroups(groups, "e", 1).length).toBeLessThanOrEqual(1);
+	});
+});
+
+describe("guaranteeSummary", () => {
+	it("stays quiet when no guarantee was set", () => {
+		expect(guaranteeSummary(makeResult())).toBeNull();
+	});
+
+	it("says so when a guarantee cost nobody anything", () => {
+		const message = guaranteeSummary(makeResult({ guaranteeCost: 0 }));
+		expect(message).toContain("kosten nichts");
+	});
+
+	it("counts the groups and students that paid", () => {
+		const message = guaranteeSummary(
+			makeResult({
+				guaranteeCost: 9,
+				displaced: [
+					{ members: "Team A", size: 6, from: 0, to: 2 },
+					{ members: "Team B", size: 1, from: 0, to: 1 },
+				],
+			}),
+		);
+		expect(message).toContain("2 Gruppen");
+		expect(message).toContain("7 Studierenden");
+		expect(message).toContain("1 davon fällt um zwei Ränge");
+	});
+});
+
+describe("solveCaveat", () => {
+	it("stays quiet when the optimum was proven and the lottery ran through", () => {
+		expect(solveCaveat(makeResult())).toBeNull();
+	});
+
+	it("says a better distribution exists when the solver stopped short", () => {
+		expect(solveCaveat(makeResult({ optimality: "suboptimal" }))).toContain(
+			"bessere Verteilung",
+		);
+	});
+
+	it("separates unproven from wrong, since the result may still be optimal", () => {
+		const message = solveCaveat(makeResult({ optimality: "unproven" }));
+		expect(message).toContain("nicht als beste bewiesen");
+	});
+
+	it("reports an incomplete lottery even when the optimum was proven", () => {
+		expect(solveCaveat(makeResult({ lotteryComplete: false }))).toContain(
+			"Auslosung",
+		);
+	});
+
+	it("leads with the worse news when both went wrong", () => {
+		const message = solveCaveat(
+			makeResult({ optimality: "suboptimal", lotteryComplete: false }),
+		);
+		expect(message).toContain("bessere Verteilung");
+	});
+});
+
 describe("toUserMessage", () => {
 	it("maps solver infeasibility to a capacity hint", () => {
 		const message = toUserMessage(
@@ -197,6 +420,18 @@ describe("toUserMessage", () => {
 
 	it("passes the timeout message through unchanged", () => {
 		const original = "Zeitüberschreitung: Berechnung dauerte zu lange.";
+		expect(toUserMessage(new Error(original))).toBe(original);
+	});
+
+	it("calls a timed out solve a timeout, not a capacity problem", () => {
+		const message = toUserMessage(
+			new Error("No assignment returned (status: Time limit reached)."),
+		);
+		expect(message).toBe("Die Berechnung hat zu lange gedauert. Versuch es nochmal.");
+	});
+
+	it("passes a validation failure through, it already names what broke", () => {
+		const original = "Ungültige Verteilung: Gruppe 3 ist mit 9 von 6 Plätzen überbelegt.";
 		expect(toUserMessage(new Error(original))).toBe(original);
 	});
 
