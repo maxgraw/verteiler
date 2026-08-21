@@ -228,30 +228,22 @@ describe("reset", () => {
 });
 
 describe("lottery seed", () => {
-	it("draws a seed when none is stored", async () => {
+	// The seed used to live here and was drawn per browser, which made the same CSV
+	// come out differently on two machines. It is derived from the applications now,
+	// so nothing about the draw may end up in storage again.
+	it("keeps no seed in the persisted state", async () => {
 		const state = await freshState();
-		expect(state.lotterySeed).toMatch(/^[A-Z2-9]{6}$/);
-	});
-
-	it("keeps the stored seed, so a reload cannot change a published draw", async () => {
-		save({ version: VERSION, lotterySeed: "ABC234" });
-		const state = await freshState();
-		expect(state.lotterySeed).toBe("ABC234");
-	});
-
-	it("persists the seed it drew", async () => {
-		const state = await freshState();
-		const drawn = state.lotterySeed;
 		state.link = "https://example.test/viewform";
 		await tick();
 		const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
-		expect(stored.lotterySeed).toBe(drawn);
+		expect(stored).not.toHaveProperty("lotterySeed");
 	});
 
-	it("draws a new seed on reset, since that starts a new semester", async () => {
+	it("ignores a seed left behind by an older build", async () => {
+		save({ version: VERSION, lotterySeed: "ABC234", link: "alt" });
 		const state = await freshState();
-		const before = state.lotterySeed;
-		state.reset();
-		expect(state.lotterySeed).not.toBe(before);
+		expect(state).not.toHaveProperty("lotterySeed");
+		// the rest of that payload must still survive
+		expect(state.link).toBe("alt");
 	});
 });

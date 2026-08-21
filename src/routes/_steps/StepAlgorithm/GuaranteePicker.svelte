@@ -38,8 +38,8 @@ function remove(id: number) {
 
     <p class="note">
         Eine Zusage setzt die Auslosung für eine Gruppe außer Kraft. Andere
-        rücken dafür nach hinten. Leg sie vor der Frist fest und schreib sie in
-        die Nachricht, sonst ist der veröffentlichte Seed nichts mehr wert.
+        rücken dafür nach hinten. Was sie kostet, steht nach dem Rechnen im
+        Ergebnis.
     </p>
 
     <div class="search">

@@ -15,6 +15,7 @@ import {
 	SPREAD_LABELS,
 	toUserMessage,
 } from "$lib/distribution";
+import { seedFromGroups } from "$lib/lottery";
 import { buildSlots } from "$lib/parser";
 import { downloadDistributionPdf } from "$lib/pdf";
 import { SolverClient } from "$lib/solver-client";
@@ -23,8 +24,20 @@ import { state as appState } from "$lib/state.svelte";
 import { STEPS } from "$lib/steps";
 import WizardStep from "../WizardStep.svelte";
 import GuaranteePicker from "./GuaranteePicker.svelte";
+import SeedField from "./SeedField.svelte";
 import SpreadSummary from "./SpreadSummary.svelte";
 import TimeSlotList from "./TimeSlotList.svelte";
+
+/**
+ * The draw for this cohort. Recomputed from the applications rather than stored, so
+ * two browsers never disagree about which of the equally optimal distributions comes
+ * out. Empty until a CSV is loaded, and solve treats that as no tie-break at all.
+ */
+const lotterySeed = $derived(
+	appState.parsedGroups
+		? seedFromGroups(appState.parsedGroups.map((g) => g.members))
+		: "",
+);
 
 let running = $state(false);
 let statusMessage = $state("");
@@ -78,7 +91,7 @@ async function run() {
 			{
 				groups: $state.snapshot(appState.parsedGroups),
 				slots,
-				lotterySeed: appState.lotterySeed,
+				lotterySeed,
 				guarantees: $state.snapshot(appState.guarantees),
 			},
 			(message) => {
@@ -136,10 +149,13 @@ async function downloadPdf() {
     </button>
 
     {#if appState.parsedGroups}
-        <GuaranteePicker
-            groups={appState.parsedGroups}
-            bind:guarantees={appState.guarantees}
-        />
+        <div class="options">
+            <GuaranteePicker
+                groups={appState.parsedGroups}
+                bind:guarantees={appState.guarantees}
+            />
+            <SeedField seed={lotterySeed} />
+        </div>
     {/if}
 
     {#if running}
@@ -211,6 +227,12 @@ async function downloadPdf() {
     .run-btn:disabled {
         background: var(--color-primary-disabled);
         cursor: not-allowed;
+    }
+
+    .options {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
     }
 
     .displaced {

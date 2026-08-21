@@ -4,8 +4,9 @@
  * The solver usually has several optimal solutions. Without an explicit rule the
  * one that gets returned depends on solver internals, which cannot be justified
  * to the group that ends up worse off. Instead every group draws a lottery number
- * from a seed that the organizer publishes before the deadline, so the outcome is
- * reproducible and checkable after the fact.
+ * from one seed, and that seed is computed from the applications themselves. The
+ * same export therefore always yields the same distribution, with no seed to
+ * store, publish or carry between machines.
  */
 
 const SEED_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -24,25 +25,36 @@ function hash(input: string): number {
 }
 
 /**
- * A fresh seed to publish. Ambiguous characters (I, O, 0, 1) are left out so it
- * survives being read aloud or retyped from a chat message.
+ * The draw that belongs to one set of applications.
+ *
+ * Derived from the applications instead of stored, so the same export produces the
+ * same distribution on every machine and in every browser, with nothing to carry
+ * over. A new semester brings other applicants and therefore a different draw by
+ * itself, which a hardcoded seed would not do: there the same member list would
+ * draw the same luck every semester, and a group that once drew badly would keep
+ * drawing badly.
+ *
+ * Only the member lists go in, not sizes or choices, so correcting a wrongly
+ * entered choice leaves the draw alone. Keys are sorted first, so re-exporting the
+ * same responses in a different order is still the same draw.
+ *
+ * The alphabet leaves out I, O, 0 and 1, which keeps the value legible when it is
+ * read off the screen and compared against another run.
+ *
+ * @param keys - One stable identifier per group, e.g. the member list
  */
-export function generateSeed(): string {
-	const bytes = new Uint8Array(SEED_LENGTH);
-	if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-		crypto.getRandomValues(bytes);
-	} else {
-		for (let i = 0; i < SEED_LENGTH; i++)
-			bytes[i] = Math.floor(Math.random() * 256);
+export function seedFromGroups(keys: string[]): string {
+	const canonical = [...keys].sort().join("\n");
+	let seed = "";
+	for (let i = 0; i < SEED_LENGTH; i++) {
+		seed += SEED_ALPHABET[hash(`${i}:${canonical}`) % SEED_ALPHABET.length];
 	}
-	return Array.from(bytes, (b) => SEED_ALPHABET[b % SEED_ALPHABET.length]).join(
-		"",
-	);
+	return seed;
 }
 
 /**
  * Lottery number of a single group. Derived from the seed and the group's own
- * key, so a group can recompute its own number once the seed is public.
+ * key, so the same seed always gives the same group the same number.
  */
 export function lotteryNumber(seed: string, key: string): number {
 	return hash(`${seed}:${key}`);

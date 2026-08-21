@@ -1,25 +1,50 @@
 import { describe, it, expect } from "vitest";
-import { generateSeed, lotteryNumber, lotteryPriorities } from "$lib/lottery";
+import {
+	lotteryNumber,
+	lotteryPriorities,
+	seedFromGroups,
+} from "$lib/lottery";
 
 const KEYS = ["Anna, Ben", "Clara", "Dora, Emil, Frida", "Gero"];
 
-describe("generateSeed", () => {
-	it("has a fixed length", () => {
-		expect(generateSeed()).toHaveLength(6);
+describe("seedFromGroups", () => {
+	it("has the same shape a seed always had", () => {
+		expect(seedFromGroups(KEYS)).toMatch(/^[A-Z2-9]{6}$/);
 	});
 
-	it("omits characters that are easy to confuse when retyped", () => {
-		const seeds = Array.from({ length: 50 }, generateSeed).join("");
+	it("omits characters that are easy to confuse when read off a screen", () => {
+		const seeds = Array.from({ length: 50 }, (_, i) =>
+			seedFromGroups([...KEYS, `Gruppe ${i}`]),
+		).join("");
 		expect(seeds).not.toMatch(/[IO01]/);
 	});
 
-	it("uses only characters that survive a chat message", () => {
-		expect(generateSeed()).toMatch(/^[A-Z2-9]+$/);
+	it("gives the same draw for the same applications, on any machine", () => {
+		expect(seedFromGroups(KEYS)).toBe(seedFromGroups(KEYS));
 	});
 
-	it("does not repeat itself", () => {
-		const seeds = new Set(Array.from({ length: 50 }, generateSeed));
-		expect(seeds.size).toBeGreaterThan(45);
+	it("ignores the order the responses were exported in", () => {
+		expect(seedFromGroups([...KEYS].reverse())).toBe(seedFromGroups(KEYS));
+	});
+
+	it("changes when the applications change, so a new semester draws afresh", () => {
+		expect(seedFromGroups([...KEYS, "Hedda"])).not.toBe(seedFromGroups(KEYS));
+	});
+
+	it("changes when a single member list is corrected", () => {
+		const corrected = ["Anna, Ben", "Klara", "Dora, Emil, Frida", "Gero"];
+		expect(seedFromGroups(corrected)).not.toBe(seedFromGroups(KEYS));
+	});
+
+	it("spreads across the alphabet rather than favouring one letter", () => {
+		const seeds = Array.from({ length: 200 }, (_, i) =>
+			seedFromGroups([`Gruppe ${i}`]),
+		);
+		expect(new Set(seeds).size).toBeGreaterThan(190);
+	});
+
+	it("handles an empty field", () => {
+		expect(seedFromGroups([])).toMatch(/^[A-Z2-9]{6}$/);
 	});
 });
 
@@ -53,7 +78,7 @@ describe("lotteryPriorities", () => {
 		expect([...priorities].sort((a, b) => a - b)).toEqual([0, 1, 2, 3]);
 	});
 
-	it("is reproducible from the published seed", () => {
+	it("is reproducible from the same seed", () => {
 		expect(lotteryPriorities("ABC123", KEYS)).toEqual(
 			lotteryPriorities("ABC123", KEYS),
 		);

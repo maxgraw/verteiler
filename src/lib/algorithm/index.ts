@@ -33,8 +33,9 @@ export interface SolveOptions {
 	onProgress?: (message: string) => void;
 	/**
 	 * Seed for the tie-break lottery. The same seed and the same input always
-	 * produce the same distribution. An empty seed still breaks ties
-	 * deterministically, but without a publicly committed draw.
+	 * produce the same distribution, and a different seed gives a different but
+	 * equally optimal one. An empty seed is still deterministic, it is just not a
+	 * draw anybody chose.
 	 */
 	lotterySeed?: string;
 	/**

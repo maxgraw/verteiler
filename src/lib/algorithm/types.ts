@@ -54,8 +54,8 @@ export interface SolveResult {
 	fairnessValue: number;
 	/**
 	 * False when the tie-break solve hit its time limit. The distribution is still valid
-	 * and still optimal, but the published seed then did not fully decide who absorbs
-	 * the remaining disappointment.
+	 * and still optimal, but the seed then did not fully decide who absorbs the
+	 * remaining disappointment, so the run is not reproducible from it.
 	 */
 	lotteryComplete: boolean;
 	/**

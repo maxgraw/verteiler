@@ -1,7 +1,6 @@
 import type { Group } from "./parser.js";
 import type { Guarantee } from "./algorithm/types.js";
 import { DEFAULT_CAPACITY, TOTAL_SLOTS } from "./config.js";
-import { generateSeed } from "./lottery.js";
 import { STEP_COUNT } from "./steps.js";
 
 export const STORAGE_KEY = "verteiler";
@@ -26,7 +25,6 @@ interface SavedState {
 	parsedGroups?: Group[] | null;
 	parseWarnings?: string[];
 	capacities?: number[];
-	lotterySeed?: string;
 	guarantees?: Guarantee[];
 }
 
@@ -45,13 +43,6 @@ export class VerteilerState {
 	link = $state("");
 	datum = $state("");
 	uhrzeit = $state("");
-
-	/**
-	 * Seed for the tie-break lottery, published in the deadline message before the
-	 * form closes. Additive field: older saved states simply draw a fresh one, so
-	 * this needs no VERSION bump and does not discard a semester in progress.
-	 */
-	lotterySeed = $state(generateSeed());
 
 	csvFileName = $state("");
 	parsedGroups = $state<Group[] | null>(null);
@@ -112,7 +103,6 @@ export class VerteilerState {
 					parsedGroups,
 					parseWarnings,
 					capacities,
-					lotterySeed,
 					guarantees,
 				} = this;
 				if (outdated) return;
@@ -129,8 +119,7 @@ export class VerteilerState {
 						parsedGroups,
 						parseWarnings,
 						capacities,
-						lotterySeed,
-						guarantees,
+							guarantees,
 					}),
 				);
 			});
@@ -149,7 +138,6 @@ export class VerteilerState {
 			parsedGroups,
 			parseWarnings,
 			capacities,
-			lotterySeed,
 			guarantees,
 		} = parsed;
 		if (link) this.link = link;
@@ -168,7 +156,6 @@ export class VerteilerState {
 		if (csvFileName) this.csvFileName = csvFileName;
 		if (parsedGroups) this.parsedGroups = parsedGroups;
 		if (parseWarnings) this.parseWarnings = parseWarnings;
-		if (lotterySeed) this.lotterySeed = lotterySeed;
 		if (guarantees && Array.isArray(guarantees)) this.guarantees = guarantees;
 	}
 
@@ -199,7 +186,6 @@ export class VerteilerState {
 		this.parsedGroups = null;
 		this.parseWarnings = [];
 		this.guarantees = [];
-		this.lotterySeed = generateSeed();
 	};
 }
 
