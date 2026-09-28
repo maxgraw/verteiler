@@ -6,8 +6,8 @@ through the $lib alias, so a spec never contains a ../../src path.
 bun run test runs vitest once across the two projects defined in vite.config.ts.
 
 client runs in real Chromium via Playwright. It covers tests/**/*.svelte.{test,spec}.{js,ts}
-plus tests/algorithm.spec.ts and tests/benchmark.spec.ts, which need performance, Web
-Workers and Wasm. state.svelte.spec.ts lands there through the .svelte.spec.ts suffix,
+plus tests/algorithm.spec.ts, tests/benchmark.spec.ts and tests/semesters.spec.ts, which
+need performance, Web Workers and Wasm. state.svelte.spec.ts lands there through the .svelte.spec.ts suffix,
 because it needs localStorage.
 
 server runs in node and covers everything else, currently parser.spec.ts and
@@ -24,9 +24,15 @@ both lists already route correctly.
 
 requireAssertions is on, so a test that asserts nothing is an error.
 
-Fixtures are real Google Forms exports in tests/fixtures/, imported with ?raw. Keep
-engpass.csv: it is the regression guard for the contested input that broke the previous
+Fixtures live in tests/fixtures/ and are imported with ?raw. semester_YYYY.csv are real
+exports, anonymized. The others are hand written in an older form layout and only feed the
+parser and the benchmark. Keep engpass.csv: it is the regression guard for the contested input that broke the previous
 solver.
+
+Never commit a real export with names in it. Raw exports stay in csv/, which is gitignored.
+Each new semester goes through bun run tools/anonymize.ts csv/<file>.csv
+tests/fixtures/semester_YYYY.csv and gets one entry in SEMESTERS in semesters.spec.ts,
+pinning the fairnessValue the solver proved on it.
 
 benchmark.spec.ts measures score quality and wall-clock time so algorithm changes can be
 compared. It is not a correctness test. Do not tighten its thresholds into flaky assertions.

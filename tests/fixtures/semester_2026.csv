@@ -1,0 +1,115 @@
+"Zeitstempel","Anzahl Gruppenmitglieder","Vor- und Nachname aller Gruppenmitglieder","Zeitslot Auswahl [1. Wahl]","Zeitslot Auswahl [2. Wahl]","Zeitslot Auswahl [3. Wahl]"
+"2026/08/08","6","Person 1
+Person 2
+Person 3
+Person 4
+Person 5
+Person 6","5-8","1-4","9-12"
+"2026/08/08","6","Person 7
+Person 8
+Person 9
+Person 10
+Person 11
+Person 12","5-8","1-4","9-12"
+"2026/08/08","6","Person 13, Person 14, Person 15, Person 16, Person 17, Person 18","25-28","29-32","5-8"
+"2026/08/08","1","Person 19","1-4","5-8","9-12"
+"2026/08/08","4","Person 20, Person 21, Person 22, Person 23","5-8","1-4","21-24"
+"2026/08/08","6","Person 24
+Person 25
+Person 26
+Person 27
+Person 28
+Person 29","9-12","13-16","Egal"
+"2026/08/08","4","Person 30, Person 31, Person 32, Person 33","1-4","5-8","17-20"
+"2026/08/08","6","Person 34
+Person 35
+Person 36
+Person 37
+Person 38
+Person 39","21-24","17-20","5-8"
+"2026/08/09","5","Person 40, Person 41, Person 42, Person 43, Person 44","1-4","5-8","17-20"
+"2026/08/09","2","Person 45, Person 46","9-12","13-16","1-4"
+"2026/08/09","6","Person 47
+Person 48
+Person 49
+Person 50
+Person 51
+Person 52 ","9-12","13-16","5-8"
+"2026/08/10","6","Person 53
+Person 54
+Person 55
+Person 56
+Person 57
+Person 58","25-28","29-32","21-24"
+"2026/08/10","6","Person 59, Person 60, Person 61, Person 62, Person 63, Person 64","17-20","21-24","25-28"
+"2026/08/10","3","Person 65
+Person 66
+Person 67","17-20","21-24","25-28"
+"2026/08/12","6","Person 68
+Person 69
+Person 70
+Person 71
+Person 72
+Person 73","1-4","5-8","9-12"
+"2026/08/12","5","Person 74
+Person 75
+Person 76
+Person 77
+Person 78","25-28","29-32","17-20"
+"2026/08/13","6","Person 79
+Person 80
+Person 81
+Person 82
+Person 83
+Person 84","25-28","29-32","Egal"
+"2026/08/13","1","Person 85","9-12","13-16","1-4"
+"2026/08/13","2","Person 86, Person 87","1-4","5-8","9-12"
+"2026/08/13","3","Person 88
+Person 89
+Person 90","17-20","21-24","29-32"
+"2026/08/13","5","Person 91
+Person 92
+Person 93
+Person 94
+Person 95 ","1-4","5-8","9-12"
+"2026/08/13","6","Person 96, Person 97, Person 98, Person 99, Person 100 , Person 101","1-4","5-8","17-20"
+"2026/08/13","3","Person 102, Person 103, Person 104","25-28","29-32","17-20"
+"2026/08/13","5","Person 105, Person 106, Person 107, Person 108, Person 109","1-4","5-8","17-20"
+"2026/08/13","1","Person 110","1-4","5-8","17-20"
+"2026/08/13","6","Person 111, Person 112, Person 113, Person 114, Person 115, Person 116","25-28","29-32","21-24"
+"2026/08/13","2","Person 117, Person 118","17-20","21-24","25-28"
+"2026/08/14","5","Person 119
+Person 120
+Person 121
+Person 122
+Person 123","9-12","13-16","5-8"
+"2026/08/14","6","
+Person 124, Person 125, Person 126, Person 127, Person 128, Person 129 ","1-4","5-8","17-20"
+"2026/08/14","5","Person 130, Person 131, Person 132, Person 133, Person 134","1-4","5-8","17-20"
+"2026/08/15","3","Person 135, Person 136, Person 137 ","1-4","5-8","17-20"
+"2026/08/15","3","Person 138
+Person 139
+Person 140","1-4","5-8","13-16"
+"2026/08/16","1","Person 141","25-28","29-32","17-20"
+"2026/08/17","4","Person 142
+Person 143
+Person 144
+Person 145","1-4","5-8","9-12"
+"2026/08/18","6","Person 146
+Person 147
+Person 148
+Person 149
+Person 150
+Person 151","5-8","1-4","17-20"
+"2026/08/18","5","Person 152, Person 153, Person 154, Person 155, Person 156","17-20","21-24","1-4"
+"2026/08/18","2","Person 157, Person 158","25-28","21-24","17-20"
+"2026/08/19","4","Person 159, Person 160, Person 161, Person 162 ","21-24","17-20","25-28"
+"2026/08/20","2","Person 163, Person 164","17-20","21-24","25-28"
+"2026/08/20","1","Person 165","17-20","21-24","25-28"
+"2026/08/20","1","Person 166","9-12","13-16","1-4"
+"2026/08/20","3","Person 167, Person 168, Person 169","17-20","21-24","29-32"
+"2026/08/20","1","Person 170","9-12","13-16","5-8"
+"2026/08/20","2","Person 171, Person 172","29-32","25-28","9-12"
+"2026/08/21","2","Person 173
+Person 174","21-24","17-20","25-28"
+"2026/08/21","1","Person 175","29-32","25-28","17-20"
