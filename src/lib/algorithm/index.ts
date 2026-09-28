@@ -388,7 +388,9 @@ export async function solve(
 	onProgress?.("Optimiere Verteilung…");
 	const run = runPipeline(highs, groups, slots, lotterySeed, fixed, onProgress);
 
-	let guaranteeCost: number | null = null;
+	// A guarantee on a group that answered Egal constrains nothing and adds no row, but it
+	// was still set, so it is reported as free rather than as absent
+	let guaranteeCost: number | null = guarantees.length > 0 ? 0 : null;
 	let displaced: Displacement[] = [];
 	if (fixed.length > 0) {
 		onProgress?.("Ermittle Preis der Zusagen…");

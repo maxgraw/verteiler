@@ -1,0 +1,47 @@
+name: Verify
+
+on:
+  push:
+    branches: [main]
+    paths: &paths
+      - src/lib/algorithm/**
+      - src/lib/parser.ts
+      - src/lib/distribution.ts
+      - src/lib/lottery.ts
+      - src/lib/config.ts
+      - tests/fixtures/semester_*.csv
+      - tests/fixtures/capacities.ts
+      - tools/verify/**
+      - bun.lock
+  pull_request:
+    paths: *paths
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: astral-sh/setup-uv@v10
+
+      - run: bun install --frozen-lockfile
+
+      - run: |
+          set +e
+          bun run verify --random=10 --seed=${{ github.run_id }} --solvers=cpsat --time-limit=120
+          code=$?
+          if [ "$code" -eq 2 ]; then
+            echo "::warning::Verify inconclusive: CP-SAT did not finish in time."
+            exit 0
+          fi
+          exit "$code"

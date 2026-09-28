@@ -191,7 +191,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("solution", help="JSON written by tools/verify/export.ts")
     parser.add_argument("--time-limit", type=int, default=120, help="seconds per solver")
+    parser.add_argument(
+        "--solvers",
+        default="cbc,cpsat",
+        help="comma separated subset of cbc,cpsat. CI runs cpsat only, CBC takes minutes",
+    )
     args = parser.parse_args()
+    available = {"cbc": ("CBC", solve_cbc), "cpsat": ("CP-SAT", solve_cpsat)}
+    wanted = [name.strip() for name in args.solvers.split(",") if name.strip()]
+    unknown = [name for name in wanted if name not in available]
+    if unknown or not wanted:
+        parser.error(f"--solvers takes cbc and/or cpsat, got {args.solvers}")
 
     # CBC can grind for minutes on an instance HiGHS finishes in a second, and block
     # buffering would hide every line until it is done
@@ -223,7 +233,7 @@ def main() -> int:
             failures.append(f"app reports {claimed} but its own assignment costs {actual}")
 
     runs: list[SolverRun] = []
-    for label, solver in (("CBC", solve_cbc), ("CP-SAT", solve_cpsat)):
+    for label, solver in (available[name] for name in wanted):
         print(f"{label:<15} solving, up to {args.time_limit}s ...")
         run = solver(label, data, cost, args.time_limit)
         runs.append(run)

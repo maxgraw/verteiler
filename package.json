@@ -11,7 +11,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test:unit": "vitest",
-		"test": "vitest --run"
+		"test": "vitest --run",
+		"verify": "bun run tools/verify/all.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.14",

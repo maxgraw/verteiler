@@ -155,6 +155,14 @@ describe("solve — Egal choices", () => {
 		const { score } = await solve(groups, fullSlots());
 		expect(score).toBe(0);
 	});
+
+	it("reports a guarantee on an Egal group as free, not as absent", async () => {
+		const group = makeGroup(0, 4, [-1, 0, 1]);
+		const { guaranteeCost } = await solve([group], fullSlots(), {
+			guarantees: [{ groupId: 0, maxRank: 0 }],
+		});
+		expect(guaranteeCost).toBe(0);
+	});
 });
 
 // ─── solve — determinism ─────────────────────────────────────────────────────

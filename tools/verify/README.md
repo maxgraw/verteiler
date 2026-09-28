@@ -22,6 +22,25 @@ The rank after the colon is the worst rank the group may get, so 0 pins it to it
 choice and 1 allows first or second. Leaving guarantees out of the checker would let it
 solve a looser problem and report the cheaper objective as a disagreement.
 
+To check everything at once, every tests/fixtures/semester_YYYY.csv under every capacity
+scenario in tests/fixtures/capacities.ts:
+
+```bash
+bun run verify                                  # CBC and CP-SAT, slow
+bun run verify --solvers=cpsat --time-limit=60  # real semesters only, about ten seconds
+bun run verify --random=10 --solvers=cpsat      # plus ten random semesters
+```
+
+Random semesters come from generate.ts: 20 to 80 groups drawn from the real ones, uneven
+capacity, sometimes a few guarantees. Each run picks a new seed and prints it, and
+--random=<n> --seed=<s> replays a failure exactly. A random case HiGHS calls infeasible is
+skipped, any other error from solve counts as a failure.
+
+.github/workflows/verify.yml runs CP-SAT over the real semesters and ten random ones
+whenever the model, the parser, the fixtures or the lockfile change, once a week, and on
+demand. Exit code 2 only warns there, because a slow runner is not evidence against the
+app.
+
 export.ts imports src/lib unchanged, so it exercises the production code path. Bun resolves
 the Wasm import by itself, which is why no extra dependency is needed.
 
@@ -56,4 +75,5 @@ budget.
 
 Both models are hand written, once in TypeScript and once in Python. A misunderstanding of
 the domain that lands in both would be confirmed by all three solvers rather than caught.
-Only exhaustive enumeration on tiny instances would rule that out, and it is not built.
+tests/brute-force.spec.ts covers that gap on tiny instances: it enumerates every assignment
+of a few hundred seeded random cases and compares the optimum with what solve returns.
