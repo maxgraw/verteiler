@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Search, X } from "@lucide/svelte";
+import { ChevronRight, Search, X } from "@lucide/svelte";
 import { findGroups } from "$lib/distribution";
 import type { Group } from "$lib/parser";
 import type { Guarantee } from "$lib/algorithm/types";
@@ -30,10 +30,12 @@ function remove(id: number) {
 
 <details class="guarantees">
     <summary>
+        <span class="chevron"><ChevronRight size={16} /></span>
         Zusagen
         {#if guarantees.length}
             <span class="count">{guarantees.length}</span>
         {/if}
+        <span class="hint">optional</span>
     </summary>
 
     <p class="note">
@@ -111,6 +113,27 @@ function remove(id: number) {
         display: flex;
         align-items: center;
         gap: var(--space-2);
+    }
+
+    summary:hover {
+        color: var(--color-primary);
+    }
+
+    .chevron {
+        display: flex;
+        color: var(--color-text-faint);
+        transition: transform var(--transition-fast);
+    }
+
+    .guarantees[open] .chevron {
+        transform: rotate(90deg);
+    }
+
+    .hint {
+        margin-left: auto;
+        font-size: var(--text-xs);
+        font-weight: 400;
+        color: var(--color-text-faint);
     }
 
     .count {
