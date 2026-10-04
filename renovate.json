@@ -1,4 +1,28 @@
 {
-	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["config:recommended"]
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard"],
+  "timezone": "Europe/Berlin",
+  "schedule": ["* 0-6 * * 1"],
+  "prConcurrentLimit": 3,
+  "packageRules": [
+    {
+      "description": "Minor, patch and digest updates land as one grouped branch and merge themselves once CI is green",
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "Major updates stay separate PRs for manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "automergeType": "branch",
+    "schedule": ["* 0-6 1 * *"]
+  }
 }
