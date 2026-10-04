@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
 import { tick } from "svelte";
-import { TOTAL_SLOTS, DEFAULT_CAPACITY } from "#lib/config.ts";
+import { beforeEach, describe, expect, it } from "vitest";
+import { DEFAULT_CAPACITY, TOTAL_SLOTS } from "#lib/config.ts";
 import { STORAGE_KEY, VERSION, VerteilerState } from "#lib/state.svelte.ts";
 import { STEP_COUNT } from "#lib/steps.ts";
 

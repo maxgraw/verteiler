@@ -5,8 +5,8 @@ components as appState. The class itself is exported too, but only for tests: th
 is built once per module load, so specs construct their own instance to exercise the
 localStorage restore. It holds the open and done accordion flags, both STEP_COUNT long,
 capacities[32],
-the deadline fields (link, datum, uhrzeit) and the parsed CSV (csvFileName, parsedGroups,
-parseWarnings). tag, formattedDatum and deadlineComplete are derived on the class.
+the deadline fields (link, datum, uhrzeit), the parsed CSV (csvFileName, parsedGroups,
+parseWarnings) and guarantees. tag, formattedDatum and deadlineComplete are derived on the class.
 
 There is no store, no context and no prop drilling. Step components mutate appState directly.
 
@@ -22,15 +22,17 @@ incompatible data. The restore pads and truncates open and done to the current l
 appending a step needs no bump. Reordering does, because the flags would then describe the
 wrong steps: version 2 discarded everything for exactly that reason.
 
-parsedGroups is persisted, so a reload keeps the uploaded CSV. The empty catch in the
-constructor is deliberate: corrupt storage falls back to defaults rather than breaking boot.
+parsedGroups is persisted, so a reload keeps the uploaded CSV. A payload with another
+VERSION or one that does not parse sets outdated instead of throwing. Persistence stays off
+while it is set, so the old payload survives until the organizer has seen the warning and
+reset.
 
 ## Step components
 
-Each step is a self-contained file in src/routes/_steps/ wrapping the shared Step component
-with bind:open={appState.open[i]}, bind:done={appState.done[i]} and
-ondone={() => appState.openNext(i)}. The num prop shown to the user is 1-based while the
-state indices are 0-based. checkDisabled blocks the done checkbox until a precondition holds.
+Each step is a self-contained file in src/routes/_steps/ wrapping WizardStep with
+index={STEPS.x}. WizardStep binds Step to appState.open[index] and appState.done[index],
+opens the next step on done and wraps the content in StepContent. The number shown to the
+user is index + 1. checkDisabled blocks the done checkbox until a precondition holds.
 
 The index i always comes from STEPS in steps.ts, never from a literal. Copy that points at
 another step does the same: Schritt {STEPS.formsExport + 1}.

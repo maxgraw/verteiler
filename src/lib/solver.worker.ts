@@ -21,5 +21,3 @@ self.onmessage = async (e: MessageEvent<SolveRequest>) => {
 		});
 	}
 };
-
-export {};

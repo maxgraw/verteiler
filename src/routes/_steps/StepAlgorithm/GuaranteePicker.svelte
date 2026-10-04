@@ -1,8 +1,8 @@
 <script lang="ts">
 import { ChevronRight, Search, X } from "@lucide/svelte";
+import type { Guarantee } from "#lib/algorithm/types.ts";
 import { findGroups } from "#lib/distribution.ts";
 import type { Group } from "#lib/parser.ts";
-import type { Guarantee } from "#lib/algorithm/types.ts";
 
 interface Props {
 	groups: Group[];

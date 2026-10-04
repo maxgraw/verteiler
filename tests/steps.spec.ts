@@ -5,7 +5,9 @@ describe("STEPS", () => {
 	// A reorder that duplicates or skips an index would silently bind two steps to the
 	// same open/done flag, so it is worth a guard rather than a code review.
 	it("covers 0 to STEP_COUNT - 1 exactly once", () => {
-		const indices = Object.values(STEPS).slice().sort((a, b) => a - b);
+		const indices = Object.values(STEPS)
+			.slice()
+			.sort((a, b) => a - b);
 		expect(indices).toEqual(Array.from({ length: STEP_COUNT }, (_, i) => i));
 	});
 

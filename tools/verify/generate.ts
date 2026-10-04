@@ -41,7 +41,9 @@ export function mulberry32(seed: number): () => number {
 export function loadSamples(fixtures: string): Sample[] {
 	return readdirSync(fixtures)
 		.filter((f) => /^semester_\d{4}\.csv$/.test(f))
-		.flatMap((f) => parseChoices(readFileSync(join(fixtures, f), "utf8")).groups)
+		.flatMap(
+			(f) => parseChoices(readFileSync(join(fixtures, f), "utf8")).groups,
+		)
 		.map((g) => ({ size: g.size, choices: g.choices }));
 }
 
@@ -51,8 +53,12 @@ function label(timeSlot: number): string {
 	return `${first}-${first + SLOTS_PER_TIME_SLOT - 1}`;
 }
 
-export function randomSemester(random: () => number, samples: Sample[]): RandomSemester {
-	const int = (lo: number, hi: number) => lo + Math.floor(random() * (hi - lo + 1));
+export function randomSemester(
+	random: () => number,
+	samples: Sample[],
+): RandomSemester {
+	const int = (lo: number, hi: number) =>
+		lo + Math.floor(random() * (hi - lo + 1));
 	const count = int(20, 80);
 
 	const groups = Array.from({ length: count }, () => {
@@ -60,7 +66,9 @@ export function randomSemester(random: () => number, samples: Sample[]): RandomS
 		const shift = random() < 0.3 ? int(1, NUM_TIME_SLOTS - 1) : 0;
 		return {
 			size,
-			choices: choices.map((c) => (c === -1 ? -1 : (c + shift) % NUM_TIME_SLOTS)),
+			choices: choices.map((c) =>
+				c === -1 ? -1 : (c + shift) % NUM_TIME_SLOTS,
+			),
 		};
 	});
 	const students = groups.reduce((sum, g) => sum + g.size, 0);
@@ -68,7 +76,10 @@ export function randomSemester(random: () => number, samples: Sample[]): RandomS
 	// 80 groups outgrow 32 slots of 6, so capacity scales with the semester. Uneven, as
 	// KLIPS leaves it, and with a little slack so most semesters are solvable.
 	const slotCount = NUM_TIME_SLOTS * SLOTS_PER_TIME_SLOT;
-	const base = Math.max(6, Math.ceil((students * int(102, 115)) / 100 / slotCount));
+	const base = Math.max(
+		6,
+		Math.ceil((students * int(102, 115)) / 100 / slotCount),
+	);
 	const capacities = Array.from({ length: slotCount }, () =>
 		Math.max(1, base - (random() < 0.3 ? int(1, 2) : 0)),
 	);

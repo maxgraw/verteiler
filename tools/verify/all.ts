@@ -84,7 +84,14 @@ function runCase(
 	const solution = join(work, `case-${caseNumber++}.json`);
 	writeFileSync(solution, exported.stdout);
 	const checked = Bun.spawnSync(
-		["uv", "run", "--quiet", "tools/verify/verify.py", solution, ...passThrough],
+		[
+			"uv",
+			"run",
+			"--quiet",
+			"tools/verify/verify.py",
+			solution,
+			...passThrough,
+		],
 		{ stdout: "inherit", stderr: "inherit" },
 	);
 	verdicts.push({ label, code: checked.exitCode ?? 1 });
@@ -127,8 +134,12 @@ rmSync(work, { recursive: true, force: true });
 
 const text = ["OK", "FAIL", "INCONCLUSIVE"];
 console.log("\n=== Summary");
-for (const { label, code } of verdicts) console.log(`${text[code] ?? "FAIL"}  ${label}`);
-if (randomCount > 0) console.log(`\nReplay with --random=${randomCount} --seed=${seed}`);
+for (const { label, code } of verdicts)
+	console.log(`${text[code] ?? "FAIL"}  ${label}`);
+if (randomCount > 0)
+	console.log(`\nReplay with --random=${randomCount} --seed=${seed}`);
 
 const codes = verdicts.map((v) => v.code);
-process.exit(codes.some((c) => c !== 0 && c !== 2) ? 1 : codes.includes(2) ? 2 : 0);
+process.exit(
+	codes.some((c) => c !== 0 && c !== 2) ? 1 : codes.includes(2) ? 2 : 0,
+);

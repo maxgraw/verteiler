@@ -6,14 +6,13 @@
  *
  * Run with: bun run test (client project, Chromium)
  */
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { solve } from "#lib/algorithm/index.ts";
-import { parseChoices, buildSlots } from "#lib/parser.ts";
-
-import realistischCsv from "./fixtures/realistisch.csv?raw";
-import engpassCsv from "./fixtures/engpass.csv?raw";
-import semester2026Csv from "./fixtures/semester_2026.csv?raw";
+import { buildSlots, parseChoices } from "#lib/parser.ts";
 import { CAPACITY_SCENARIOS } from "./fixtures/capacities";
+import engpassCsv from "./fixtures/engpass.csv?raw";
+import realistischCsv from "./fixtures/realistisch.csv?raw";
+import semester2026Csv from "./fixtures/semester_2026.csv?raw";
 
 const NUM_TIME_SLOTS = 8;
 const SLOTS_PER_TIME_SLOT = 4;
@@ -87,15 +86,24 @@ describe("algorithm benchmark", () => {
 		expect(result.score).toBeDefined();
 	}, 60_000);
 
-	it.each(CAPACITY_SCENARIOS)("semester_2026.csv — $name", async ({ name, capacities }) => {
-		const { groups } = parseChoices(semester2026Csv);
-		const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, capacities);
-		const t0 = performance.now();
-		const result = await solve(groups, slots);
-		const ms = performance.now() - t0;
-		formatBenchmark(`semester_2026.csv, ${name}`, result.score, result.spread, ms);
-		expect(result.score).toBeDefined();
-	}, 60_000);
+	it.each(CAPACITY_SCENARIOS)(
+		"semester_2026.csv — $name",
+		async ({ name, capacities }) => {
+			const { groups } = parseChoices(semester2026Csv);
+			const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, capacities);
+			const t0 = performance.now();
+			const result = await solve(groups, slots);
+			const ms = performance.now() - t0;
+			formatBenchmark(
+				`semester_2026.csv, ${name}`,
+				result.score,
+				result.spread,
+				ms,
+			);
+			expect(result.score).toBeDefined();
+		},
+		60_000,
+	);
 
 	it("synthetic — 32 groups, all Egal", async () => {
 		const groups = syntheticAllEgal(32);

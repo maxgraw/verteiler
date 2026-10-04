@@ -6,7 +6,7 @@
  * a constraint, a higher one misses the optimum. Assignments are not pinned, because a
  * contested semester has many distributions that tie for best.
  */
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { solve } from "#lib/algorithm/index.ts";
 import { validateSolution } from "#lib/algorithm/validate.ts";
 import {

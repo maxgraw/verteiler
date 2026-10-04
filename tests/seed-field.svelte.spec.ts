@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { describe, expect, it } from "vitest";
 import { page } from "vitest/browser";
+import { render } from "vitest-browser-svelte";
 import SeedField from "../src/routes/_steps/StepAlgorithm/SeedField.svelte";
 
 describe("SeedField", () => {

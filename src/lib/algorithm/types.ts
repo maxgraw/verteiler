@@ -1,4 +1,4 @@
-import type { Slot, Group } from "../parser";
+import type { Group, Slot } from "../parser";
 
 export interface Solution {
 	occupancy: Slot[];

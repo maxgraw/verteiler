@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { validateSolution } from "#lib/algorithm/validate.ts";
+import { describe, expect, it } from "vitest";
 import { COSTS } from "#lib/algorithm/costs.ts";
-import { rankOf } from "#lib/distribution.ts";
-import { buildSlots } from "#lib/parser.ts";
-import type { Group, Slot } from "#lib/parser.ts";
 import type { SolveResult } from "#lib/algorithm/types.ts";
+import { validateSolution } from "#lib/algorithm/validate.ts";
+import { rankOf } from "#lib/distribution.ts";
+import type { Group, Slot } from "#lib/parser.ts";
+import { buildSlots } from "#lib/parser.ts";
 
 // Named Team, so member names stay apart from the "Gruppe N" a row is assigned to
 function makeGroup(
@@ -37,7 +37,8 @@ function makeResult(groups: Group[], slots: Slot[]): SolveResult {
 	for (let g = 0; g < placed.length; g++) {
 		const slot = placed[g].currentSelection;
 		occupancy[slot].amount += placed[g].size;
-		(invAllocation[slot] ??= []).push(g);
+		invAllocation[slot] ??= [];
+		invAllocation[slot].push(g);
 		const rank = rankOf(placed[g].choices, slots[slot].timeSlot);
 		spread[rank]++;
 		studentSpread[rank] += placed[g].size;
@@ -50,7 +51,10 @@ function makeResult(groups: Group[], slots: Slot[]): SolveResult {
 		spread,
 		studentSpread,
 		optimality: "proven",
-		fairnessValue: studentSpread.reduce((sum, n, rank) => sum + n * COSTS[rank], 0),
+		fairnessValue: studentSpread.reduce(
+			(sum, n, rank) => sum + n * COSTS[rank],
+			0,
+		),
 		lotteryComplete: true,
 		guaranteeCost: null,
 		displaced: [],
@@ -67,7 +71,9 @@ describe("validateSolution", () => {
 			makeGroup(2, 4, [1, 0, -1], 2),
 		];
 		const slots = makeSlots();
-		expect(validateSolution(groups, slots, makeResult(groups, slots))).toEqual([]);
+		expect(validateSolution(groups, slots, makeResult(groups, slots))).toEqual(
+			[],
+		);
 	});
 
 	it("passes an empty cohort", () => {
@@ -81,7 +87,11 @@ describe("validateSolution", () => {
 			makeGroup(1, 3, [0, 1, -1], 0),
 		];
 		const slots = makeSlots();
-		const violations = validateSolution(groups, slots, makeResult(groups, slots));
+		const violations = validateSolution(
+			groups,
+			slots,
+			makeResult(groups, slots),
+		);
 		expect(codes(violations)).toContain("capacity");
 		expect(violations.find((v) => v.code === "capacity")?.message).toContain(
 			"9 von 6",
@@ -93,7 +103,9 @@ describe("validateSolution", () => {
 		const slots = makeSlots();
 		const result = makeResult(groups, slots);
 		result.solution.groups[0].currentSelection = -1;
-		expect(codes(validateSolution(groups, slots, result))).toContain("unassigned");
+		expect(codes(validateSolution(groups, slots, result))).toContain(
+			"unassigned",
+		);
 	});
 
 	it("reports a slot index past the end of the slot array", () => {
@@ -101,7 +113,9 @@ describe("validateSolution", () => {
 		const slots = makeSlots();
 		const result = makeResult(groups, slots);
 		result.solution.groups[0].currentSelection = 99;
-		expect(codes(validateSolution(groups, slots, result))).toContain("unassigned");
+		expect(codes(validateSolution(groups, slots, result))).toContain(
+			"unassigned",
+		);
 	});
 
 	it("reports a group size that changed on the way through", () => {
@@ -109,7 +123,9 @@ describe("validateSolution", () => {
 		const slots = makeSlots();
 		const result = makeResult(groups, slots);
 		result.solution.groups[0].size = 4;
-		expect(codes(validateSolution(groups, slots, result))).toContain("size-changed");
+		expect(codes(validateSolution(groups, slots, result))).toContain(
+			"size-changed",
+		);
 	});
 
 	it("reports occupancy that disagrees with the assignment", () => {
@@ -117,7 +133,9 @@ describe("validateSolution", () => {
 		const slots = makeSlots();
 		const result = makeResult(groups, slots);
 		result.solution.occupancy[0].amount = 2;
-		expect(codes(validateSolution(groups, slots, result))).toContain("occupancy");
+		expect(codes(validateSolution(groups, slots, result))).toContain(
+			"occupancy",
+		);
 	});
 
 	it("reports a reverse index that lost a group", () => {
@@ -216,6 +234,8 @@ describe("validateSolution", () => {
 		const slots = makeSlots();
 		const result = makeResult(groups, slots);
 		result.solution.groups = [result.solution.groups[0]];
-		expect(codes(validateSolution(groups, slots, result))).toEqual(["group-count"]);
+		expect(codes(validateSolution(groups, slots, result))).toEqual([
+			"group-count",
+		]);
 	});
 });

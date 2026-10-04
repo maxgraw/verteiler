@@ -48,7 +48,9 @@ describe("deadlineMessage", () => {
 
 	// The form now closes on its own, so the message may not promise anything weaker.
 	it("states that the form closes by itself", () => {
-		expect(deadlineMessage(filled)).toContain("schließt zur Deadline automatisch");
+		expect(deadlineMessage(filled)).toContain(
+			"schließt zur Deadline automatisch",
+		);
 	});
 });
 
