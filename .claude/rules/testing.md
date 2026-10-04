@@ -6,12 +6,11 @@ through the #lib subpath import, so a spec never contains a ../../src path.
 bun run test runs vitest once across the two projects defined in vite.config.ts.
 
 client runs in real Chromium via Playwright. It covers tests/**/*.svelte.{test,spec}.{js,ts}
-plus tests/algorithm.spec.ts, tests/benchmark.spec.ts and tests/semesters.spec.ts, which
-need performance, Web Workers and Wasm. state.svelte.spec.ts lands there through the .svelte.spec.ts suffix,
+plus tests/algorithm.spec.ts, tests/benchmark.spec.ts, tests/semesters.spec.ts and
+tests/brute-force.spec.ts, which need performance, Web Workers and Wasm. state.svelte.spec.ts lands there through the .svelte.spec.ts suffix,
 because it needs localStorage.
 
-server runs in node and covers everything else, currently parser.spec.ts and
-distribution.spec.ts.
+server runs in node and covers everything else.
 
 Prefer the node project. Logic that needs a browser to be tested usually belongs in a pure
 module instead, which is why distribution.ts exists.

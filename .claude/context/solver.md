@@ -49,7 +49,7 @@ shows both. spread[3] > 0 means groups got none of their choices and needs manua
 An empty objective is rendered as the 0 x_0_0 fallback that LP format requires. It looks
 like a bug and is not.
 
-time_limit is 30 seconds per stage, and "Time limit reached" is still accepted alongside
+time_limit is 30 seconds per stage (algorithm/limits.ts), and "Time limit reached" is still accepted alongside
 "Optimal", so a timed-out solve returns its incumbent instead of failing. Only a missing
 assignment counts as failure. What changed is that this is no longer silent: the certificate
 below decides whether the incumbent was actually the optimum, and runStage reports whether
@@ -69,9 +69,9 @@ never buys a better slot for a lucky group at someone else's expense. The frozen
 recomputed from the assignment rather than read off ObjectiveValue, which comes back as a
 float and would need a tolerance.
 
-The seed lives in state.lotterySeed, is drawn once, persists, and is printed into
-deadlineMessage in messages.ts so it is public before the form closes. reset() draws a new
-one, since that starts a new semester.
+The seed is not stored. seedFromGroups derives it from the sorted member lists, so the same
+export gives the same draw on every machine, and a new semester draws differently by itself.
+StepAlgorithm shows it next to the result so a run can be compared against another.
 
 ## Validation
 
@@ -159,15 +159,18 @@ the distinction the Gurobi attempt in the history below got wrong.
 solver.worker.ts wraps solve so Wasm never blocks the UI. It posts back three message types:
 status, result, error.
 
-StepAlgorithm.svelte owns the lifecycle, and each guard exists for a reason:
+SolverClient in solver-client.ts owns the lifecycle, and each guard exists for a reason:
 
-- one cached worker, prewarmed by an effect when step 9 is checked off, so the first solve
-  does not pay Wasm init latency
-- worker is nulled on both onerror and timeout, otherwise a dead worker gets reused forever
+- one cached worker, prewarmed by StepAlgorithm once the capacities step is checked off,
+  so the first solve does not pay Wasm init latency
+- worker is dropped on both onerror and timeout, otherwise a dead worker gets reused forever
   and every later run hangs with no result and no error
-- a 120 second client-side timeout above the solver's own budget, cleared on both resolve
-  and reject paths. That budget is three solves: 30 seconds to optimise, 15 to prove it,
-  30 to break ties. The client limit has to stay above their sum
+- a client-side timeout above the solver's own budget, cleared on both resolve and reject
+  paths. timeoutMs derives it from PIPELINE_LIMIT_SECONDS in algorithm/limits.ts and
+  doubles it when guarantees are set, since those run the pipeline twice
+
+StepAlgorithm.svelte adds the checks before a run:
+
 - a pre-solve feasibility check comparing total students against total capacity, because the
   solver's own infeasibility error means nothing to the user
 - capacities clamped to finite and at least 1 before buildSlots, since the min=1 HTML
