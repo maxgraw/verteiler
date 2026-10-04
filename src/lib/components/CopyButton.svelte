@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onDestroy } from "svelte";
-import { copyText } from "$lib/clipboard";
+import { copyText } from "#lib/clipboard.ts";
 
 interface Props {
 	text: string;

@@ -7,15 +7,15 @@
  * contested semester has many distributions that tie for best.
  */
 import { describe, it, expect } from "vitest";
-import { solve } from "$lib/algorithm";
-import { validateSolution } from "$lib/algorithm/validate";
+import { solve } from "#lib/algorithm/index.ts";
+import { validateSolution } from "#lib/algorithm/validate.ts";
 import {
 	DEFAULT_CAPACITY,
 	NUM_TIME_SLOTS,
 	SLOTS_PER_TIME_SLOT,
 	TOTAL_SLOTS,
-} from "$lib/config";
-import { buildSlots, parseChoices } from "$lib/parser";
+} from "#lib/config.ts";
+import { buildSlots, parseChoices } from "#lib/parser.ts";
 
 import semester2026 from "./fixtures/semester_2026.csv?raw";
 

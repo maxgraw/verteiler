@@ -3,7 +3,7 @@ import {
 	lotteryNumber,
 	lotteryPriorities,
 	seedFromGroups,
-} from "$lib/lottery";
+} from "#lib/lottery.ts";
 
 const KEYS = ["Anna, Ben", "Clara", "Dora, Emil, Frida", "Gero"];
 

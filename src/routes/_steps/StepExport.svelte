@@ -1,6 +1,6 @@
 <script lang="ts">
 import { ChevronRight } from "@lucide/svelte";
-import { STEPS } from "$lib/steps";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 </script>
 

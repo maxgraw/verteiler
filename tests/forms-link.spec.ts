@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formsLinkError, isFormsLink } from "$lib/forms-link";
+import { formsLinkError, isFormsLink } from "#lib/forms-link.ts";
 
 describe("isFormsLink", () => {
 	it("accepts the short link from the publish dialog", () => {

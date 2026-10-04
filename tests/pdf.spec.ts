@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { GroupRow } from "$lib/distribution";
+import type { GroupRow } from "#lib/distribution.ts";
 import {
 	distributionTable,
 	rotationRows,
 	spreadTable,
 	summaryLine,
-} from "$lib/pdf";
+} from "#lib/pdf.ts";
 
 const rows: GroupRow[] = [
 	{ members: "Anna Müller, Ben Schmidt", num: 1, label: "Gruppe 1", rank: 0 },

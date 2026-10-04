@@ -1,6 +1,6 @@
 <script lang="ts">
-import Alert from "$lib/components/Alert.svelte";
-import { state } from "$lib/state.svelte";
+import Alert from "#lib/components/Alert.svelte";
+import { state } from "#lib/state.svelte.ts";
 </script>
 
 <header>

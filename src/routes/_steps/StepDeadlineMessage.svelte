@@ -1,8 +1,8 @@
 <script lang="ts">
-import TemplateMessage from "$lib/components/TemplateMessage.svelte";
-import { deadlineMessage } from "$lib/messages";
-import { state } from "$lib/state.svelte";
-import { STEPS } from "$lib/steps";
+import TemplateMessage from "#lib/components/TemplateMessage.svelte";
+import { deadlineMessage } from "#lib/messages.ts";
+import { state } from "#lib/state.svelte.ts";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
 const complete = $derived(state.deadlineComplete && !!state.link);

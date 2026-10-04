@@ -1,7 +1,7 @@
 # Testing
 
 All tests live in tests/, never next to the file they cover. Specs import the code under test
-through the $lib alias, so a spec never contains a ../../src path.
+through the #lib subpath import, so a spec never contains a ../../src path.
 
 bun run test runs vitest once across the two projects defined in vite.config.ts.
 

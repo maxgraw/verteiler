@@ -1,8 +1,8 @@
 <script lang="ts">
 import { onDestroy } from "svelte";
-import Alert from "$lib/components/Alert.svelte";
-import CopyButton from "$lib/components/CopyButton.svelte";
-import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "$lib/config";
+import Alert from "#lib/components/Alert.svelte";
+import CopyButton from "#lib/components/CopyButton.svelte";
+import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "#lib/config.ts";
 import {
 	checkCapacity,
 	checkGuarantees,
@@ -14,14 +14,14 @@ import {
 	solveCaveat,
 	SPREAD_LABELS,
 	toUserMessage,
-} from "$lib/distribution";
-import { seedFromGroups } from "$lib/lottery";
-import { buildSlots } from "$lib/parser";
-import { downloadDistributionPdf } from "$lib/pdf";
-import { SolverClient } from "$lib/solver-client";
-import type { SolveResult } from "$lib/algorithm/types";
-import { state as appState } from "$lib/state.svelte";
-import { STEPS } from "$lib/steps";
+} from "#lib/distribution.ts";
+import { seedFromGroups } from "#lib/lottery.ts";
+import { buildSlots } from "#lib/parser.ts";
+import { downloadDistributionPdf } from "#lib/pdf.ts";
+import { SolverClient } from "#lib/solver-client.ts";
+import type { SolveResult } from "#lib/algorithm/types.ts";
+import { state as appState } from "#lib/state.svelte.ts";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "../WizardStep.svelte";
 import GuaranteePicker from "./GuaranteePicker.svelte";
 import SeedField from "./SeedField.svelte";

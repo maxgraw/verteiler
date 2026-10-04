@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { validateSolution } from "$lib/algorithm/validate";
-import { COSTS } from "$lib/algorithm/costs";
-import { rankOf } from "$lib/distribution";
-import { buildSlots } from "$lib/parser";
-import type { Group, Slot } from "$lib/parser";
-import type { SolveResult } from "$lib/algorithm/types";
+import { validateSolution } from "#lib/algorithm/validate.ts";
+import { COSTS } from "#lib/algorithm/costs.ts";
+import { rankOf } from "#lib/distribution.ts";
+import { buildSlots } from "#lib/parser.ts";
+import type { Group, Slot } from "#lib/parser.ts";
+import type { SolveResult } from "#lib/algorithm/types.ts";
 
 // Named Team, so member names stay apart from the "Gruppe N" a row is assigned to
 function makeGroup(

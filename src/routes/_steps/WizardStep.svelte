@@ -1,8 +1,8 @@
 <script lang="ts">
 import type { Snippet } from "svelte";
-import Step from "$lib/components/Step.svelte";
-import StepContent from "$lib/components/StepContent.svelte";
-import { state as appState } from "$lib/state.svelte";
+import Step from "#lib/components/Step.svelte";
+import StepContent from "#lib/components/StepContent.svelte";
+import { state as appState } from "#lib/state.svelte.ts";
 
 interface Props {
 	/**

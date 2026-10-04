@@ -7,8 +7,8 @@
  * Run with: bun run test (client project, Chromium)
  */
 import { describe, it, expect } from "vitest";
-import { solve } from "$lib/algorithm";
-import { parseChoices, buildSlots } from "$lib/parser";
+import { solve } from "#lib/algorithm/index.ts";
+import { parseChoices, buildSlots } from "#lib/parser.ts";
 
 import realistischCsv from "./fixtures/realistisch.csv?raw";
 import engpassCsv from "./fixtures/engpass.csv?raw";

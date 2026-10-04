@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { STEP_COUNT, STEPS } from "$lib/steps";
+import { STEP_COUNT, STEPS } from "#lib/steps.ts";
 
 describe("STEPS", () => {
 	// A reorder that duplicates or skips an index would silently bind two steps to the

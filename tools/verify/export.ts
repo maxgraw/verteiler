@@ -7,7 +7,6 @@
  *
  * This imports src/lib untouched: Bun resolves highs/runtime?url to a file path by
  * itself, so the production module graph runs here exactly as it does in the browser.
- * Relative imports only, $lib is a Vite alias and does not exist outside the app.
  *
  * Usage: bun run tools/verify/export.ts <csv> [--seed=ABC123]
  *          [--capacity=6 | --capacities=6,6,5,4,...] [--guarantee=Name:0 ...]

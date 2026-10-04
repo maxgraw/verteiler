@@ -1,7 +1,7 @@
 <script lang="ts">
-import { formsLinkError, isFormsLink } from "$lib/forms-link";
-import { state } from "$lib/state.svelte";
-import { STEPS } from "$lib/steps";
+import { formsLinkError, isFormsLink } from "#lib/forms-link.ts";
+import { state } from "#lib/state.svelte.ts";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
 const isValidLink = $derived(isFormsLink(state.link));

@@ -12,10 +12,10 @@ import {
 	sanitizeCapacities,
 	solveCaveat,
 	toUserMessage,
-} from "$lib/distribution";
-import { buildSlots } from "$lib/parser";
-import type { Group } from "$lib/parser";
-import type { Solution, SolveResult } from "$lib/algorithm/types";
+} from "#lib/distribution.ts";
+import { buildSlots } from "#lib/parser.ts";
+import type { Group } from "#lib/parser.ts";
+import type { Solution, SolveResult } from "#lib/algorithm/types.ts";
 
 function makeGroup(
 	id: number,

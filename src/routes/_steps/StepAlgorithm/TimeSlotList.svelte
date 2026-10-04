@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { TimeSlotView } from "$lib/distribution";
-import { SPREAD_LABELS } from "$lib/distribution";
+import type { TimeSlotView } from "#lib/distribution.ts";
+import { SPREAD_LABELS } from "#lib/distribution.ts";
 
 interface Props {
 	timeSlots: TimeSlotView[];

@@ -1,6 +1,6 @@
 <script lang="ts">
-import Alert from "$lib/components/Alert.svelte";
-import { SPREAD_LABELS } from "$lib/distribution";
+import Alert from "#lib/components/Alert.svelte";
+import { SPREAD_LABELS } from "#lib/distribution.ts";
 
 interface Props {
 	/** Groups per rank: [1st choice, 2nd, 3rd, no match] */

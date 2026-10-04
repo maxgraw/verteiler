@@ -1,8 +1,8 @@
 <script lang="ts">
-import TemplateMessage from "$lib/components/TemplateMessage.svelte";
-import { reminderMessage } from "$lib/messages";
-import { state } from "$lib/state.svelte";
-import { STEPS } from "$lib/steps";
+import TemplateMessage from "#lib/components/TemplateMessage.svelte";
+import { reminderMessage } from "#lib/messages.ts";
+import { state } from "#lib/state.svelte.ts";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
 const message = $derived(reminderMessage(state.tag, state.uhrzeit));
