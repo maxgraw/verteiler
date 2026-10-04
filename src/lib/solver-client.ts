@@ -1,3 +1,4 @@
+import { PIPELINE_LIMIT_SECONDS } from "./algorithm/limits";
 import type { Guarantee, SolveResult } from "./algorithm/types";
 import type { Group, Slot } from "./parser";
 
@@ -14,14 +15,20 @@ export type WorkerMessage =
 	| { type: "result"; data: SolveResult }
 	| { type: "error"; message: string };
 
+/** Headroom on top of the solver budget for Wasm init, model building and validation. */
+const TIMEOUT_MARGIN_SECONDS = 45;
+
 /**
- * A run this long is stuck, not slow. Aborting beats leaving the organizer waiting.
+ * A run longer than this is stuck, not slow. Aborting beats leaving the organizer waiting.
  *
- * Has to stay above the solver's own budget, which is three solves: 30 s to optimise,
- * 15 s to prove it, 30 s to break ties. Below that the client would cut off runs the
- * solver was still allowed to finish.
+ * Has to stay above the solver's own budget, otherwise the client cuts off runs the
+ * solver was still allowed to finish. Guarantees double that budget, because solve runs
+ * the whole pipeline a second time without them to price them.
  */
-const TIMEOUT_MS = 120_000;
+export function timeoutMs(request: SolveRequest): number {
+	const runs = request.guarantees?.length ? 2 : 1;
+	return (runs * PIPELINE_LIMIT_SECONDS + TIMEOUT_MARGIN_SECONDS) * 1000;
+}
 
 /**
  * Owns the solver worker across runs.
@@ -65,7 +72,7 @@ export class SolverClient {
 				reject(
 					new Error("Zeitüberschreitung: Die Berechnung dauert zu lange."),
 				);
-			}, TIMEOUT_MS);
+			}, timeoutMs(request));
 
 			worker.onmessage = (e: MessageEvent<WorkerMessage>) => {
 				if (e.data.type === "status") {

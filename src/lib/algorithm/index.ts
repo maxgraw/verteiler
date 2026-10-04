@@ -4,6 +4,7 @@ import { allowedTimeSlots, rankOf } from "../distribution";
 import { lotteryPriorities } from "../lottery";
 import type { Group, Slot } from "../parser";
 import { COSTS } from "./costs";
+import { CERTIFICATE_TIME_LIMIT_SECONDS, TIME_LIMIT_SECONDS } from "./limits";
 import type {
 	Displacement,
 	Guarantee,
@@ -12,15 +13,6 @@ import type {
 	SolveResult,
 } from "./types";
 import { validateSolution } from "./validate";
-
-const TIME_LIMIT_SECONDS = 30;
-
-/**
- * The certificate only has to fail, which is far cheaper than optimising. Measured at
- * 1.1 s on a real 46 group export, so this is a wide margin. Running out of it costs
- * the proof, never the distribution.
- */
-const CERTIFICATE_TIME_LIMIT_SECONDS = 15;
 
 const highsInstance = loadHighs({ locateFile: () => wasmUrl });
 
