@@ -8,9 +8,16 @@ capacities[32],
 the deadline fields (link, datum, uhrzeit), the parsed CSV (csvFileName, parsedGroups,
 parseWarnings) and guarantees. tag, formattedDatum and deadlineComplete are derived on the class.
 
-There is no store, no context and no prop drilling. Step components mutate appState directly.
+There is no store, no context and no prop drilling. Step components mutate appState directly
+for single fields. Changes that touch several fields at once go through a method, so the rule
+behind them lives in one place: loadCsv and clearCsv also drop guarantees, setAllCapacities
+fills every slot.
 
 ## Persistence
+
+defaults() lists every persisted field with its fresh value. Persist, restore and reset all
+derive from it, so a new field is one entry there plus its $state declaration on the class.
+Restore only accepts a stored value of the same kind as its default and skips the rest.
 
 The whole object is serialized to localStorage under the key "verteiler" from an effect
 wrapped in $effect.root(), which is needed because the class lives outside a component

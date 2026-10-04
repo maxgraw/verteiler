@@ -1,6 +1,6 @@
 import type { Guarantee } from "./algorithm/types.js";
 import { DEFAULT_CAPACITY, TOTAL_SLOTS } from "./config.js";
-import type { Group } from "./parser.js";
+import { type Group, parseChoices } from "./parser.js";
 import { STEP_COUNT } from "./steps.js";
 
 export const STORAGE_KEY = "verteiler";
@@ -13,47 +13,71 @@ export const STORAGE_KEY = "verteiler";
  */
 export const VERSION = 4;
 
-/** Fields are optional because a stored payload is untrusted input, not a guarantee. */
-interface SavedState {
-	version?: number;
-	link?: string;
-	datum?: string;
-	uhrzeit?: string;
-	open?: boolean[];
-	done?: boolean[];
-	csvFileName?: string;
-	parsedGroups?: Group[] | null;
-	parseWarnings?: string[];
-	capacities?: number[];
-	guarantees?: Guarantee[];
+/**
+ * Every persisted field with its value on a fresh start. The single list that persist,
+ * restore and reset all derive from, so a new field is one entry here plus its $state
+ * declaration on the class.
+ */
+function defaults() {
+	return {
+		link: "",
+		datum: "",
+		uhrzeit: "",
+		/** Only the first step starts open, the rest unfold as the organizer works through them. */
+		open: [true, ...Array<boolean>(STEP_COUNT - 1).fill(false)],
+		done: Array<boolean>(STEP_COUNT).fill(false),
+		capacities: Array<number>(TOTAL_SLOTS).fill(DEFAULT_CAPACITY),
+		csvFileName: "",
+		parsedGroups: null as Group[] | null,
+		parseWarnings: [] as string[],
+		guarantees: [] as Guarantee[],
+	};
 }
 
-/** Only the first step starts open, the rest unfold as the organizer works through them. */
-const freshOpen = (): boolean[] => [
-	true,
-	...Array<boolean>(STEP_COUNT - 1).fill(false),
-];
-const freshDone = (): boolean[] => Array<boolean>(STEP_COUNT).fill(false);
+type Persisted = ReturnType<typeof defaults>;
+
+const PERSISTED = Object.keys(defaults()) as (keyof Persisted)[];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * A stored value only replaces a default of the same kind. This is a cheap guard against
+ * hand-edited or foreign storage, not a full validation of the contents.
+ */
+function sameKind(value: unknown, fallback: unknown): boolean {
+	// parsedGroups defaults to null, but only a stored array is worth restoring
+	if (fallback === null || Array.isArray(fallback)) return Array.isArray(value);
+	return typeof value === typeof fallback;
+}
+
+/** Pads with false or truncates, so a stored flag list survives steps being appended. */
+function fitFlags(flags: boolean[], length: number): boolean[] {
+	return flags.concat(Array(length).fill(false)).slice(0, length);
+}
 
 /** Exported for tests. Application code uses the `state` singleton below. */
 export class VerteilerState {
-	open = $state(freshOpen());
-	done = $state(freshDone());
-	capacities = $state<number[]>(Array(TOTAL_SLOTS).fill(DEFAULT_CAPACITY));
-	link = $state("");
-	datum = $state("");
-	uhrzeit = $state("");
+	#fresh = defaults();
 
-	csvFileName = $state("");
-	parsedGroups = $state<Group[] | null>(null);
-	parseWarnings = $state<string[]>([]);
+	open = $state(this.#fresh.open);
+	done = $state(this.#fresh.done);
+	capacities = $state(this.#fresh.capacities);
+	link = $state(this.#fresh.link);
+	datum = $state(this.#fresh.datum);
+	uhrzeit = $state(this.#fresh.uhrzeit);
+
+	csvFileName = $state(this.#fresh.csvFileName);
+	parsedGroups = $state(this.#fresh.parsedGroups);
+	parseWarnings = $state(this.#fresh.parseWarnings);
 
 	/**
 	 * Groups pinned to a rank by hand. Indices point into parsedGroups, so a new upload
 	 * clears them: the same index would mean a different group. Additive field, so an
 	 * older saved state simply has none and needs no VERSION bump.
 	 */
-	guarantees = $state<Guarantee[]>([]);
+	guarantees = $state(this.#fresh.guarantees);
 
 	/**
 	 * True when localStorage holds a payload this build cannot use, either written by a
@@ -81,8 +105,9 @@ export class VerteilerState {
 			const saved = localStorage.getItem(STORAGE_KEY);
 			if (saved) {
 				try {
-					const parsed: SavedState | null = JSON.parse(saved);
-					if (parsed?.version === VERSION) this.#restore(parsed);
+					const parsed: unknown = JSON.parse(saved);
+					if (isRecord(parsed) && parsed.version === VERSION)
+						this.#restore(parsed);
 					else this.outdated = true;
 				} catch {
 					this.outdated = true;
@@ -92,75 +117,26 @@ export class VerteilerState {
 
 		$effect.root(() => {
 			$effect(() => {
-				const {
-					outdated,
-					link,
-					datum,
-					uhrzeit,
-					open,
-					done,
-					csvFileName,
-					parsedGroups,
-					parseWarnings,
-					capacities,
-					guarantees,
-				} = this;
-				if (outdated) return;
-				localStorage.setItem(
-					STORAGE_KEY,
-					JSON.stringify({
-						version: VERSION,
-						link,
-						datum,
-						uhrzeit,
-						open,
-						done,
-						csvFileName,
-						parsedGroups,
-						parseWarnings,
-						capacities,
-						guarantees,
-					}),
-				);
+				if (this.outdated) return;
+				const payload: Record<string, unknown> = { version: VERSION };
+				for (const key of PERSISTED) payload[key] = this[key];
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 			});
 		});
 	}
 
 	/** Applies a payload already confirmed to carry the current VERSION. */
-	#restore(parsed: SavedState) {
-		const {
-			link,
-			datum,
-			uhrzeit,
-			open,
-			done,
-			csvFileName,
-			parsedGroups,
-			parseWarnings,
-			capacities,
-			guarantees,
-		} = parsed;
-		if (link) this.link = link;
-		if (datum) this.datum = datum;
-		if (uhrzeit) this.uhrzeit = uhrzeit;
-		if (open)
-			this.open = open
-				.concat(Array(this.open.length).fill(false))
-				.slice(0, this.open.length);
-		if (done)
-			this.done = done
-				.concat(Array(this.done.length).fill(false))
-				.slice(0, this.done.length);
-		if (
-			capacities &&
-			Array.isArray(capacities) &&
-			capacities.length === TOTAL_SLOTS
-		)
-			this.capacities = capacities;
-		if (csvFileName) this.csvFileName = csvFileName;
-		if (parsedGroups) this.parsedGroups = parsedGroups;
-		if (parseWarnings) this.parseWarnings = parseWarnings;
-		if (guarantees && Array.isArray(guarantees)) this.guarantees = guarantees;
+	#restore(saved: Record<string, unknown>) {
+		const fresh = defaults();
+		const accepted: Partial<Persisted> = {};
+		for (const key of PERSISTED) {
+			if (sameKind(saved[key], fresh[key]))
+				Object.assign(accepted, { [key]: saved[key] });
+		}
+		if (accepted.open) accepted.open = fitFlags(accepted.open, STEP_COUNT);
+		if (accepted.done) accepted.done = fitFlags(accepted.done, STEP_COUNT);
+		if (accepted.capacities?.length !== TOTAL_SLOTS) delete accepted.capacities;
+		Object.assign(this, accepted);
 	}
 
 	/**
@@ -180,16 +156,32 @@ export class VerteilerState {
 		if (typeof localStorage !== "undefined")
 			localStorage.removeItem(STORAGE_KEY);
 		this.outdated = false;
-		this.link = "";
-		this.datum = "";
-		this.uhrzeit = "";
-		this.open = freshOpen();
-		this.done = freshDone();
-		this.capacities = Array(TOTAL_SLOTS).fill(DEFAULT_CAPACITY);
+		Object.assign(this, defaults());
+	};
+
+	/**
+	 * Replaces the uploaded CSV with a newly parsed one. The previous CSV is cleared first,
+	 * so a failed parse leaves nothing behind.
+	 * @throws Error with a German message when the file cannot be parsed
+	 */
+	loadCsv = (fileName: string, text: string) => {
+		this.clearCsv();
+		const { groups, warnings } = parseChoices(text);
+		this.csvFileName = fileName;
+		this.parsedGroups = groups;
+		this.parseWarnings = warnings;
+	};
+
+	/** Guarantees go with the CSV: their indices would mean other groups in the next file. */
+	clearCsv = () => {
 		this.csvFileName = "";
 		this.parsedGroups = null;
 		this.parseWarnings = [];
 		this.guarantees = [];
+	};
+
+	setAllCapacities = (capacity: number) => {
+		this.capacities = Array(TOTAL_SLOTS).fill(capacity);
 	};
 }
 

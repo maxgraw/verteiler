@@ -4,7 +4,6 @@ import {
 	DEFAULT_CAPACITY,
 	NUM_TIME_SLOTS,
 	SLOTS_PER_TIME_SLOT,
-	TOTAL_SLOTS,
 } from "#lib/config.ts";
 import { state as appState } from "#lib/state.svelte.ts";
 import { STEPS } from "#lib/steps.ts";
@@ -46,10 +45,8 @@ let defaultCapacity = $state(DEFAULT_CAPACITY);
                 />
                 <button
                     class="apply-btn"
-                    onclick={() => {
-                        appState.capacities =
-                            Array(TOTAL_SLOTS).fill(defaultCapacity);
-                    }}>Anwenden</button
+                    onclick={() => appState.setAllCapacities(defaultCapacity)}
+                    >Anwenden</button
                 >
             </div>
         </div>

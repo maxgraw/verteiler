@@ -1,7 +1,6 @@
 <script lang="ts">
 import { FileText, Upload } from "@lucide/svelte";
 import Alert from "#lib/components/Alert.svelte";
-import { parseChoices } from "#lib/parser.ts";
 import { state as appState } from "#lib/state.svelte.ts";
 import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
@@ -15,18 +14,10 @@ const studentCount = $derived(
 
 async function processFile(file: File) {
 	error = "";
-	appState.csvFileName = file.name;
-	appState.parsedGroups = null;
-	appState.parseWarnings = [];
-	// Guarantees point at group indices, which mean something else in a new file
-	appState.guarantees = [];
 	try {
-		const { groups, warnings } = parseChoices(await file.text());
-		appState.parsedGroups = groups;
-		appState.parseWarnings = warnings;
+		appState.loadCsv(file.name, await file.text());
 	} catch (e) {
 		error = e instanceof Error ? e.message : "Unbekannter Fehler";
-		appState.csvFileName = "";
 	}
 }
 
@@ -53,10 +44,7 @@ function handleDragLeave() {
 
 function reset() {
 	error = "";
-	appState.csvFileName = "";
-	appState.parsedGroups = null;
-	appState.parseWarnings = [];
-	appState.guarantees = [];
+	appState.clearCsv();
 }
 </script>
 

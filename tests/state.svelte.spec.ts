@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_CAPACITY, TOTAL_SLOTS } from "#lib/config.ts";
 import { STORAGE_KEY, VERSION, VerteilerState } from "#lib/state.svelte.ts";
 import { STEP_COUNT } from "#lib/steps.ts";
+import semester2026 from "./fixtures/semester_2026.csv?raw";
 
 /**
  * A new instance restores from localStorage exactly like a page load does.
@@ -96,6 +97,22 @@ describe("restore from localStorage", () => {
 		save({ version: VERSION, capacities: [1, 2, 3] });
 		const state = await freshState();
 		expect(state.capacities).toHaveLength(TOTAL_SLOTS);
+	});
+
+	it("ignores stored values of the wrong kind", async () => {
+		save({
+			version: VERSION,
+			link: 42,
+			parsedGroups: "antworten",
+			guarantees: { groupId: 0 },
+			datum: "2026-05-04",
+		});
+		const state = await freshState();
+		expect(state.link).toBe("");
+		expect(state.parsedGroups).toBeNull();
+		expect(state.guarantees).toEqual([]);
+		// a bad field must not take the valid ones down with it
+		expect(state.datum).toBe("2026-05-04");
 	});
 
 	it("restores capacities of the correct length", async () => {
@@ -195,6 +212,7 @@ describe("reset", () => {
 			},
 		];
 		state.parseWarnings = ["irgendein Hinweis"];
+		state.guarantees = [{ groupId: 0, maxRank: 0 }];
 		state.done[0] = true;
 		state.capacities[0] = 1;
 
@@ -205,6 +223,7 @@ describe("reset", () => {
 		expect(state.csvFileName).toBe("");
 		expect(state.parsedGroups).toBeNull();
 		expect(state.parseWarnings).toEqual([]);
+		expect(state.guarantees).toEqual([]);
 		expect(state.open[0]).toBe(true);
 		expect(state.open.slice(1).every((o) => o === false)).toBe(true);
 		expect(state.done.every((d) => d === false)).toBe(true);
@@ -245,5 +264,50 @@ describe("lottery seed", () => {
 		expect(state).not.toHaveProperty("lotterySeed");
 		// the rest of that payload must still survive
 		expect(state.link).toBe("alt");
+	});
+});
+
+describe("CSV", () => {
+	it("loads a parsed export", async () => {
+		const state = await freshState();
+		state.loadCsv("antworten.csv", semester2026);
+		expect(state.csvFileName).toBe("antworten.csv");
+		expect(state.parsedGroups?.length).toBeGreaterThan(0);
+	});
+
+	it("drops guarantees on a new upload, since their indices mean other groups", async () => {
+		const state = await freshState();
+		state.loadCsv("alt.csv", semester2026);
+		state.guarantees = [{ groupId: 0, maxRank: 0 }];
+		state.loadCsv("neu.csv", semester2026);
+		expect(state.guarantees).toEqual([]);
+	});
+
+	it("leaves nothing of the previous file behind when a parse fails", async () => {
+		const state = await freshState();
+		state.loadCsv("alt.csv", semester2026);
+		expect(() => state.loadCsv("kaputt.csv", "")).toThrow();
+		expect(state.csvFileName).toBe("");
+		expect(state.parsedGroups).toBeNull();
+	});
+
+	it("clears the CSV together with its guarantees", async () => {
+		const state = await freshState();
+		state.loadCsv("antworten.csv", semester2026);
+		state.guarantees = [{ groupId: 0, maxRank: 0 }];
+		state.clearCsv();
+		expect(state.csvFileName).toBe("");
+		expect(state.parsedGroups).toBeNull();
+		expect(state.parseWarnings).toEqual([]);
+		expect(state.guarantees).toEqual([]);
+	});
+});
+
+describe("setAllCapacities", () => {
+	it("sets every slot to the same value", async () => {
+		const state = await freshState();
+		state.setAllCapacities(4);
+		expect(state.capacities).toHaveLength(TOTAL_SLOTS);
+		expect(state.capacities.every((c) => c === 4)).toBe(true);
 	});
 });
