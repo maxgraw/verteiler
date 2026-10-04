@@ -5,9 +5,9 @@ import {
 	NUM_TIME_SLOTS,
 	SLOTS_PER_TIME_SLOT,
 	TOTAL_SLOTS,
-} from "$lib/config";
-import { state as appState } from "$lib/state.svelte";
-import { STEPS } from "$lib/steps";
+} from "#lib/config.ts";
+import { state as appState } from "#lib/state.svelte.ts";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
 let defaultCapacity = $state(DEFAULT_CAPACITY);

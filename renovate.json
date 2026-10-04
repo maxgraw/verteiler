@@ -17,6 +17,11 @@
       "description": "Major updates stay separate PRs for manual review",
       "matchUpdateTypes": ["major"],
       "automerge": false
+    },
+    {
+      "description": "TypeScript 7 has no JS API, which SvelteKit and svelte-check still need",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7"
     }
   ],
   "lockFileMaintenance": {

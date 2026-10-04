@@ -1,9 +1,9 @@
 <script lang="ts">
 import { FileText, Upload } from "@lucide/svelte";
-import Alert from "$lib/components/Alert.svelte";
-import { parseChoices } from "$lib/parser";
-import { state as appState } from "$lib/state.svelte";
-import { STEPS } from "$lib/steps";
+import Alert from "#lib/components/Alert.svelte";
+import { parseChoices } from "#lib/parser.ts";
+import { state as appState } from "#lib/state.svelte.ts";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
 let error = $state("");

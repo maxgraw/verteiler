@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { solve } from "$lib/algorithm";
-import { buildSlots } from "$lib/parser";
-import type { Group, Slot } from "$lib/parser";
+import { solve } from "#lib/algorithm/index.ts";
+import { buildSlots } from "#lib/parser.ts";
+import type { Group, Slot } from "#lib/parser.ts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

@@ -1,7 +1,9 @@
 # Code quality
 
 TypeScript is strict with checkJs on. Do not reach for any or non-null assertions to silence
-the checker. Use import type for type-only imports. $lib resolves to src/lib.
+the checker. Use import type for type-only imports. #lib resolves to src/lib
+through the imports field in package.json. Kit 3 removed $lib, and #lib paths need the file
+extension (#lib/parser.ts).
 
 Indentation is inconsistent across the repo: 4 spaces in parser.ts and the .svelte files,
 2 in src/lib/algorithm. There is no formatter config. Match the file you are editing and do

@@ -11,11 +11,11 @@
  * message, so it can be pasted into a plain test.
  */
 import { describe, it, expect } from "vitest";
-import { solve } from "$lib/algorithm";
-import { COSTS } from "$lib/algorithm/costs";
-import type { Guarantee } from "$lib/algorithm/types";
-import { buildSlots } from "$lib/parser";
-import type { Group, Slot } from "$lib/parser";
+import { solve } from "#lib/algorithm/index.ts";
+import { COSTS } from "#lib/algorithm/costs.ts";
+import type { Guarantee } from "#lib/algorithm/types.ts";
+import { buildSlots } from "#lib/parser.ts";
+import type { Group, Slot } from "#lib/parser.ts";
 
 const CASES = 500;
 const SEED = 20260928;

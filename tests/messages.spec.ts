@@ -3,7 +3,7 @@ import {
 	deadlineMessage,
 	formIntroMessage,
 	reminderMessage,
-} from "$lib/messages";
+} from "#lib/messages.ts";
 
 const filled = {
 	tag: "Montag",

@@ -3,6 +3,9 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
+	"imports": {
+		"#lib/*": "./src/lib/*"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -15,21 +18,21 @@
 		"verify": "bun run tools/verify/all.ts"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.14",
-		"@sveltejs/adapter-static": "3.0.10",
-		"@sveltejs/kit": "2.70.3",
+		"@biomejs/biome": "2.5.15",
+		"@sveltejs/adapter-static": "4.0.0",
+		"@sveltejs/kit": "3.0.0",
 		"@sveltejs/vite-plugin-svelte": "7.3.1",
-		"@vitest/browser-playwright": "5.0.2",
+		"@vitest/browser-playwright": "5.0.3",
 		"playwright": "1.63.0",
 		"svelte": "5.57.1",
 		"svelte-check": "4.7.6",
 		"typescript": "6.0.3",
-		"vite": "8.3.1",
-		"vitest": "5.0.2",
+		"vite": "8.3.2",
+		"vitest": "5.0.3",
 		"vitest-browser-svelte": "3.1.0"
 	},
 	"dependencies": {
-		"@lucide/svelte": "1.48.0",
+		"@lucide/svelte": "1.52.0",
 		"highs": "1.15.3",
 		"jspdf": "4.2.1",
 		"jspdf-autotable": "5.0.8"

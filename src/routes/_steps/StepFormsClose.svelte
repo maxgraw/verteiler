@@ -1,6 +1,6 @@
 <script lang="ts">
-import { state } from "$lib/state.svelte";
-import { STEPS } from "$lib/steps";
+import { state } from "#lib/state.svelte.ts";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
 /** Falls back to a pointer at the deadline step while datum or uhrzeit are still empty. */

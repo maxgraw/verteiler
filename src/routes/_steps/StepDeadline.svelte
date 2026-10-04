@@ -1,10 +1,10 @@
 <script lang="ts">
 import { ChevronRight } from "@lucide/svelte";
-import DeadlineInputs from "$lib/components/DeadlineInputs.svelte";
-import TemplateMessage from "$lib/components/TemplateMessage.svelte";
-import { formIntroMessage } from "$lib/messages";
-import { state } from "$lib/state.svelte";
-import { STEPS } from "$lib/steps";
+import DeadlineInputs from "#lib/components/DeadlineInputs.svelte";
+import TemplateMessage from "#lib/components/TemplateMessage.svelte";
+import { formIntroMessage } from "#lib/messages.ts";
+import { state } from "#lib/state.svelte.ts";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
 const message = $derived(

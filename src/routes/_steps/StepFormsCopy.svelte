@@ -1,5 +1,5 @@
 <script lang="ts">
-import { STEPS } from "$lib/steps";
+import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
 const FORMS_COPY_URL =

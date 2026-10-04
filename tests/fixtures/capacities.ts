@@ -1,7 +1,7 @@
 /**
  * Capacity scenarios run against every real semester, by benchmark.spec.ts and by
- * tools/verify/all.ts. Plain literals without imports, because the verify script runs
- * under Bun where the $lib alias does not exist.
+ * tools/verify/all.ts. Plain literals without imports, so the verify script under Bun
+ * pulls in nothing else.
  *
  * Only uniform is guaranteed to fit every semester. The tighter ones were picked for the
  * 175 students of 2026, and a later semester may simply not fit into them.
