@@ -72,7 +72,7 @@ function reset() {
             <button class="reset-btn" onclick={reset}>Entfernen</button>
         </div>
     {:else}
-        <div class="upload-area" class:drag-over={dragOver}>
+        <div class="upload-area" data-drag-over={dragOver}>
             <input
                 type="file"
                 id="csv-input"
@@ -142,7 +142,7 @@ function reset() {
     }
 
     .upload-area label:hover,
-    .upload-area.drag-over label {
+    .upload-area[data-drag-over="true"] label {
         border-color: var(--color-primary);
         color: var(--color-text);
         background: var(--color-primary-bg);
@@ -155,7 +155,7 @@ function reset() {
     }
 
     .upload-area label:hover .upload-icon,
-    .upload-area.drag-over .upload-icon {
+    .upload-area[data-drag-over="true"] .upload-icon {
         color: var(--color-primary);
     }
 
@@ -195,7 +195,7 @@ function reset() {
     .success-text {
         display: flex;
         flex-direction: column;
-        gap: 0.1rem;
+        gap: var(--space-0-5);
         min-width: 0;
     }
 

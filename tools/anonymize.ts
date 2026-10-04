@@ -12,50 +12,12 @@
  * Usage: bun run tools/anonymize.ts <real.csv> <tests/fixtures/semester_YYYY.csv>
  */
 import { readFileSync, writeFileSync } from "node:fs";
+import { detectLayout, detectSeparator, splitCsv } from "../src/lib/parser";
 
 const [input, output] = process.argv.slice(2);
 if (!input || !output) {
 	console.error("Usage: bun run tools/anonymize.ts <real.csv> <fixture.csv>");
 	process.exit(2);
-}
-
-/**
- * Split CSV text into rows of raw cells. Unlike the parser this does not trim, because
- * the whitespace inside a cell is part of what the fixture has to preserve.
- */
-function readCsv(text: string, sep: string): string[][] {
-	const rows: string[][] = [];
-	let row: string[] = [];
-	let cell = "";
-	let inQuote = false;
-
-	for (let i = 0; i < text.length; i++) {
-		const ch = text[i];
-		if (ch === '"') {
-			if (inQuote && text[i + 1] === '"') {
-				cell += '"';
-				i++;
-			} else {
-				inQuote = !inQuote;
-			}
-		} else if (ch === sep && !inQuote) {
-			row.push(cell);
-			cell = "";
-		} else if ((ch === "\n" || ch === "\r") && !inQuote) {
-			if (ch === "\r" && text[i + 1] === "\n") i++;
-			row.push(cell);
-			rows.push(row);
-			row = [];
-			cell = "";
-		} else {
-			cell += ch;
-		}
-	}
-	if (cell !== "" || row.length > 0) {
-		row.push(cell);
-		rows.push(row);
-	}
-	return rows;
 }
 
 // Google Forms quotes every cell, so writing them all quoted reproduces its format
@@ -69,24 +31,18 @@ function writeCsv(rows: string[][], sep: string): string {
 const raw = readFileSync(input, "utf8");
 const bom = raw.startsWith("\uFEFF") ? "\uFEFF" : "";
 const text = raw.slice(bom.length);
-const firstLine = text.split(/\r?\n/)[0];
-const sep =
-	(firstLine.match(/;/g) ?? []).length > (firstLine.match(/,/g) ?? []).length
-		? ";"
-		: ",";
+const firstLine = text.split(/\r?\n/).find((l) => l.trim() !== "") ?? "";
+const sep = detectSeparator(firstLine);
 
-const [header, ...body] = readCsv(text, sep);
+// Raw cells, not parseChoices: the whitespace it trims is part of what the fixture keeps
+const [header, ...body] = splitCsv(text, sep);
 
-// Same order as detectLayout in parser.ts: "Anzahl Gruppenmitglieder" matches both
-const sizeCol = header.findIndex((h) => /anzahl|größe/i.test(h));
-const memberCol = header.findIndex(
-	(h, i) => i !== sizeCol && !/\bwahl\b/i.test(h) && /name|mitglied/i.test(h),
-);
+const memberCol = detectLayout(header)?.members ?? -1;
 const mailCol = header.findIndex((h) => /mail/i.test(h));
 const timeCol = header.findIndex((h) => /zeitstempel|timestamp/i.test(h));
 
 if (memberCol === -1) {
-	console.error("No member column found in the header.");
+	console.error("Header not recognized, no member column found.");
 	process.exit(1);
 }
 

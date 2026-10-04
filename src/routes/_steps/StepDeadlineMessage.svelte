@@ -1,18 +1,18 @@
 <script lang="ts">
 import TemplateMessage from "#lib/components/TemplateMessage.svelte";
 import { deadlineMessage } from "#lib/messages.ts";
-import { state } from "#lib/state.svelte.ts";
+import { state as appState } from "#lib/state.svelte.ts";
 import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
-const complete = $derived(state.deadlineComplete && !!state.link);
+const complete = $derived(appState.deadlineComplete && !!appState.link);
 
 const message = $derived(
 	deadlineMessage({
-		tag: state.tag,
-		datum: state.formattedDatum,
-		uhrzeit: state.uhrzeit,
-		link: state.link,
+		tag: appState.tag,
+		datum: appState.formattedDatum,
+		uhrzeit: appState.uhrzeit,
+		link: appState.link,
 	}),
 );
 </script>
@@ -29,9 +29,9 @@ const message = $derived(
         <small class="missing">
             Noch fehlt:
             {[
-                !state.deadlineComplete &&
+                !appState.deadlineComplete &&
                     `Deadline (Schritt ${STEPS.deadline + 1})`,
-                !state.link && `Google Forms Link (Schritt ${STEPS.formsUrl + 1})`,
+                !appState.link && `Google Forms Link (Schritt ${STEPS.formsUrl + 1})`,
             ]
                 .filter(Boolean)
                 .join(', ')}

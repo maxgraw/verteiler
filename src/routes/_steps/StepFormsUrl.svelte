@@ -1,11 +1,11 @@
 <script lang="ts">
 import { formsLinkError, isFormsLink } from "#lib/forms-link.ts";
-import { state } from "#lib/state.svelte.ts";
+import { state as appState } from "#lib/state.svelte.ts";
 import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
-const isValidLink = $derived(isFormsLink(state.link));
-const linkError = $derived(formsLinkError(state.link));
+const isValidLink = $derived(isFormsLink(appState.link));
+const linkError = $derived(formsLinkError(appState.link));
 </script>
 
 <WizardStep
@@ -26,8 +26,8 @@ const linkError = $derived(formsLinkError(state.link));
         <label for="forms-url">Google Forms Link</label>
         {#if isValidLink}
             <div class="confirmed">
-                <span class="confirmed-text">{state.link}</span>
-                <button class="change-btn" onclick={() => (state.link = '')}>Ändern</button>
+                <span class="confirmed-text">{appState.link}</span>
+                <button class="change-btn" onclick={() => (appState.link = '')}>Ändern</button>
             </div>
         {:else}
             <input
@@ -35,8 +35,7 @@ const linkError = $derived(formsLinkError(state.link));
                 id="forms-url"
                 placeholder="https://forms.gle/..."
                 required
-                pattern="https://(forms\.gle/[A-Za-z0-9_-]+|docs\.google\.com/forms/.+/viewform.*)"
-                bind:value={state.link}
+                bind:value={appState.link}
             />
             {#if linkError}
                 <small class="error">{linkError}</small>
@@ -51,9 +50,9 @@ const linkError = $derived(formsLinkError(state.link));
         align-items: center;
         gap: var(--space-2);
         padding: var(--space-1) var(--space-2);
-        border: 1px solid var(--color-success-border, var(--color-primary));
+        border: 1px solid var(--color-success-border);
         border-radius: var(--radius-sm);
-        background: var(--color-success-bg, var(--color-primary-bg));
+        background: var(--color-success-bg);
     }
 
     .confirmed-text {

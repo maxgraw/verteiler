@@ -75,10 +75,10 @@ async function run() {
 	}
 }
 
-const zeitslots = $derived(
+const timeSlots = $derived(
 	solveResult ? groupByTimeSlot(solveResult.solution) : [],
 );
-const rows = $derived(groupRows(zeitslots));
+const rows = $derived(groupRows(timeSlots));
 const caveat = $derived(solveResult ? solveCaveat(solveResult) : null);
 const guaranteeNote = $derived(
 	solveResult ? guaranteeSummary(solveResult) : null,
@@ -164,7 +164,7 @@ async function downloadPdf() {
                     {/if}
                 </Alert>
             {/if}
-            <TimeSlotList timeSlots={zeitslots} />
+            <TimeSlotList {timeSlots} />
             <CopyButton
                 text={formatDistribution(rows)}
                 label="Ergebnisse kopieren"
@@ -182,7 +182,7 @@ async function downloadPdf() {
         width: 100%;
         padding: var(--space-2) var(--space-4);
         background: var(--color-primary);
-        color: white;
+        color: var(--color-on-primary);
         font-weight: 600;
         font-size: var(--text-base);
         border-radius: var(--radius-md);

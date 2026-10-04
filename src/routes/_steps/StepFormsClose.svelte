@@ -1,12 +1,12 @@
 <script lang="ts">
-import { state } from "#lib/state.svelte.ts";
+import { state as appState } from "#lib/state.svelte.ts";
 import { STEPS } from "#lib/steps.ts";
 import WizardStep from "./WizardStep.svelte";
 
 /** Falls back to a pointer at the deadline step while datum or uhrzeit are still empty. */
 const deadlineLabel = $derived(
-	state.deadlineComplete
-		? `${state.tag}, den ${state.formattedDatum} um ${state.uhrzeit} Uhr`
+	appState.deadlineComplete
+		? `${appState.tag}, den ${appState.formattedDatum} um ${appState.uhrzeit} Uhr`
 		: `deine Deadline aus Schritt ${STEPS.deadline + 1}`,
 );
 </script>
@@ -14,7 +14,7 @@ const deadlineLabel = $derived(
 <WizardStep
     index={STEPS.formsClose}
     title="Abschlusszeitpunkt im Formular setzen"
-    checkDisabled={!state.deadlineComplete}
+    checkDisabled={!appState.deadlineComplete}
 >
     <p class="description">
         So schließt das Formular pünktlich von selbst. Nach der Deadline kommt

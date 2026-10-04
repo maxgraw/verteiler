@@ -9,16 +9,16 @@ interface Props {
 let { timeSlots }: Props = $props();
 </script>
 
-<div class="zeitslots">
-    {#each timeSlots as zs}
-        <div class="zeitslot">
-            <div class="zeitslot-header">
-                <span class="zeitslot-title">Zeitslot {zs.num}</span>
-                <span class="zeitslot-meta">
-                    {zs.label} · {zs.studentCount} Studierende
+<div class="time-slots">
+    {#each timeSlots as ts}
+        <div class="time-slot">
+            <div class="time-slot-header">
+                <span class="time-slot-title">Zeitslot {ts.num}</span>
+                <span class="time-slot-meta">
+                    {ts.label} · {ts.studentCount} Studierende
                 </span>
             </div>
-            {#each zs.rotationGroups as rg}
+            {#each ts.rotationGroups as rg}
                 <div class="rotation">
                     <div class="rotation-header">
                         <span class="rotation-title">Gruppe {rg.num}</span>
@@ -47,19 +47,19 @@ let { timeSlots }: Props = $props();
 </div>
 
 <style>
-    .zeitslots {
+    .time-slots {
         display: flex;
         flex-direction: column;
         gap: var(--space-2);
     }
 
-    .zeitslot {
+    .time-slot {
         border: 1px solid var(--color-border);
         border-radius: var(--radius-md);
         overflow: hidden;
     }
 
-    .zeitslot-header {
+    .time-slot-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -68,12 +68,12 @@ let { timeSlots }: Props = $props();
         border-bottom: 1px solid var(--color-border);
     }
 
-    .zeitslot-title {
+    .time-slot-title {
         font-weight: 700;
         font-size: var(--text-sm);
     }
 
-    .zeitslot-meta {
+    .time-slot-meta {
         font-size: var(--text-xs);
         color: var(--color-text-subtle);
     }
@@ -130,7 +130,7 @@ let { timeSlots }: Props = $props();
         flex-shrink: 0;
         font-size: var(--text-xs);
         font-weight: 600;
-        padding: 0.1rem var(--space-2);
+        padding: var(--space-0-5) var(--space-2);
         border-radius: var(--radius-full);
         background: var(--rank-bg);
         color: var(--rank-text);

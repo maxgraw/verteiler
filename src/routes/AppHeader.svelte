@@ -1,6 +1,6 @@
 <script lang="ts">
 import Alert from "#lib/components/Alert.svelte";
-import { state } from "#lib/state.svelte.ts";
+import { state as appState } from "#lib/state.svelte.ts";
 </script>
 
 <header>
@@ -11,12 +11,12 @@ import { state } from "#lib/state.svelte.ts";
                 Rotationsgruppenverteilung für Semesterorganisatoren
             </p>
         </div>
-        <button class="reset-btn" onclick={() => state.reset()}
+        <button class="reset-btn" onclick={() => appState.reset()}
             >Zurücksetzen</button
         >
     </div>
 
-    {#if state.outdated}
+    {#if appState.outdated}
         <Alert variant="warning">
             <p>
                 Auf diesem Gerät liegt ein gespeicherter Fortschritt aus einer
@@ -24,7 +24,7 @@ import { state } from "#lib/state.svelte.ts";
                 und bis du zurücksetzt wird nichts Neues gespeichert.
             </p>
             <div>
-                <button class="outdated-btn" onclick={() => state.reset()}>
+                <button class="outdated-btn" onclick={() => appState.reset()}>
                     Zurücksetzen und neu starten
                 </button>
             </div>

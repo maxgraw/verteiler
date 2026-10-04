@@ -4,7 +4,8 @@
 	"version": "0.0.1",
 	"type": "module",
 	"imports": {
-		"#lib/*": "./src/lib/*"
+		"#lib/*": "./src/lib/*",
+		"#routes/*": "./src/routes/*"
 	},
 	"scripts": {
 		"dev": "vite dev",

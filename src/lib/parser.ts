@@ -1,4 +1,4 @@
-import { NUM_TIME_SLOTS } from "./config";
+import { MAX_GROUP_SIZE, NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "./config";
 
 export interface Slot {
 	/** Unique index of this slot */
@@ -28,7 +28,7 @@ export interface ParseResult {
 const DONT_CARE_WORD = "Egal";
 
 /** Column positions parseChoices reads, resolved from the header row. */
-interface Layout {
+export interface Layout {
 	size: number;
 	members: number;
 	/** Columns of the three choices, ranked by their position in the export */
@@ -39,8 +39,10 @@ interface Layout {
  * Resolve the columns by header text instead of by position. Google Forms only exports the
  * E-Mail column when the form asks for addresses, so the same form yields a 6 or 7 column
  * export, and the wording of the questions differs between form copies.
+ *
+ * Exported for tools/anonymize.ts, which has to find the same member column.
  */
-function detectLayout(header: string[]): Layout | null {
+export function detectLayout(header: string[]): Layout | null {
 	// Auswahl does not match: \b requires a non-word character before Wahl.
 	const choices = header.flatMap((h, i) => (/\bwahl\b/i.test(h) ? [i] : []));
 	if (choices.length !== 3) return null;
@@ -65,47 +67,43 @@ function detectLayout(header: string[]): Layout | null {
  */
 const IMPLAUSIBLE_GROUP_COUNT = 80;
 
-function detectSeparator(firstLine: string): "," | ";" {
+export function detectSeparator(firstLine: string): "," | ";" {
 	const commas = (firstLine.match(/,/g) ?? []).length;
 	const semicolons = (firstLine.match(/;/g) ?? []).length;
 	return semicolons > commas ? ";" : ",";
 }
 
 /**
- * Split CSV text into rows of trimmed cells.
+ * Split CSV text into rows of raw cells: quotes resolved, whitespace kept.
  *
  * Scans the whole text rather than splitting on newlines first, so a quoted
  * field may span multiple lines. Google Forms produces those whenever someone
- * types the member names one per line. Blank rows are dropped.
+ * types the member names one per line.
+ *
+ * Exported for tools/anonymize.ts, which has to keep the whitespace the parser trims.
  */
-function parseCSVText(text: string): string[][] {
-	const clean = text.replace(/^\uFEFF/, "");
-	const firstLine = clean.split(/\r?\n/).find((l) => l.trim() !== "");
-	if (firstLine === undefined) return [];
-
-	const sep = detectSeparator(firstLine);
+export function splitCsv(text: string, sep: string): string[][] {
 	const rows: string[][] = [];
-
 	let row: string[] = [];
 	let cell = "";
 	let inQuote = false;
 
-	for (let i = 0; i < clean.length; i++) {
-		const ch = clean[i];
+	for (let i = 0; i < text.length; i++) {
+		const ch = text[i];
 
 		if (ch === '"') {
-			if (inQuote && clean[i + 1] === '"') {
+			if (inQuote && text[i + 1] === '"') {
 				cell += '"';
 				i++;
 			} else {
 				inQuote = !inQuote;
 			}
 		} else if (ch === sep && !inQuote) {
-			row.push(cell.trim());
+			row.push(cell);
 			cell = "";
 		} else if ((ch === "\n" || ch === "\r") && !inQuote) {
-			if (ch === "\r" && clean[i + 1] === "\n") i++;
-			row.push(cell.trim());
+			if (ch === "\r" && text[i + 1] === "\n") i++;
+			row.push(cell);
 			rows.push(row);
 			row = [];
 			cell = "";
@@ -114,15 +112,28 @@ function parseCSVText(text: string): string[][] {
 		}
 	}
 
-	row.push(cell.trim());
-	rows.push(row);
+	// A trailing newline already closed the last row
+	if (cell !== "" || row.length > 0) {
+		row.push(cell);
+		rows.push(row);
+	}
+	return rows;
+}
 
-	return rows.filter((r) => r.some((c) => c !== ""));
+/** Rows of trimmed cells, with the separator detected and BOM and blank rows dropped. */
+function parseCSVText(text: string): string[][] {
+	const clean = text.replace(/^\uFEFF/, "");
+	const firstLine = clean.split(/\r?\n/).find((l) => l.trim() !== "");
+	if (firstLine === undefined) return [];
+
+	return splitCsv(clean, detectSeparator(firstLine))
+		.map((row) => row.map((cell) => cell.trim()))
+		.filter((row) => row.some((cell) => cell !== ""));
 }
 
 /**
  * Parse a single choice cell value into a 0-based time slot index.
- * "Gruppe X-Y" → Math.floor(Y / 4) - 1
+ * "Gruppe X-Y" → Math.floor(Y / SLOTS_PER_TIME_SLOT) - 1
  * "Egal"       → -1
  */
 function parseChoiceCell(cell: string): number | null {
@@ -131,7 +142,7 @@ function parseChoiceCell(cell: string): number | null {
 	const match = trimmed.match(/-(\d+)$/);
 	if (!match) return null;
 	const y = parseInt(match[1], 10);
-	const timeSlot = Math.floor(y / 4) - 1;
+	const timeSlot = Math.floor(y / SLOTS_PER_TIME_SLOT) - 1;
 	if (timeSlot < 0 || timeSlot >= NUM_TIME_SLOTS) return null;
 	return timeSlot;
 }
@@ -180,7 +191,7 @@ export function parseChoices(csvText: string): ParseResult {
 		}
 
 		const size = parseInt(row[layout.size], 10);
-		if (Number.isNaN(size) || size < 1 || size > 6) {
+		if (Number.isNaN(size) || size < 1 || size > MAX_GROUP_SIZE) {
 			warnings.push(
 				`Zeile ${rowNum}: Ungültige Gruppengröße "${row[layout.size]}". Eintrag übersprungen.`,
 			);

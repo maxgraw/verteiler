@@ -37,16 +37,19 @@ reset.
 ## Step components
 
 Each step is a self-contained file in src/routes/_steps/ wrapping WizardStep with
-index={STEPS.x}. WizardStep binds Step to appState.open[index] and appState.done[index],
-opens the next step on done and wraps the content in StepContent. The number shown to the
-user is index + 1. checkDisabled blocks the done checkbox until a precondition holds.
+index={STEPS.x}. WizardStep is the whole accordion item: it binds to appState.open[index]
+and appState.done[index] and opens the next step on done. The number shown to the user is
+index + 1. checkDisabled blocks the done checkbox until a precondition holds.
 
 The index i always comes from STEPS in steps.ts, never from a literal. Copy that points at
 another step does the same: Schritt {STEPS.formsExport + 1}.
 
-StepContent styles its children globally by tag and class (p.description, small.hint, ol,
+WizardStep styles its children globally by tag and class (p.description, small.hint, ol,
 li), so use those plain elements instead of new wrappers. Steps whose only job is producing a
 copyable German message use TemplateMessage.
+
+src/lib/components holds only components shared by several steps. A component used by one
+step lives next to it in src/routes/_steps/, or in the step's own folder like StepAlgorithm/.
 
 To add a step: create the file, add an entry to STEPS, and add it to the ol in +page.svelte in
 the matching position. The open and done arrays size themselves from STEP_COUNT. Inserting or

@@ -51,10 +51,10 @@ let defaultCapacity = $state(DEFAULT_CAPACITY);
             </div>
         </div>
 
-        <div class="capacity-grid">
+        <div class="capacity-grid" style:--slots={SLOTS_PER_TIME_SLOT}>
             {#each Array(NUM_TIME_SLOTS) as _, t}
                 <div class="grid-row">
-                    <span class="zs-label">ZS {t + 1}</span>
+                    <span class="ts-label">ZS {t + 1}</span>
                     {#each Array(SLOTS_PER_TIME_SLOT) as _, s}
                         {@const slotId = t * SLOTS_PER_TIME_SLOT + s}
                         <div class="grid-cell">
@@ -140,12 +140,12 @@ let defaultCapacity = $state(DEFAULT_CAPACITY);
 
     .grid-row {
         display: grid;
-        grid-template-columns: 3rem repeat(4, 1fr);
+        grid-template-columns: 3rem repeat(var(--slots), 1fr);
         gap: 1px;
         background: var(--color-border);
     }
 
-    .zs-label {
+    .ts-label {
         font-size: var(--text-xs);
         font-weight: 600;
         color: var(--color-text-subtle);
@@ -159,7 +159,7 @@ let defaultCapacity = $state(DEFAULT_CAPACITY);
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 2px;
+        gap: var(--space-0-5);
         padding: var(--space-1);
         background: var(--color-bg);
     }

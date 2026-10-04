@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { page } from "vitest/browser";
 import { render } from "vitest-browser-svelte";
-import SeedField from "../src/routes/_steps/StepAlgorithm/SeedField.svelte";
+import SeedField from "#routes/_steps/StepAlgorithm/SeedField.svelte";
 
 describe("SeedField", () => {
 	it("shows the draw the distribution came from", async () => {

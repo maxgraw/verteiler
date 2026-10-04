@@ -92,6 +92,8 @@ details summary::-webkit-details-marker {
 	--color-primary-disabled: #a5b4fc;
 	--color-primary-bg: #eef2ff;
 	--color-primary-border: #e0e7ff;
+	/* Text and icons sitting on a --color-primary background */
+	--color-on-primary: #ffffff;
 
 	/* Colors: success */
 	--color-success: #16a34a;
@@ -121,6 +123,7 @@ details summary::-webkit-details-marker {
 	--color-choice-3-border: #fed7aa;
 
 	/* Spacing */
+	--space-0-5: 0.125rem;
 	--space-1: 0.25rem;
 	--space-2: 0.5rem;
 	--space-3: 0.75rem;
