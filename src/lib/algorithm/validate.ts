@@ -1,5 +1,5 @@
-import { rankOf, SPREAD_LABELS } from "../distribution";
 import type { Group, Slot } from "../parser";
+import { rankOf, SPREAD_LABELS } from "../rank";
 import { COSTS } from "./costs";
 import type { Guarantee, SolveResult } from "./types";
 
@@ -32,23 +32,21 @@ export function validateSolution(
 	const violations: Violation[] = [];
 	const { solution } = result;
 
-	if (solution.groups.length !== groups.length) {
+	if (solution.assignment.length !== groups.length) {
 		return [
 			{
 				code: "group-count",
-				message: `${groups.length} Gruppen gingen hinein, ${solution.groups.length} kamen zurück.`,
+				message: `${groups.length} Gruppen gingen hinein, ${solution.assignment.length} kamen zurück.`,
 			},
 		];
 	}
 
 	const load = new Array<number>(slots.length).fill(0);
-	const spread = [0, 0, 0, 0];
-	const studentSpread = [0, 0, 0, 0];
-	let score = 0;
+	const spread = Array<number>(SPREAD_LABELS.length).fill(0);
+	const studentSpread = Array<number>(SPREAD_LABELS.length).fill(0);
 
 	for (let g = 0; g < groups.length; g++) {
-		const placed = solution.groups[g];
-		const slot = placed.currentSelection;
+		const slot = solution.assignment[g];
 
 		if (!Number.isInteger(slot) || slot < 0 || slot >= slots.length) {
 			violations.push({
@@ -57,18 +55,10 @@ export function validateSolution(
 			});
 			continue;
 		}
-		if (placed.size !== groups[g].size) {
-			violations.push({
-				code: "size-changed",
-				message: `"${groups[g].members}" ist von ${groups[g].size} auf ${placed.size} Plätze gesprungen.`,
-			});
-		}
-
 		load[slot] += groups[g].size;
 		const rank = rankOf(groups[g].choices, slots[slot].timeSlot);
 		spread[rank]++;
 		studentSpread[rank] += groups[g].size;
-		score -= COSTS[rank];
 	}
 
 	for (let s = 0; s < slots.length; s++) {
@@ -78,22 +68,12 @@ export function validateSolution(
 				message: `Gruppe ${s + 1} ist mit ${load[s]} von ${slots[s].capacity} Plätzen überbelegt.`,
 			});
 		}
-		if (solution.occupancy[s]?.amount !== load[s]) {
-			violations.push({
-				code: "occupancy",
-				message: `Gruppe ${s + 1} meldet ${solution.occupancy[s]?.amount} Studierende, belegt sind ${load[s]}.`,
-			});
-		}
 	}
-
-	violations.push(
-		...checkInvAllocation(solution.invAllocation, solution.groups),
-	);
 
 	// The one thing a guarantee is: a promise. Nothing else in the chain would notice a
 	// dropped constraint, the distribution would just look like a normal optimum.
 	for (const { groupId, maxRank } of guarantees) {
-		const slot = solution.groups[groupId]?.currentSelection;
+		const slot = solution.assignment[groupId];
 		if (slot === undefined || slot < 0 || slot >= slots.length) continue;
 		const rank = rankOf(groups[groupId].choices, slots[slot].timeSlot);
 		if (rank > maxRank) {
@@ -128,47 +108,7 @@ export function validateSolution(
 			message: `Zielwert ${result.fairnessValue} gemeldet, ${fairnessCost} gerechnet.`,
 		});
 	}
-	if (result.score !== score) {
-		violations.push({
-			code: "score",
-			message: `Punktzahl ${result.score} gemeldet, ${score} gerechnet.`,
-		});
-	}
 
-	return violations;
-}
-
-/** invAllocation is a reverse index, so it has to agree with the assignment both ways. */
-function checkInvAllocation(
-	invAllocation: Record<number, number[]>,
-	placed: Group[],
-): Violation[] {
-	const violations: Violation[] = [];
-	const expected = new Map<number, number[]>();
-	for (let g = 0; g < placed.length; g++) {
-		const slot = placed[g].currentSelection;
-		if (slot < 0) continue;
-		expected.set(slot, [...(expected.get(slot) ?? []), g]);
-	}
-
-	for (const [slot, ids] of expected) {
-		const listed = invAllocation[slot] ?? [];
-		if (listed.length !== ids.length || ids.some((id, i) => listed[i] !== id)) {
-			violations.push({
-				code: "inv-allocation",
-				message: `Gruppe ${slot + 1} listet [${listed.join(", ")}], zugewiesen sind [${ids.join(", ")}].`,
-			});
-		}
-	}
-	for (const key of Object.keys(invAllocation)) {
-		const slot = Number(key);
-		if (!expected.has(slot) && (invAllocation[slot] ?? []).length > 0) {
-			violations.push({
-				code: "inv-allocation",
-				message: `Gruppe ${slot + 1} listet Einträge, hat aber keine Zuteilung.`,
-			});
-		}
-	}
 	return violations;
 }
 

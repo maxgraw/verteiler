@@ -208,7 +208,6 @@ describe("reset", () => {
 				size: 1,
 				members: "Anna",
 				choices: [0, 1, 2],
-				currentSelection: -1,
 			},
 		];
 		state.parseWarnings = ["irgendein Hinweis"];

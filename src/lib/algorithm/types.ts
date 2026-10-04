@@ -1,9 +1,15 @@
 import type { Group, Slot } from "../parser";
 
+/**
+ * A distribution together with the input it answers, so a view needs nothing else to
+ * render it. The assignment is the only placement data: anything derived from it, like
+ * slot loads, is recomputed where needed rather than carried along and kept in sync.
+ */
 export interface Solution {
-	occupancy: Slot[];
 	groups: Group[];
-	invAllocation: Record<number, number[]>;
+	slots: Slot[];
+	/** Slot index per group, in the order of groups. -1 = unassigned. */
+	assignment: number[];
 }
 
 /** How sure we are that the fairness objective actually reached its minimum. */
@@ -39,11 +45,6 @@ export interface Displacement {
 
 export interface SolveResult {
 	solution: Solution;
-	/**
-	 * Penalty sum counted per group (0/-1/-5/-100), reported only so runs stay
-	 * comparable. The solver minimises the same costs weighted by group size.
-	 */
-	score: number;
 	/** Groups per rank: [1st choice, 2nd, 3rd, no match]. */
 	spread: number[];
 	/** Students per rank, same four buckets. This is the unit the solver optimises. */

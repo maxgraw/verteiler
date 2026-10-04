@@ -13,7 +13,8 @@ Two constraints are always present. assign_g puts each group in exactly one slot
 what guarantees a group is never split across slots. cap_s keeps the summed group sizes in a
 slot within its capacity.
 
-rankOf lives in distribution.ts so the solver and the results view score a slot identically.
+rankOf lives in rank.ts so the solver, the validation and the results view score a slot
+identically. A rank of NO_MATCH (3) means none of the choices.
 
 ## Objective
 
@@ -29,9 +30,6 @@ COSTS lives in algorithm/costs.ts, not in index.ts, because validate.ts needs it
 importing it back from index.ts would be a cycle. The values have to stay integers: the
 optimality certificate cuts the objective at V - 1, which proves nothing if a value can sit
 in between.
-
-SolveResult.score reports the same costs unweighted and negated, so runs stay comparable with
-older ones. Nothing optimizes it.
 
 The jump to 100 means "avoid leaving a group without any of its wishes at almost any cost",
 which is easy to explain. The 1 against 5 for 2nd against 3rd choice is the only real
@@ -76,9 +74,9 @@ StepAlgorithm shows it next to the result so a run can be compared against anoth
 ## Validation
 
 algorithm/validate.ts checks a finished result against the input it came from: every group
-in exactly one real slot, no slot over capacity, occupancy and invAllocation agreeing with
-the assignment, and spread, studentSpread, fairnessValue and score all recomputed from
-rankOf rather than trusted.
+in exactly one real slot, no slot over capacity, and spread, studentSpread and
+fairnessValue all recomputed from rankOf rather than trusted. Solution carries only the
+assignment, no derived loads or reverse index, so there is nothing else to keep in sync.
 
 solve() runs it last and throws on the first violation, because a distribution that breaks
 its own constraints must never reach the organizer. HiGHS would not catch any of this: it
@@ -101,7 +99,7 @@ asks only whether such a point exists:
 - Optimal means one does exist, so the first stage stopped short
 - anything else means the proof ran out of time and nothing is claimed
 
-The result carries this as SolveResult.optimality, and solveCaveat in distribution.ts turns
+The result carries this as SolveResult.optimality, and solveCaveat in result.ts turns
 anything short of proven into a German warning above the result list. A proven optimum says
 nothing at all: it is the normal case.
 
@@ -116,9 +114,8 @@ who absorbs the leftover disappointment, and that gets said too.
 
 The organizer can pin a group to a rank: `SolveOptions.guarantees` is a list of
 `{ groupId, maxRank }`, and guaranteeRows turns each one into a constraint that allows only
-the time slots satisfying it. allowedTimeSlots lives in distribution.ts next to rankOf,
-because it is the same rank logic read backwards, and putting it in the solver would make
-distribution.ts and index.ts import each other.
+the time slots satisfying it. allowedTimeSlots lives in rank.ts next to rankOf,
+because it is the same rank logic read backwards.
 
 The constraint goes into all three solves. Leaving it out of the certificate would prove
 the optimum of the unconstrained problem, which is not the one being answered.
@@ -126,7 +123,7 @@ the optimum of the unconstrained problem, which is not the one being answered.
 A guarantee overrides the lottery for one group and is paid for by others, so solve runs
 the whole pipeline a second time without the guarantees and reports the difference:
 guaranteeCost is the extra fairness cost, displaced lists every group that came off worse,
-worst hit first. guaranteeSummary in distribution.ts turns that into German.
+worst hit first. guaranteeSummary in result.ts turns that into German.
 
 The price is not guessable and has to be computed. Measured on a real 46 group export:
 pinning a four person group to its first choice cost 9, while several six person groups
@@ -177,9 +174,9 @@ StepAlgorithm.svelte adds the checks before a run:
 - capacities clamped to finite and at least 1 before buildSlots, since the min=1 HTML
   attribute is only advisory
 
-The pure parts of all that (sanitizeCapacities, checkCapacity, groupByTimeSlot,
-formatDistribution, solveCaveat, toUserMessage) live in distribution.ts and are covered by
-tests/distribution.spec.ts. Keep new logic there rather than in the component.
+The pure parts of all that live in modules with a node spec each: prepareSolve and the
+checks in presolve.ts, the result views and caveats in result.ts, toUserMessage in
+algorithm/errors.ts. Keep new logic there rather than in the component.
 
 ## History
 

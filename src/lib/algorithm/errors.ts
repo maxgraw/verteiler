@@ -31,3 +31,23 @@ export class SolveError extends Error {
 export function errorKind(e: unknown): SolveErrorKind {
 	return e instanceof SolveError ? e.kind : "unknown";
 }
+
+/** Turn any solver or worker failure into a German message the organizer can act on. */
+export function toUserMessage(e: unknown): string {
+	const msg = e instanceof Error ? e.message : String(e);
+	switch (errorKind(e)) {
+		case "infeasible":
+			return "Keine gültige Verteilung möglich. Prüf, ob die Kapazitäten ausreichen.";
+		// Not a capacity problem: a solve that ran out of time found nothing, which says
+		// nothing about whether the capacities are enough
+		case "timeLimit":
+		case "timeout":
+			return "Die Berechnung hat zu lange gedauert. Versuch es nochmal.";
+		// Already plain German and already names what broke
+		case "invalid":
+			return msg;
+		case "worker":
+		case "unknown":
+			return `Unbekannter Fehler. Bitte Seite neu laden und nochmal versuchen. (${msg})`;
+	}
+}

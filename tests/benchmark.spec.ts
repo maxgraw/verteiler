@@ -1,7 +1,7 @@
 /**
  * Benchmark suite for the solve() algorithm.
  *
- * Not a correctness test — measures score quality and wall-clock time
+ * Not a correctness test — measures the fairness value and wall-clock time
  * so that algorithm improvements can be compared objectively.
  *
  * Run with: bun run test (client project, Chromium)
@@ -32,7 +32,6 @@ function syntheticAllEgal(n: number) {
 		size: 1,
 		members: `Student ${i}`,
 		choices: [-1, -1, -1],
-		currentSelection: -1,
 	}));
 }
 
@@ -42,13 +41,12 @@ function syntheticContested(n: number, timeslot: number) {
 		size: 1,
 		members: `Student ${i}`,
 		choices: [timeslot, -1, -1],
-		currentSelection: -1,
 	}));
 }
 
 function formatBenchmark(
 	label: string,
-	score: number,
+	fairnessValue: number,
 	spread: number[],
 	ms: number,
 ) {
@@ -56,7 +54,7 @@ function formatBenchmark(
 	const total = spread.reduce((a, b) => a + b, 0);
 	console.log(
 		`\n┌─ ${label}\n` +
-			`│  Score:    ${score}\n` +
+			`│  Fairness: ${fairnessValue}\n` +
 			`│  1. Wahl:  ${first} / ${total}  (${((first / total) * 100).toFixed(1)}%)\n` +
 			`│  2. Wahl:  ${second} / ${total}  (${((second / total) * 100).toFixed(1)}%)\n` +
 			`│  3. Wahl:  ${third} / ${total}  (${((third / total) * 100).toFixed(1)}%)\n` +
@@ -72,8 +70,8 @@ describe("algorithm benchmark", () => {
 		const t0 = performance.now();
 		const result = await solve(groups, slots);
 		const ms = performance.now() - t0;
-		formatBenchmark("realistisch.csv", result.score, result.spread, ms);
-		expect(result.score).toBeDefined();
+		formatBenchmark("realistisch.csv", result.fairnessValue, result.spread, ms);
+		expect(result.fairnessValue).toBeDefined();
 	}, 60_000);
 
 	it("engpass.csv — contested input (20/32 groups want same timeslot)", async () => {
@@ -82,8 +80,8 @@ describe("algorithm benchmark", () => {
 		const t0 = performance.now();
 		const result = await solve(groups, slots);
 		const ms = performance.now() - t0;
-		formatBenchmark("engpass.csv", result.score, result.spread, ms);
-		expect(result.score).toBeDefined();
+		formatBenchmark("engpass.csv", result.fairnessValue, result.spread, ms);
+		expect(result.fairnessValue).toBeDefined();
 	}, 60_000);
 
 	it.each(CAPACITY_SCENARIOS)(
@@ -96,11 +94,11 @@ describe("algorithm benchmark", () => {
 			const ms = performance.now() - t0;
 			formatBenchmark(
 				`semester_2026.csv, ${name}`,
-				result.score,
+				result.fairnessValue,
 				result.spread,
 				ms,
 			);
-			expect(result.score).toBeDefined();
+			expect(result.fairnessValue).toBeDefined();
 		},
 		60_000,
 	);
@@ -113,11 +111,11 @@ describe("algorithm benchmark", () => {
 		const ms = performance.now() - t0;
 		formatBenchmark(
 			"synthetic: all Egal (32 groups × 1)",
-			result.score,
+			result.fairnessValue,
 			result.spread,
 			ms,
 		);
-		expect(result.score).toBeDefined();
+		expect(result.fairnessValue).toBeDefined();
 	}, 60_000);
 
 	it("synthetic — 32 groups of 1, all want timeslot 0 (maximum contention)", async () => {
@@ -129,10 +127,10 @@ describe("algorithm benchmark", () => {
 		const ms = performance.now() - t0;
 		formatBenchmark(
 			"synthetic: all want t=0 (32 groups × 1)",
-			result.score,
+			result.fairnessValue,
 			result.spread,
 			ms,
 		);
-		expect(result.score).toBeDefined();
+		expect(result.fairnessValue).toBeDefined();
 	}, 60_000);
 });

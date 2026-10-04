@@ -20,8 +20,9 @@ import {
 	NUM_TIME_SLOTS,
 	SLOTS_PER_TIME_SLOT,
 } from "../../src/lib/config";
-import { allowedTimeSlots, findGroups } from "../../src/lib/distribution";
 import { buildSlots, parseChoices } from "../../src/lib/parser";
+import { allowedTimeSlots } from "../../src/lib/rank";
+import { findGroups } from "../../src/lib/search";
 
 function flag(name: string, fallback: string): string {
 	const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
@@ -144,14 +145,13 @@ console.log(
 					g.maxRank,
 				),
 			})),
-			assignment: result.solution.groups.map((g) => g.currentSelection),
+			assignment: result.solution.assignment,
 			fairnessValue: result.fairnessValue,
 			guaranteeCost: result.guaranteeCost,
 			optimality: result.optimality,
 			lotteryComplete: result.lotteryComplete,
 			spread: result.spread,
 			studentSpread: result.studentSpread,
-			score: result.score,
 		},
 		null,
 		2,

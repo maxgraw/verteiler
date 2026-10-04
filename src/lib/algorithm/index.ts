@@ -1,8 +1,8 @@
 import loadHighs from "highs";
 import wasmUrl from "highs/runtime?url";
-import { allowedTimeSlots, rankOf } from "../distribution";
 import { lotteryPriorities } from "../lottery";
 import type { Group, Slot } from "../parser";
+import { allowedTimeSlots, rankOf, SPREAD_LABELS } from "../rank";
 import { COSTS } from "./costs";
 import { SolveError } from "./errors";
 import { CERTIFICATE_TIME_LIMIT_SECONDS, TIME_LIMIT_SECONDS } from "./limits";
@@ -256,29 +256,20 @@ function buildResult(
 	slots: Slot[],
 	assignment: number[],
 ): Distribution {
-	const solution: Solution = {
-		occupancy: slots.map((s) => ({ ...s, amount: 0 })),
-		groups: groups.map((g, i) => ({ ...g, currentSelection: assignment[i] })),
-		invAllocation: {},
-	};
+	const solution: Solution = { groups, slots, assignment };
 
-	let score = 0;
-	const spread = [0, 0, 0, 0];
-	const studentSpread = [0, 0, 0, 0];
+	const spread = Array<number>(SPREAD_LABELS.length).fill(0);
+	const studentSpread = Array<number>(SPREAD_LABELS.length).fill(0);
 
 	for (let gi = 0; gi < groups.length; gi++) {
 		const s = assignment[gi];
 		if (s < 0) continue;
-		solution.occupancy[s].amount += groups[gi].size;
-		if (!solution.invAllocation[s]) solution.invAllocation[s] = [];
-		solution.invAllocation[s].push(gi);
 		const rank = rankOf(groups[gi].choices, slots[s].timeSlot);
-		score -= COSTS[rank];
 		spread[rank]++;
 		studentSpread[rank] += groups[gi].size;
 	}
 
-	return { solution, score, spread, studentSpread };
+	return { solution, spread, studentSpread };
 }
 
 interface PipelineResult {

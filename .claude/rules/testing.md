@@ -13,7 +13,7 @@ because it needs localStorage.
 server runs in node and covers everything else.
 
 Prefer the node project. Logic that needs a browser to be tested usually belongs in a pure
-module instead, which is why distribution.ts exists.
+module instead, which is why presolve.ts and result.ts exist.
 
 The include and exclude lists are maintained by hand and mirror each other. A new spec that
 touches the solver, Wasm or the DOM must be added to the client include and to the server
@@ -33,7 +33,7 @@ Each new semester goes through bun run tools/anonymize.ts csv/<file>.csv
 tests/fixtures/semester_YYYY.csv and gets one entry in SEMESTERS in semesters.spec.ts,
 pinning the fairnessValue the solver proved on it.
 
-benchmark.spec.ts measures score quality and wall-clock time so algorithm changes can be
+benchmark.spec.ts measures the fairness value and wall-clock time so algorithm changes can be
 compared. It is not a correctness test. Do not tighten its thresholds into flaky assertions.
 
 Follow the local helper factories in the file you are extending (makeGroup, fullSlots,

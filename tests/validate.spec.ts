@@ -2,18 +2,21 @@ import { describe, expect, it } from "vitest";
 import { COSTS } from "#lib/algorithm/costs.ts";
 import type { SolveResult } from "#lib/algorithm/types.ts";
 import { validateSolution } from "#lib/algorithm/validate.ts";
-import { rankOf } from "#lib/distribution.ts";
 import type { Group, Slot } from "#lib/parser.ts";
 import { buildSlots } from "#lib/parser.ts";
+import { rankOf } from "#lib/rank.ts";
+
+/** A group plus the slot a test puts it in. Only the test helpers read slot. */
+type PlacedGroup = Group & { slot: number };
 
 // Named Team, so member names stay apart from the "Gruppe N" a row is assigned to
 function makeGroup(
 	id: number,
 	size: number,
 	choices: number[],
-	currentSelection: number,
-): Group {
-	return { id, size, members: `Team ${id}`, choices, currentSelection };
+	slot: number,
+): PlacedGroup {
+	return { id, size, members: `Team ${id}`, choices, slot };
 }
 
 /** Two time slots of two slots each, so slot 0-1 are ts0 and slot 2-3 are ts1. */
@@ -26,28 +29,22 @@ function makeSlots(): Slot[] {
  * shared mistake in the solver cannot make these tests agree with it. Every case below
  * takes one of these and breaks exactly one thing.
  */
-function makeResult(groups: Group[], slots: Slot[]): SolveResult {
-	const occupancy = slots.map((s) => ({ ...s, amount: 0 }));
-	const invAllocation: Record<number, number[]> = {};
+function makeResult(groups: PlacedGroup[], slots: Slot[]): SolveResult {
 	const spread = [0, 0, 0, 0];
 	const studentSpread = [0, 0, 0, 0];
-	let score = 0;
-	const placed = groups.map((g) => ({ ...g }));
 
-	for (let g = 0; g < placed.length; g++) {
-		const slot = placed[g].currentSelection;
-		occupancy[slot].amount += placed[g].size;
-		invAllocation[slot] ??= [];
-		invAllocation[slot].push(g);
-		const rank = rankOf(placed[g].choices, slots[slot].timeSlot);
+	for (const g of groups) {
+		const rank = rankOf(g.choices, slots[g.slot].timeSlot);
 		spread[rank]++;
-		studentSpread[rank] += placed[g].size;
-		score -= COSTS[rank];
+		studentSpread[rank] += g.size;
 	}
 
 	return {
-		solution: { occupancy, groups: placed, invAllocation },
-		score,
+		solution: {
+			groups: groups.map(({ slot, ...group }) => group),
+			slots,
+			assignment: groups.map((g) => g.slot),
+		},
 		spread,
 		studentSpread,
 		optimality: "proven",
@@ -102,7 +99,7 @@ describe("validateSolution", () => {
 		const groups = [makeGroup(0, 3, [0, 1, -1], 0)];
 		const slots = makeSlots();
 		const result = makeResult(groups, slots);
-		result.solution.groups[0].currentSelection = -1;
+		result.solution.assignment[0] = -1;
 		expect(codes(validateSolution(groups, slots, result))).toContain(
 			"unassigned",
 		);
@@ -112,52 +109,9 @@ describe("validateSolution", () => {
 		const groups = [makeGroup(0, 3, [0, 1, -1], 0)];
 		const slots = makeSlots();
 		const result = makeResult(groups, slots);
-		result.solution.groups[0].currentSelection = 99;
+		result.solution.assignment[0] = 99;
 		expect(codes(validateSolution(groups, slots, result))).toContain(
 			"unassigned",
-		);
-	});
-
-	it("reports a group size that changed on the way through", () => {
-		const groups = [makeGroup(0, 3, [0, 1, -1], 0)];
-		const slots = makeSlots();
-		const result = makeResult(groups, slots);
-		result.solution.groups[0].size = 4;
-		expect(codes(validateSolution(groups, slots, result))).toContain(
-			"size-changed",
-		);
-	});
-
-	it("reports occupancy that disagrees with the assignment", () => {
-		const groups = [makeGroup(0, 3, [0, 1, -1], 0)];
-		const slots = makeSlots();
-		const result = makeResult(groups, slots);
-		result.solution.occupancy[0].amount = 2;
-		expect(codes(validateSolution(groups, slots, result))).toContain(
-			"occupancy",
-		);
-	});
-
-	it("reports a reverse index that lost a group", () => {
-		const groups = [
-			makeGroup(0, 2, [0, 1, -1], 0),
-			makeGroup(1, 2, [0, 1, -1], 0),
-		];
-		const slots = makeSlots();
-		const result = makeResult(groups, slots);
-		result.solution.invAllocation[0] = [0];
-		expect(codes(validateSolution(groups, slots, result))).toContain(
-			"inv-allocation",
-		);
-	});
-
-	it("reports a reverse index listing a slot nobody got", () => {
-		const groups = [makeGroup(0, 2, [0, 1, -1], 0)];
-		const slots = makeSlots();
-		const result = makeResult(groups, slots);
-		result.solution.invAllocation[3] = [0];
-		expect(codes(validateSolution(groups, slots, result))).toContain(
-			"inv-allocation",
 		);
 	});
 
@@ -187,14 +141,6 @@ describe("validateSolution", () => {
 		expect(codes(validateSolution(groups, slots, result))).toContain(
 			"fairness-value",
 		);
-	});
-
-	it("reports a score that drifted from the assignment", () => {
-		const groups = [makeGroup(0, 2, [1, 0, -1], 0)];
-		const slots = makeSlots();
-		const result = makeResult(groups, slots);
-		result.score = 0;
-		expect(codes(validateSolution(groups, slots, result))).toContain("score");
 	});
 
 	it("reports a guarantee the distribution did not keep", () => {
@@ -233,7 +179,7 @@ describe("validateSolution", () => {
 		];
 		const slots = makeSlots();
 		const result = makeResult(groups, slots);
-		result.solution.groups = [result.solution.groups[0]];
+		result.solution.assignment = [result.solution.assignment[0]];
 		expect(codes(validateSolution(groups, slots, result))).toEqual([
 			"group-count",
 		]);

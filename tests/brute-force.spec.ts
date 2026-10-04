@@ -135,7 +135,6 @@ function materialize(instance: Instance): { groups: Group[]; slots: Slot[] } {
 			size: g.size,
 			members: `Team ${id}`,
 			choices: g.choices,
-			currentSelection: -1,
 		})),
 		slots: buildSlots(
 			instance.numTimeSlots,

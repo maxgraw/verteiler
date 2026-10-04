@@ -7,8 +7,6 @@ export interface Slot {
 	timeSlot: number;
 	/** Max number of students */
 	capacity: number;
-	/** Current occupancy */
-	amount: number;
 }
 
 export interface Group {
@@ -20,8 +18,6 @@ export interface Group {
 	members: string;
 	/** 3 time slot preferences (0-based); -1 = don't care */
 	choices: number[];
-	/** Index into slots array; -1 = unassigned */
-	currentSelection: number;
 }
 
 export interface ParseResult {
@@ -240,7 +236,6 @@ export function parseChoices(csvText: string): ParseResult {
 			size,
 			members,
 			choices,
-			currentSelection: -1,
 		});
 	}
 
@@ -279,7 +274,7 @@ export function buildSlots(
 	let id = 0;
 	for (let t = 0; t < numTimeSlots; t++) {
 		for (let s = 0; s < slotsPerTimeSlot; s++) {
-			slots.push({ id, timeSlot: t, capacity: capacities[id], amount: 0 });
+			slots.push({ id, timeSlot: t, capacity: capacities[id] });
 			id++;
 		}
 	}

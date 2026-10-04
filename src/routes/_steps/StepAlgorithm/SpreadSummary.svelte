@@ -1,6 +1,6 @@
 <script lang="ts">
 import Alert from "#lib/components/Alert.svelte";
-import { SPREAD_LABELS } from "#lib/distribution.ts";
+import { NO_MATCH, SPREAD_LABELS } from "#lib/rank.ts";
 
 interface Props {
 	/** Groups per rank: [1st choice, 2nd, 3rd, no match] */
@@ -22,10 +22,10 @@ let { spread, studentSpread }: Props = $props();
     {/each}
 </div>
 
-{#if spread[3] > 0}
+{#if spread[NO_MATCH] > 0}
     <Alert variant="warning">
-        Ohne Wunsch-Zeitslot: {spread[3]}
-        {spread[3] === 1 ? 'Gruppe' : 'Gruppen'} ({studentSpread[3]} Studierende).
+        Ohne Wunsch-Zeitslot: {spread[NO_MATCH]}
+        {spread[NO_MATCH] === 1 ? 'Gruppe' : 'Gruppen'} ({studentSpread[NO_MATCH]} Studierende).
         Bitte von Hand nachbearbeiten.
     </Alert>
 {/if}

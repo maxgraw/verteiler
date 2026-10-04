@@ -75,13 +75,6 @@ describe("parseChoices", () => {
 			);
 			expect(groups[0].id).toBe(0);
 		});
-
-		it("sets currentSelection to -1", () => {
-			const { groups } = parseChoices(
-				csv(row(1, "Max", "Gruppe 1-4", "Gruppe 5-8", "Gruppe 9-12")),
-			);
-			expect(groups[0].currentSelection).toBe(-1);
-		});
 	});
 
 	describe("multiple rows", () => {
@@ -415,11 +408,6 @@ describe("buildSlots", () => {
 	it("applies per-slot capacities in order", () => {
 		const slots = buildSlots(2, 2, [1, 2, 3, 4]);
 		expect(slots.map((s) => s.capacity)).toEqual([1, 2, 3, 4]);
-	});
-
-	it("initialises amount to 0 for all slots", () => {
-		const slots = buildSlots(8, 4, Array(32).fill(6));
-		expect(slots.every((s) => s.amount === 0)).toBe(true);
 	});
 
 	it("uses the full 8×4 config correctly", () => {

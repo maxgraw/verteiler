@@ -1,12 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { solve } from "#lib/algorithm/index.ts";
+import type { Solution } from "#lib/algorithm/types.ts";
 import type { Group, Slot } from "#lib/parser.ts";
 import { buildSlots } from "#lib/parser.ts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeGroup(id: number, size: number, choices: number[]): Group {
-	return { id, size, members: `Group ${id}`, choices, currentSelection: -1 };
+	return { id, size, members: `Group ${id}`, choices };
+}
+
+/** Students per slot, recomputed from the assignment. */
+function loads(solution: Solution): number[] {
+	const load = solution.slots.map(() => 0);
+	solution.assignment.forEach((slot, g) => {
+		load[slot] += solution.groups[g].size;
+	});
+	return load;
+}
+
+function timeSlotOf(solution: Solution, group: number): number {
+	return solution.slots[solution.assignment[group]].timeSlot;
 }
 
 /** 8 timeslots × 4 slots = 32 slots, uniform capacity */
@@ -37,8 +51,8 @@ describe("solve — structural guarantees", () => {
 			makeGroup(2, 2, [2, 3, 4]),
 		];
 		const { solution } = await solve(groups, fullSlots());
-		for (const g of solution.groups) {
-			expect(g.currentSelection).toBeGreaterThanOrEqual(0);
+		for (const slot of solution.assignment) {
+			expect(slot).toBeGreaterThanOrEqual(0);
 		}
 	});
 
@@ -47,9 +61,9 @@ describe("solve — structural guarantees", () => {
 			makeGroup(i, 5, [i % 8, (i + 1) % 8, (i + 2) % 8]),
 		);
 		const { solution } = await solve(groups, fullSlots(6));
-		for (const slot of solution.occupancy) {
-			expect(slot.amount).toBeLessThanOrEqual(slot.capacity);
-		}
+		loads(solution).forEach((load, s) => {
+			expect(load).toBeLessThanOrEqual(solution.slots[s].capacity);
+		});
 	});
 
 	it("spread entries sum to the number of groups", async () => {
@@ -66,67 +80,47 @@ describe("solve — structural guarantees", () => {
 		const { spread } = await solve([makeGroup(0, 1, [0, 1, 2])], fullSlots());
 		expect(spread).toHaveLength(4);
 	});
-
-	it("invAllocation mirrors group currentSelection", async () => {
-		const groups = [makeGroup(0, 3, [0, 1, 2]), makeGroup(1, 2, [1, 2, 3])];
-		const { solution } = await solve(groups, fullSlots());
-		for (const g of solution.groups) {
-			expect(solution.invAllocation[g.currentSelection]).toContain(g.id);
-		}
-	});
-
-	it("occupancy amount matches sum of group sizes assigned to that slot", async () => {
-		const groups = [makeGroup(0, 4, [0, 1, 2]), makeGroup(1, 3, [1, 2, 3])];
-		const { solution } = await solve(groups, fullSlots());
-		for (const [slotId, groupIds] of Object.entries(solution.invAllocation)) {
-			const expectedAmount = groupIds.reduce(
-				(sum, gId) => sum + solution.groups[gId].size,
-				0,
-			);
-			expect(solution.occupancy[Number(slotId)].amount).toBe(expectedAmount);
-		}
-	});
 });
 
-// ─── solve — scoring ──────────────────────────────────────────────────────────
+// ─── solve — fairness cost ──────────────────────────────────────────────────────────
 
-describe("solve — scoring", () => {
-	it("score is 0 when a single group is forced to its 1st choice timeslot", async () => {
+describe("solve — fairness cost", () => {
+	it("costs nothing when a single group is forced to its 1st choice timeslot", async () => {
 		const group = makeGroup(0, 5, [2, 1, 0]);
-		const { score, spread } = await solve([group], onlyTimeslot(2, 6));
-		expect(score).toBe(0);
+		const { fairnessValue, spread } = await solve([group], onlyTimeslot(2, 6));
+		expect(fairnessValue).toBe(0);
 		expect(spread[0]).toBe(1);
 	});
 
-	it("score is -1 when a single group is forced to its 2nd choice timeslot", async () => {
+	it("costs 1 per student when a single group is forced to its 2nd choice timeslot", async () => {
 		const group = makeGroup(0, 5, [2, 1, 0]);
-		const { score, spread } = await solve([group], onlyTimeslot(1, 6));
-		expect(score).toBe(-1);
+		const { fairnessValue, spread } = await solve([group], onlyTimeslot(1, 6));
+		expect(fairnessValue).toBe(5);
 		expect(spread[1]).toBe(1);
 	});
 
-	it("score is -5 when a single group is forced to its 3rd choice timeslot", async () => {
+	it("costs 5 per student when a single group is forced to its 3rd choice timeslot", async () => {
 		const group = makeGroup(0, 5, [2, 1, 0]);
-		const { score, spread } = await solve([group], onlyTimeslot(0, 6));
-		expect(score).toBe(-5);
+		const { fairnessValue, spread } = await solve([group], onlyTimeslot(0, 6));
+		expect(fairnessValue).toBe(25);
 		expect(spread[2]).toBe(1);
 	});
 
-	it("score is -100 when a group gets none of its choices", async () => {
+	it("costs 100 per student when a group gets none of its choices", async () => {
 		const group = makeGroup(0, 5, [0, 1, 2]);
-		const { score, spread } = await solve([group], onlyTimeslot(7, 6));
-		expect(score).toBe(-100);
+		const { fairnessValue, spread } = await solve([group], onlyTimeslot(7, 6));
+		expect(fairnessValue).toBe(500);
 		expect(spread[3]).toBe(1);
 	});
 
-	it("score accumulates correctly across multiple groups", async () => {
+	it("adds up the cost across multiple groups", async () => {
 		const slots = buildSlots(8, 1, [6, 5, 0, 0, 0, 0, 0, 0]);
 		const groups = [
 			makeGroup(0, 6, [0, 1, 2]), // timeslot 0 → 1st choice → 0
-			makeGroup(1, 5, [3, 1, 0]), // timeslot 1 → 2nd choice → -1
+			makeGroup(1, 5, [3, 1, 0]), // timeslot 1 → 2nd choice → 5 × 1
 		];
-		const { score } = await solve(groups, slots);
-		expect(score).toBe(-1);
+		const { fairnessValue } = await solve(groups, slots);
+		expect(fairnessValue).toBe(5);
 	});
 });
 
@@ -135,25 +129,25 @@ describe("solve — scoring", () => {
 describe("solve — Egal choices", () => {
 	it("Egal as 1st choice counts as 1st-choice match regardless of assigned slot", async () => {
 		const group = makeGroup(0, 4, [-1, -1, -1]);
-		const { score, spread } = await solve([group], fullSlots());
-		expect(score).toBe(0);
+		const { fairnessValue, spread } = await solve([group], fullSlots());
+		expect(fairnessValue).toBe(0);
 		expect(spread[0]).toBe(1);
 	});
 
 	it("Egal as 2nd choice counts as 2nd-choice match when 1st is not satisfied", async () => {
 		// Only timeslot 7 has capacity; choices = [0, -1, 2] → 1st fails, 2nd is Egal → rank 1
 		const group = makeGroup(0, 4, [0, -1, 2]);
-		const { score, spread } = await solve([group], onlyTimeslot(7, 6));
-		expect(score).toBe(-1);
+		const { fairnessValue, spread } = await solve([group], onlyTimeslot(7, 6));
+		expect(fairnessValue).toBe(4);
 		expect(spread[1]).toBe(1);
 	});
 
-	it("three Egal choices all produce score 0", async () => {
+	it("three Egal choices cost nothing", async () => {
 		const groups = Array.from({ length: 5 }, (_, i) =>
 			makeGroup(i, 3, [-1, -1, -1]),
 		);
-		const { score } = await solve(groups, fullSlots());
-		expect(score).toBe(0);
+		const { fairnessValue } = await solve(groups, fullSlots());
+		expect(fairnessValue).toBe(0);
 	});
 
 	it("reports a guarantee on an Egal group as free, not as absent", async () => {
@@ -175,34 +169,32 @@ describe("solve — determinism", () => {
 		const slots = fullSlots();
 		const r1 = await solve(groups, slots);
 		const r2 = await solve(groups, slots);
-		expect(r1.score).toBe(r2.score);
+		expect(r1.fairnessValue).toBe(r2.fairnessValue);
 		expect(r1.spread).toEqual(r2.spread);
-		expect(r1.solution.groups.map((g) => g.currentSelection)).toEqual(
-			r2.solution.groups.map((g) => g.currentSelection),
-		);
+		expect(r1.solution.assignment).toEqual(r2.solution.assignment);
 	});
 });
 
 // ─── solve — optimality ───────────────────────────────────────────────────────
 
 describe("solve — optimality", () => {
-	it("achieves perfect score when all groups can get their 1st choice", async () => {
+	it("costs nothing when all groups can get their 1st choice", async () => {
 		// 8 groups, each exclusively wants a different timeslot — trivially satisfiable
 		const groups = Array.from({ length: 8 }, (_, i) =>
 			makeGroup(i, 1, [i, (i + 1) % 8, (i + 2) % 8]),
 		);
-		const { score, spread } = await solve(groups, fullSlots());
-		expect(score).toBe(0);
+		const { fairnessValue, spread } = await solve(groups, fullSlots());
+		expect(fairnessValue).toBe(0);
 		expect(spread[0]).toBe(8);
 	});
 
 	it("finds the globally optimal assignment on a contested input", async () => {
 		// Two groups both prefer ts 0, but only one fits (1 slot, capacity = group size).
-		// Optimal: one gets 1st choice (score 0), one gets 2nd choice (score -1). Total = -1.
+		// Optimal: one gets its 1st choice, the other its 2nd: 3 students × 1 = 3.
 		const slots = buildSlots(2, 1, [3, 3]);
 		const groups = [makeGroup(0, 3, [0, 1, -1]), makeGroup(1, 3, [0, 1, -1])];
-		const { score } = await solve(groups, slots);
-		expect(score).toBe(-1);
+		const { fairnessValue } = await solve(groups, slots);
+		expect(fairnessValue).toBe(3);
 	});
 
 	it("throws when there is no feasible assignment", async () => {
@@ -266,23 +258,23 @@ describe("solve — integration", () => {
 
 	it("all 32 groups are assigned", async () => {
 		const { solution } = await solve(groups, fullSlots());
-		expect(solution.groups.every((g) => g.currentSelection >= 0)).toBe(true);
+		expect(solution.assignment.every((slot) => slot >= 0)).toBe(true);
 	});
 
 	it("no slot is over capacity", async () => {
 		const { solution } = await solve(groups, fullSlots());
-		for (const slot of solution.occupancy) {
-			expect(slot.amount).toBeLessThanOrEqual(slot.capacity);
-		}
+		loads(solution).forEach((load, s) => {
+			expect(load).toBeLessThanOrEqual(solution.slots[s].capacity);
+		});
 	});
 
-	it("score is deterministic", async () => {
+	it("fairness value is deterministic", async () => {
 		const r1 = await solve(groups, fullSlots());
 		const r2 = await solve(groups, fullSlots());
-		expect(r1.score).toBe(r2.score);
+		expect(r1.fairnessValue).toBe(r2.fairnessValue);
 	});
 
-	it("achieves a perfect or near-perfect score on this well-distributed input", async () => {
+	it("satisfies nearly every group on this well-distributed input", async () => {
 		// With 32 groups spread across 8 timeslots, the ILP should satisfy nearly all 1st choices
 		const { spread } = await solve(groups, fullSlots());
 		// At least 28 of 32 groups should get their 1st or 2nd choice
@@ -319,8 +311,8 @@ describe("solve — fairness measured in students", () => {
 		];
 		const { solution, studentSpread } = await solve(groups, fullSlots());
 		const expected = [0, 0, 0, 0];
-		for (const g of solution.groups) {
-			const ts = solution.occupancy[g.currentSelection].timeSlot;
+		for (const [i, g] of solution.groups.entries()) {
+			const ts = timeSlotOf(solution, i);
 			const rank = g.choices.findIndex((c) => c === -1 || c === ts);
 			expected[rank === -1 ? 3 : rank] += g.size;
 		}
@@ -334,12 +326,8 @@ describe("solve — fairness measured in students", () => {
 		const groups = [makeGroup(0, 6, [0, 1, -1]), makeGroup(1, 1, [0, 1, -1])];
 		const { solution, studentSpread } = await solve(groups, slots);
 
-		expect(
-			solution.occupancy[solution.groups[0].currentSelection].timeSlot,
-		).toBe(0);
-		expect(
-			solution.occupancy[solution.groups[1].currentSelection].timeSlot,
-		).toBe(1);
+		expect(timeSlotOf(solution, 0)).toBe(0);
+		expect(timeSlotOf(solution, 1)).toBe(1);
 		expect(studentSpread).toEqual([6, 1, 0, 0]);
 	});
 
@@ -363,7 +351,7 @@ describe("solve — lottery tie-break", () => {
 
 	function winnerOf(result: Awaited<ReturnType<typeof solve>>): number {
 		return result.solution.groups.findIndex(
-			(g) => result.solution.occupancy[g.currentSelection].timeSlot === 0,
+			(_, i) => timeSlotOf(result.solution, i) === 0,
 		);
 	}
 

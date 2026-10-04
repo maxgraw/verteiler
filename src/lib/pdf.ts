@@ -1,5 +1,5 @@
-import type { GroupRow } from "./distribution";
-import { SPREAD_LABELS } from "./distribution";
+import { SPREAD_LABELS } from "./rank";
+import type { GroupRow } from "./result";
 
 export const PDF_FILE_NAME = "rotationsgruppen-verteilung.pdf";
 

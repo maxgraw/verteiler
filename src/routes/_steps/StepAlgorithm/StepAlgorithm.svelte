@@ -1,19 +1,19 @@
 <script lang="ts">
 import { onDestroy } from "svelte";
+import { toUserMessage } from "#lib/algorithm/errors.ts";
 import type { SolveResult } from "#lib/algorithm/types.ts";
 import Alert from "#lib/components/Alert.svelte";
 import CopyButton from "#lib/components/CopyButton.svelte";
+import { downloadDistributionPdf } from "#lib/pdf.ts";
+import { prepareSolve } from "#lib/presolve.ts";
+import { SPREAD_LABELS } from "#lib/rank.ts";
 import {
 	formatDistribution,
 	groupByTimeSlot,
 	groupRows,
 	guaranteeSummary,
-	SPREAD_LABELS,
 	solveCaveat,
-	toUserMessage,
-} from "#lib/distribution.ts";
-import { downloadDistributionPdf } from "#lib/pdf.ts";
-import { prepareSolve } from "#lib/presolve.ts";
+} from "#lib/result.ts";
 import { SolverClient } from "#lib/solver-client.ts";
 import { state as appState } from "#lib/state.svelte.ts";
 import { STEPS } from "#lib/steps.ts";

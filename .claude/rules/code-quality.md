@@ -12,7 +12,9 @@ blocks, which use 4 spaces. Match that by hand.
 bun run check must stay at 0 errors and 0 warnings.
 
 Keep logic out of components. Parsing belongs in parser.ts, solving in algorithm/, shared
-state in state.svelte.ts. Components wire those together and render.
+state in state.svelte.ts. Rank logic is in rank.ts, everything between the button and the
+worker in presolve.ts, result views and caveats in result.ts, the group name search in
+search.ts. Components wire those together and render.
 
 The slot layout constants live in src/lib/config.ts (NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT,
 TOTAL_SLOTS, DEFAULT_CAPACITY). Import them, never redeclare them locally.
