@@ -73,10 +73,7 @@ export function distributionTable(rows: GroupRow[]): {
 } {
 	return {
 		head: ["Rotationsgruppe", "Namen"],
-		body: rotationRows(rows).map((r) => [
-			String(r.num),
-			r.members.join("\n"),
-		]),
+		body: rotationRows(rows).map((r) => [String(r.num), r.members.join("\n")]),
 	};
 }
 

@@ -1,15 +1,15 @@
 <script lang="ts">
-import AppHeader from "./AppHeader.svelte";
-import StepFormsCopy from "./_steps/StepFormsCopy.svelte";
-import StepDeadline from "./_steps/StepDeadline.svelte";
-import StepFormsUrl from "./_steps/StepFormsUrl.svelte";
-import StepFormsClose from "./_steps/StepFormsClose.svelte";
-import StepDeadlineMessage from "./_steps/StepDeadlineMessage.svelte";
-import StepReminder from "./_steps/StepReminder.svelte";
-import StepExport from "./_steps/StepExport.svelte";
-import StepCsvUpload from "./_steps/StepCsvUpload.svelte";
-import StepCapacities from "./_steps/StepCapacities.svelte";
 import StepAlgorithm from "./_steps/StepAlgorithm/StepAlgorithm.svelte";
+import StepCapacities from "./_steps/StepCapacities.svelte";
+import StepCsvUpload from "./_steps/StepCsvUpload.svelte";
+import StepDeadline from "./_steps/StepDeadline.svelte";
+import StepDeadlineMessage from "./_steps/StepDeadlineMessage.svelte";
+import StepExport from "./_steps/StepExport.svelte";
+import StepFormsClose from "./_steps/StepFormsClose.svelte";
+import StepFormsCopy from "./_steps/StepFormsCopy.svelte";
+import StepFormsUrl from "./_steps/StepFormsUrl.svelte";
+import StepReminder from "./_steps/StepReminder.svelte";
+import AppHeader from "./AppHeader.svelte";
 </script>
 
 <AppHeader />

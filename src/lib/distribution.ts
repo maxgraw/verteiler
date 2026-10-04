@@ -1,6 +1,6 @@
-import type { Group, Slot } from "./parser";
 import type { Guarantee, Solution, SolveResult } from "./algorithm/types";
 import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "./config";
+import type { Group, Slot } from "./parser";
 
 /** Labels for the four preference ranks, indexed the same way as SolveResult.spread. */
 export const SPREAD_LABELS = ["1. Wahl", "2. Wahl", "3. Wahl", "Kein Wunsch"];
@@ -84,7 +84,8 @@ export function checkGuarantees(
 ): string | null {
 	for (const { groupId, maxRank } of guarantees) {
 		const group = groups[groupId];
-		if (!group) return "Eine Zusage zeigt auf eine Gruppe, die es nicht mehr gibt.";
+		if (!group)
+			return "Eine Zusage zeigt auf eine Gruppe, die es nicht mehr gibt.";
 
 		const allowed = allowedTimeSlots(group.choices, maxRank);
 		if (allowed === null) continue;
@@ -133,14 +134,12 @@ function foldName(value: string): string {
  *
  * @param limit - Cap on results, because a short query matches almost everything
  */
-export function findGroups(
-	groups: Group[],
-	query: string,
-	limit = 8,
-): Group[] {
+export function findGroups(groups: Group[], query: string, limit = 8): Group[] {
 	const needle = foldName(query);
 	if (needle.length < 2) return [];
-	return groups.filter((g) => foldName(g.members).includes(needle)).slice(0, limit);
+	return groups
+		.filter((g) => foldName(g.members).includes(needle))
+		.slice(0, limit);
 }
 
 /**
@@ -201,7 +200,10 @@ export function groupByTimeSlot(
 			num: t + 1,
 			label: `Gruppe ${t * slotsPerTimeSlot + 1}–${(t + 1) * slotsPerTimeSlot}`,
 			rotationGroups,
-			studentCount: rotationGroups.reduce((sum, rg) => sum + rg.studentCount, 0),
+			studentCount: rotationGroups.reduce(
+				(sum, rg) => sum + rg.studentCount,
+				0,
+			),
 		};
 	});
 }

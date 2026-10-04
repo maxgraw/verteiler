@@ -156,9 +156,7 @@ export function parseChoices(csvText: string): ParseResult {
 		throw new Error("Die Datei ist leer.");
 	}
 	if (records.length < 2) {
-		throw new Error(
-			"Die CSV enthält nur eine Kopfzeile, aber keine Einträge.",
-		);
+		throw new Error("Die CSV enthält nur eine Kopfzeile, aber keine Einträge.");
 	}
 	const layout = detectLayout(records[0]);
 	if (!layout) {
@@ -186,7 +184,7 @@ export function parseChoices(csvText: string): ParseResult {
 		}
 
 		const size = parseInt(row[layout.size], 10);
-		if (isNaN(size) || size < 1 || size > 6) {
+		if (Number.isNaN(size) || size < 1 || size > 6) {
 			warnings.push(
 				`Zeile ${rowNum}: Ungültige Gruppengröße "${row[layout.size]}". Eintrag übersprungen.`,
 			);

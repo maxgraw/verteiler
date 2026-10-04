@@ -125,14 +125,20 @@ for (const name of names) {
 	for (const word of name.split(/\s+/)) {
 		if (word.length < 3) continue;
 		const escaped = word.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-		if (new RegExp(`(^|[^\\p{L}])${escaped}($|[^\\p{L}])`, "u").test(resultBody))
+		if (
+			new RegExp(`(^|[^\\p{L}])${escaped}($|[^\\p{L}])`, "u").test(resultBody)
+		)
 			leaked.add(word);
 	}
 }
 if (leaked.size > 0) {
-	console.error(`Still in the output, nothing written: ${[...leaked].join(", ")}`);
+	console.error(
+		`Still in the output, nothing written: ${[...leaked].join(", ")}`,
+	);
 	process.exit(1);
 }
 
 writeFileSync(output, result);
-console.error(`${body.length} rows, ${person} names replaced, written to ${output}`);
+console.error(
+	`${body.length} rows, ${person} names replaced, written to ${output}`,
+);

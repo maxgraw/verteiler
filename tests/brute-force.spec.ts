@@ -10,12 +10,12 @@
  * Instances are random but seeded. A failure names the case, and its instance is in the
  * message, so it can be pasted into a plain test.
  */
-import { describe, it, expect } from "vitest";
-import { solve } from "#lib/algorithm/index.ts";
+import { describe, expect, it } from "vitest";
 import { COSTS } from "#lib/algorithm/costs.ts";
+import { solve } from "#lib/algorithm/index.ts";
 import type { Guarantee } from "#lib/algorithm/types.ts";
-import { buildSlots } from "#lib/parser.ts";
 import type { Group, Slot } from "#lib/parser.ts";
+import { buildSlots } from "#lib/parser.ts";
 
 const CASES = 500;
 const SEED = 20260928;
@@ -45,11 +45,13 @@ function mulberry32(seed: number): () => number {
  * guarantee ever binding, which let a solver that ignored guarantees pass.
  */
 function randomInstance(random: () => number): Instance {
-	const int = (lo: number, hi: number) => lo + Math.floor(random() * (hi - lo + 1));
+	const int = (lo: number, hi: number) =>
+		lo + Math.floor(random() * (hi - lo + 1));
 	const numTimeSlots = int(1, 3);
 	const slotsPerTimeSlot = int(1, 2);
-	const capacities = Array.from({ length: numTimeSlots * slotsPerTimeSlot }, () =>
-		random() < 0.1 ? 0 : int(3, 6),
+	const capacities = Array.from(
+		{ length: numTimeSlots * slotsPerTimeSlot },
+		() => (random() < 0.1 ? 0 : int(3, 6)),
 	);
 	const room = capacities.reduce((a, b) => a + b, 0);
 	const favourite = int(0, numTimeSlots - 1);
@@ -76,7 +78,8 @@ function randomInstance(random: () => number): Instance {
 	const guarantees: Guarantee[] = [];
 	if (random() < 0.5) {
 		for (let g = 0; g < groups.length; g++) {
-			if (random() < 0.5) guarantees.push({ groupId: g, maxRank: random() < 0.7 ? 0 : 1 });
+			if (random() < 0.5)
+				guarantees.push({ groupId: g, maxRank: random() < 0.7 ? 0 : 1 });
 		}
 	}
 	return { numTimeSlots, slotsPerTimeSlot, capacities, groups, guarantees };
@@ -93,7 +96,10 @@ function rank(choices: number[], timeSlot: number): number {
  * assignment is legal. Depth first with a capacity check per step, so dead branches end
  * early, but nothing is pruned on cost.
  */
-function bruteForce(instance: Instance, withGuarantees: boolean): number | null {
+function bruteForce(
+	instance: Instance,
+	withGuarantees: boolean,
+): number | null {
 	const { groups, capacities, slotsPerTimeSlot } = instance;
 	const maxRank = new Map<number, number>();
 	if (withGuarantees)

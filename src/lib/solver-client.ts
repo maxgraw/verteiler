@@ -62,7 +62,9 @@ export class SolverClient {
 
 			const timeout = setTimeout(() => {
 				this.dispose();
-				reject(new Error("Zeitüberschreitung: Die Berechnung dauert zu lange."));
+				reject(
+					new Error("Zeitüberschreitung: Die Berechnung dauert zu lange."),
+				);
 			}, TIMEOUT_MS);
 
 			worker.onmessage = (e: MessageEvent<WorkerMessage>) => {

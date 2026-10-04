@@ -1,16 +1,16 @@
 import loadHighs from "highs";
 import wasmUrl from "highs/runtime?url";
+import { allowedTimeSlots, rankOf } from "../distribution";
+import { lotteryPriorities } from "../lottery";
 import type { Group, Slot } from "../parser";
+import { COSTS } from "./costs";
 import type {
 	Displacement,
 	Guarantee,
 	Optimality,
-	SolveResult,
 	Solution,
+	SolveResult,
 } from "./types";
-import { allowedTimeSlots, rankOf } from "../distribution";
-import { lotteryPriorities } from "../lottery";
-import { COSTS } from "./costs";
 import { validateSolution } from "./validate";
 
 const TIME_LIMIT_SECONDS = 30;
@@ -121,7 +121,8 @@ function guaranteeRows(
 		// An empty set means the guarantee cannot be met at all. checkGuarantees rejects
 		// that before solving, and validateSolution catches it after, so skipping here
 		// never lets a broken promise through silently.
-		if (vars.length > 0) rows.push(`  keep_${groupId}: ${vars.join(" + ")} = 1`);
+		if (vars.length > 0)
+			rows.push(`  keep_${groupId}: ${vars.join(" + ")} = 1`);
 	}
 	return rows;
 }
@@ -232,7 +233,7 @@ function certify(
  * rather than read off ObjectiveValue, which comes back as a float and would need
  * a tolerance when it is frozen into the tie-break stage as an integer bound.
  */
-function valueOf(entries: Entry[], assignment: number[]): number {
+function objectiveValue(entries: Entry[], assignment: number[]): number {
 	const chosen = new Set(assignment.map((s, g) => varName(g, s)));
 	let total = 0;
 	for (const entry of entries) {
@@ -309,10 +310,17 @@ function runPipeline(
 		buildLP(groups, slots, fairness, fixed),
 		groups.length,
 	).assignment;
-	const fairnessValue = valueOf(fairness, assignment);
+	const fairnessValue = objectiveValue(fairness, assignment);
 
 	onProgress?.("Prüfe Optimalität…");
-	const optimality = certify(highs, groups, slots, fairness, fairnessValue, fixed);
+	const optimality = certify(
+		highs,
+		groups,
+		slots,
+		fairness,
+		fairnessValue,
+		fixed,
+	);
 
 	// Nothing to freeze when every group is happy wherever it lands
 	let lotteryComplete = true;

@@ -1,6 +1,6 @@
-import type { Group } from "./parser.js";
 import type { Guarantee } from "./algorithm/types.js";
 import { DEFAULT_CAPACITY, TOTAL_SLOTS } from "./config.js";
+import type { Group } from "./parser.js";
 import { STEP_COUNT } from "./steps.js";
 
 export const STORAGE_KEY = "verteiler";
@@ -119,7 +119,7 @@ export class VerteilerState {
 						parsedGroups,
 						parseWarnings,
 						capacities,
-							guarantees,
+						guarantees,
 					}),
 				);
 			});
@@ -151,7 +151,11 @@ export class VerteilerState {
 			this.done = done
 				.concat(Array(this.done.length).fill(false))
 				.slice(0, this.done.length);
-		if (capacities && Array.isArray(capacities) && capacities.length === TOTAL_SLOTS)
+		if (
+			capacities &&
+			Array.isArray(capacities) &&
+			capacities.length === TOTAL_SLOTS
+		)
 			this.capacities = capacities;
 		if (csvFileName) this.csvFileName = csvFileName;
 		if (parsedGroups) this.parsedGroups = parsedGroups;

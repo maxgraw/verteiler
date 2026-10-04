@@ -12,8 +12,9 @@
  *          [--capacity=6 | --capacities=6,6,5,4,...] [--guarantee=Name:0 ...]
  */
 import { readFileSync } from "node:fs";
-import { solve } from "../../src/lib/algorithm/index";
 import { COSTS } from "../../src/lib/algorithm/costs";
+import { solve } from "../../src/lib/algorithm/index";
+import type { Guarantee } from "../../src/lib/algorithm/types";
 import {
 	DEFAULT_CAPACITY,
 	NUM_TIME_SLOTS,
@@ -21,7 +22,6 @@ import {
 } from "../../src/lib/config";
 import { allowedTimeSlots, findGroups } from "../../src/lib/distribution";
 import { buildSlots, parseChoices } from "../../src/lib/parser";
-import type { Guarantee } from "../../src/lib/algorithm/types";
 
 function flag(name: string, fallback: string): string {
 	const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
@@ -63,7 +63,10 @@ function capacities(): number[] {
 	}
 
 	const values = list.split(",").map((v) => Number(v.trim()));
-	if (values.length !== TOTAL || values.some((v) => !Number.isInteger(v) || v < 1)) {
+	if (
+		values.length !== TOTAL ||
+		values.some((v) => !Number.isInteger(v) || v < 1)
+	) {
 		console.error(
 			`--capacities needs ${TOTAL} whole numbers of at least 1, got ${values.length}`,
 		);
@@ -136,7 +139,10 @@ console.log(
 			guarantees: pinned.map((g) => ({
 				groupId: g.groupId,
 				maxRank: g.maxRank,
-				allowedTimeSlots: allowedTimeSlots(groups[g.groupId].choices, g.maxRank),
+				allowedTimeSlots: allowedTimeSlots(
+					groups[g.groupId].choices,
+					g.maxRank,
+				),
 			})),
 			assignment: result.solution.groups.map((g) => g.currentSelection),
 			fairnessValue: result.fairnessValue,

@@ -5,12 +5,11 @@ the checker. Use import type for type-only imports. #lib resolves to src/lib
 through the imports field in package.json. Kit 3 removed $lib, and #lib paths need the file
 extension (#lib/parser.ts).
 
-Indentation is inconsistent across the repo: 4 spaces in parser.ts and the .svelte files,
-2 in src/lib/algorithm. There is no formatter config. Match the file you are editing and do
-not reformat surrounding code.
+Biome formats and lints TS, JS and JSON, with tabs. Run bun run format before committing;
+CI runs bun run lint and fails on any diff. Biome does not format Svelte markup or style
+blocks, which use 4 spaces. Match that by hand.
 
-bun run check must stay at 0 errors. The two a11y warnings on the drop zone in
-StepCsvUpload.svelte are the known baseline. Do not add new ones.
+bun run check must stay at 0 errors and 0 warnings.
 
 Keep logic out of components. Parsing belongs in parser.ts, solving in algorithm/, shared
 state in state.svelte.ts. Components wire those together and render.

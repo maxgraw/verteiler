@@ -1,7 +1,7 @@
-import type { Group, Slot } from "../parser";
-import type { Guarantee, SolveResult } from "./types";
 import { rankOf, SPREAD_LABELS } from "../distribution";
+import type { Group, Slot } from "../parser";
 import { COSTS } from "./costs";
+import type { Guarantee, SolveResult } from "./types";
 
 /** One broken invariant, phrased so it can be put in front of the organizer. */
 export interface Violation {
@@ -86,7 +86,9 @@ export function validateSolution(
 		}
 	}
 
-	violations.push(...checkInvAllocation(solution.invAllocation, solution.groups));
+	violations.push(
+		...checkInvAllocation(solution.invAllocation, solution.groups),
+	);
 
 	// The one thing a guarantee is: a promise. Nothing else in the chain would notice a
 	// dropped constraint, the distribution would just look like a normal optimum.

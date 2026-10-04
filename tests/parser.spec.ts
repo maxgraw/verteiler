@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { parseChoices, buildSlots } from "#lib/parser.ts";
+import { describe, expect, it } from "vitest";
+import { buildSlots, parseChoices } from "#lib/parser.ts";
 import ohneEmailCsv from "./fixtures/ohne_email.csv?raw";
 
 const HEADER =

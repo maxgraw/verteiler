@@ -1,21 +1,21 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import type { Solution, SolveResult } from "#lib/algorithm/types.ts";
 import {
 	allowedTimeSlots,
 	checkCapacity,
 	checkGuarantees,
 	findGroups,
 	formatDistribution,
-	guaranteeSummary,
 	groupByTimeSlot,
 	groupRows,
+	guaranteeSummary,
 	rankOf,
 	sanitizeCapacities,
 	solveCaveat,
 	toUserMessage,
 } from "#lib/distribution.ts";
-import { buildSlots } from "#lib/parser.ts";
 import type { Group } from "#lib/parser.ts";
-import type { Solution, SolveResult } from "#lib/algorithm/types.ts";
+import { buildSlots } from "#lib/parser.ts";
 
 function makeGroup(
 	id: number,
@@ -33,7 +33,8 @@ function makeSolution(groups: Group[]): Solution {
 	const invAllocation: Record<number, number[]> = {};
 	for (const g of groups) {
 		occupancy[g.currentSelection].amount += g.size;
-		(invAllocation[g.currentSelection] ??= []).push(g.id);
+		invAllocation[g.currentSelection] ??= [];
+		invAllocation[g.currentSelection].push(g.id);
 	}
 	return { occupancy, groups, invAllocation };
 }
@@ -118,8 +119,12 @@ describe("groupByTimeSlot", () => {
 			makeGroup(1, 4, [1, 0, -1], 2), // slot 2 is time slot 1
 		]);
 		const view = groupByTimeSlot(solution, 2, 2);
-		expect(view[0].rotationGroups.flatMap((rg) => rg.groups.map((g) => g.id))).toEqual([0]);
-		expect(view[1].rotationGroups.flatMap((rg) => rg.groups.map((g) => g.id))).toEqual([1]);
+		expect(
+			view[0].rotationGroups.flatMap((rg) => rg.groups.map((g) => g.id)),
+		).toEqual([0]);
+		expect(
+			view[1].rotationGroups.flatMap((rg) => rg.groups.map((g) => g.id)),
+		).toEqual([1]);
 	});
 
 	it("sums student counts per time slot", () => {
@@ -178,7 +183,9 @@ describe("groupByTimeSlot", () => {
 			invAllocation: {},
 		};
 		const view = groupByTimeSlot(solution, 2, 2);
-		expect(view.flatMap((v) => v.rotationGroups.flatMap((rg) => rg.groups))).toEqual([]);
+		expect(
+			view.flatMap((v) => v.rotationGroups.flatMap((rg) => rg.groups)),
+		).toEqual([]);
 	});
 });
 
@@ -276,7 +283,9 @@ describe("checkGuarantees", () => {
 	it("passes when every guarantee fits", () => {
 		const groups = [makeGroup(0, 3, [0, 1, -1], -1)];
 		const slots = buildSlots(2, 2, [6, 6, 6, 6]);
-		expect(checkGuarantees(groups, slots, [{ groupId: 0, maxRank: 0 }])).toBeNull();
+		expect(
+			checkGuarantees(groups, slots, [{ groupId: 0, maxRank: 0 }]),
+		).toBeNull();
 	});
 
 	it("passes an empty list", () => {
@@ -286,7 +295,9 @@ describe("checkGuarantees", () => {
 	it("rejects a group too large for any rotation group it may take", () => {
 		const groups = [makeGroup(0, 5, [0, 1, -1], -1)];
 		const slots = buildSlots(2, 2, [3, 3, 6, 6]);
-		const message = checkGuarantees(groups, slots, [{ groupId: 0, maxRank: 0 }]);
+		const message = checkGuarantees(groups, slots, [
+			{ groupId: 0, maxRank: 0 },
+		]);
 		expect(message).toContain("5 Mitglieder");
 	});
 
@@ -330,8 +341,20 @@ describe("checkGuarantees", () => {
 
 describe("findGroups", () => {
 	const groups = [
-		{ id: 0, size: 2, members: "Anna Müller, Ben Schmidt", choices: [0], currentSelection: -1 },
-		{ id: 1, size: 1, members: "Clara Weiß", choices: [0], currentSelection: -1 },
+		{
+			id: 0,
+			size: 2,
+			members: "Anna Müller, Ben Schmidt",
+			choices: [0],
+			currentSelection: -1,
+		},
+		{
+			id: 1,
+			size: 1,
+			members: "Clara Weiß",
+			choices: [0],
+			currentSelection: -1,
+		},
 	];
 
 	it("finds a group by part of a member name", () => {
@@ -427,11 +450,14 @@ describe("toUserMessage", () => {
 		const message = toUserMessage(
 			new Error("No assignment returned (status: Time limit reached)."),
 		);
-		expect(message).toBe("Die Berechnung hat zu lange gedauert. Versuch es nochmal.");
+		expect(message).toBe(
+			"Die Berechnung hat zu lange gedauert. Versuch es nochmal.",
+		);
 	});
 
 	it("passes a validation failure through, it already names what broke", () => {
-		const original = "Ungültige Verteilung: Gruppe 3 ist mit 9 von 6 Plätzen überbelegt.";
+		const original =
+			"Ungültige Verteilung: Gruppe 3 ist mit 9 von 6 Plätzen überbelegt.";
 		expect(toUserMessage(new Error(original))).toBe(original);
 	});
 
