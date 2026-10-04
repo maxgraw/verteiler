@@ -261,7 +261,8 @@ describe("lottery seed", () => {
 	it("ignores a seed left behind by an older build", async () => {
 		save({ version: VERSION, lotterySeed: "ABC234", link: "alt" });
 		const state = await freshState();
-		expect(state).not.toHaveProperty("lotterySeed");
+		// derived from the (here absent) applications, never taken from storage
+		expect(state.lotterySeed).toBe("");
 		// the rest of that payload must still survive
 		expect(state.link).toBe("alt");
 	});

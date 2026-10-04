@@ -3,22 +3,17 @@ import { onDestroy } from "svelte";
 import type { SolveResult } from "#lib/algorithm/types.ts";
 import Alert from "#lib/components/Alert.svelte";
 import CopyButton from "#lib/components/CopyButton.svelte";
-import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "#lib/config.ts";
 import {
-	checkCapacity,
-	checkGuarantees,
 	formatDistribution,
 	groupByTimeSlot,
 	groupRows,
 	guaranteeSummary,
 	SPREAD_LABELS,
-	sanitizeCapacities,
 	solveCaveat,
 	toUserMessage,
 } from "#lib/distribution.ts";
-import { seedFromGroups } from "#lib/lottery.ts";
-import { buildSlots } from "#lib/parser.ts";
 import { downloadDistributionPdf } from "#lib/pdf.ts";
+import { prepareSolve } from "#lib/presolve.ts";
 import { SolverClient } from "#lib/solver-client.ts";
 import { state as appState } from "#lib/state.svelte.ts";
 import { STEPS } from "#lib/steps.ts";
@@ -27,17 +22,6 @@ import GuaranteePicker from "./GuaranteePicker.svelte";
 import SeedField from "./SeedField.svelte";
 import SpreadSummary from "./SpreadSummary.svelte";
 import TimeSlotList from "./TimeSlotList.svelte";
-
-/**
- * The draw for this cohort. Recomputed from the applications rather than stored, so
- * two browsers never disagree about which of the equally optimal distributions comes
- * out. Empty until a CSV is loaded, and solve treats that as no tie-break at all.
- */
-const lotterySeed = $derived(
-	appState.parsedGroups
-		? seedFromGroups(appState.parsedGroups.map((g) => g.members))
-		: "",
-);
 
 let running = $state(false);
 let statusMessage = $state("");
@@ -66,38 +50,23 @@ async function run() {
 	error = "";
 	solveResult = null;
 
-	const capacities = sanitizeCapacities(appState.capacities);
-	const capacityError = checkCapacity(appState.parsedGroups, capacities);
-	if (capacityError) {
-		error = capacityError;
-		return;
-	}
-
-	const slots = buildSlots(NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT, capacities);
-	const guaranteeError = checkGuarantees(
-		appState.parsedGroups,
-		slots,
-		appState.guarantees,
-	);
-	if (guaranteeError) {
-		error = guaranteeError;
+	const prepared = prepareSolve({
+		groups: $state.snapshot(appState.parsedGroups),
+		capacities: $state.snapshot(appState.capacities),
+		guarantees: $state.snapshot(appState.guarantees),
+		lotterySeed: appState.lotterySeed,
+	});
+	if ("error" in prepared) {
+		error = prepared.error;
 		return;
 	}
 
 	running = true;
 	statusMessage = "Starte…";
 	try {
-		solveResult = await solver.run(
-			{
-				groups: $state.snapshot(appState.parsedGroups),
-				slots,
-				lotterySeed,
-				guarantees: $state.snapshot(appState.guarantees),
-			},
-			(message) => {
-				statusMessage = message;
-			},
-		);
+		solveResult = await solver.run(prepared.request, (message) => {
+			statusMessage = message;
+		});
 	} catch (e) {
 		error = toUserMessage(e);
 	} finally {
@@ -154,7 +123,7 @@ async function downloadPdf() {
                 groups={appState.parsedGroups}
                 bind:guarantees={appState.guarantees}
             />
-            <SeedField seed={lotterySeed} />
+            <SeedField seed={appState.lotterySeed} />
         </div>
     {/if}
 

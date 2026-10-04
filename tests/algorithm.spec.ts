@@ -211,6 +211,14 @@ describe("solve — optimality", () => {
 		const groups = [makeGroup(0, 4, [0, 1, 2])];
 		await expect(solve(groups, slots)).rejects.toThrow();
 	});
+
+	it("reports infeasibility as its own kind, so the UI can name the cause", async () => {
+		const slots = buildSlots(8, 1, [3, 0, 0, 0, 0, 0, 0, 0]);
+		const groups = [makeGroup(0, 4, [0, 1, 2])];
+		await expect(solve(groups, slots)).rejects.toMatchObject({
+			kind: "infeasible",
+		});
+	});
 });
 
 // ─── solve — integration with real-size data ─────────────────────────────────

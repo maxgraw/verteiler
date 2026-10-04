@@ -7,7 +7,8 @@ Code is English: identifiers, comments, test names, commit messages.
 
 Parser warnings and solver errors reach the user directly, so they must read as plain German,
 not as technical output. Include the 1-based row number in parser warnings (Zeile N) and say
-what happened to the row. Map raw solver errors through toUserMessage in StepAlgorithm.svelte.
+what happened to the row. Solver failures are thrown as SolveError (algorithm/errors.ts) with a kind and a technical
+message. toUserMessage picks the German text by kind. Never match on the message text.
 
 The copyable chat messages live in messages.ts, not in the step files, and address the
 semester with ihr. Everything shown in the page itself addresses the single organizer with du.

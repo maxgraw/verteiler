@@ -4,6 +4,7 @@ import { allowedTimeSlots, rankOf } from "../distribution";
 import { lotteryPriorities } from "../lottery";
 import type { Group, Slot } from "../parser";
 import { COSTS } from "./costs";
+import { SolveError } from "./errors";
 import { CERTIFICATE_TIME_LIMIT_SECONDS, TIME_LIMIT_SECONDS } from "./limits";
 import type {
 	Displacement,
@@ -166,7 +167,10 @@ function runStage(highs: Highs, lp: string, groupCount: number): StageResult {
 	const result = highs.solve(lp, { time_limit: TIME_LIMIT_SECONDS });
 
 	if (result.Status !== "Optimal" && result.Status !== "Time limit reached") {
-		throw new Error(`No feasible solution found (status: ${result.Status}).`);
+		throw new SolveError(
+			result.Status === "Infeasible" ? "infeasible" : "unknown",
+			`No feasible solution found (status: ${result.Status}).`,
+		);
 	}
 
 	const columns = result.Columns as Record<string, { Primal: number }>;
@@ -181,7 +185,10 @@ function runStage(highs: Highs, lp: string, groupCount: number): StageResult {
 	// Reached on a time limit that expired before any incumbent was found. Naming the
 	// status keeps that apart from genuine infeasibility, which needs a different answer.
 	if (assignment.some((s) => s < 0)) {
-		throw new Error(`No assignment returned (status: ${result.Status}).`);
+		throw new SolveError(
+			result.Status === "Time limit reached" ? "timeLimit" : "unknown",
+			`No assignment returned (status: ${result.Status}).`,
+		);
 	}
 	return { assignment, timedOut: result.Status === "Time limit reached" };
 }
@@ -413,7 +420,10 @@ export async function solve(
 	// HiGHS would not report it: it reports on the LP it was given, not on this one.
 	const violations = validateSolution(groups, slots, result, guarantees);
 	if (violations.length > 0) {
-		throw new Error(`Ungültige Verteilung: ${violations[0].message}`);
+		throw new SolveError(
+			"invalid",
+			`Ungültige Verteilung: ${violations[0].message}`,
+		);
 	}
 
 	return result;

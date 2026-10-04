@@ -1,3 +1,4 @@
+import { errorKind } from "./algorithm/errors";
 import type { Guarantee, Solution, SolveResult } from "./algorithm/types";
 import { NUM_TIME_SLOTS, SLOTS_PER_TIME_SLOT } from "./config";
 import type { Group, Slot } from "./parser";
@@ -265,16 +266,19 @@ export function solveCaveat(result: SolveResult): string | null {
 /** Turn any solver or worker failure into a German message the organizer can act on. */
 export function toUserMessage(e: unknown): string {
 	const msg = e instanceof Error ? e.message : String(e);
-	// Already plain German and already names what broke, so it goes through untouched
-	if (msg.startsWith("Ungültige Verteilung")) return msg;
-	if (msg.includes("Zeitüberschreitung")) return msg;
-	// Checked before the infeasibility branch: a solve that ran out of time found nothing,
-	// which says nothing about whether the capacities are enough
-	if (msg.includes("Time limit reached")) {
-		return "Die Berechnung hat zu lange gedauert. Versuch es nochmal.";
+	switch (errorKind(e)) {
+		case "infeasible":
+			return "Keine gültige Verteilung möglich. Prüf, ob die Kapazitäten ausreichen.";
+		// Not a capacity problem: a solve that ran out of time found nothing, which says
+		// nothing about whether the capacities are enough
+		case "timeLimit":
+		case "timeout":
+			return "Die Berechnung hat zu lange gedauert. Versuch es nochmal.";
+		// Already plain German and already names what broke
+		case "invalid":
+			return msg;
+		case "worker":
+		case "unknown":
+			return `Unbekannter Fehler. Bitte Seite neu laden und nochmal versuchen. (${msg})`;
 	}
-	if (msg.includes("Infeasible") || msg.includes("feasible")) {
-		return "Keine gültige Verteilung möglich. Prüf, ob die Kapazitäten ausreichen.";
-	}
-	return `Unbekannter Fehler. Bitte Seite neu laden und nochmal versuchen. (${msg})`;
 }

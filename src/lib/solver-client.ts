@@ -1,3 +1,4 @@
+import { SolveError, type SolveErrorKind } from "./algorithm/errors";
 import { PIPELINE_LIMIT_SECONDS } from "./algorithm/limits";
 import type { Guarantee, SolveResult } from "./algorithm/types";
 import type { Group, Slot } from "./parser";
@@ -13,7 +14,8 @@ export interface SolveRequest {
 export type WorkerMessage =
 	| { type: "status"; message: string }
 	| { type: "result"; data: SolveResult }
-	| { type: "error"; message: string };
+	/** A class does not survive postMessage, so the kind travels as a field */
+	| { type: "error"; kind: SolveErrorKind; message: string };
 
 /** Headroom on top of the solver budget for Wasm init, model building and validation. */
 const TIMEOUT_MARGIN_SECONDS = 45;
@@ -57,8 +59,8 @@ export class SolverClient {
 
 	/**
 	 * @param onStatus - Progress messages from the solver, already in German.
-	 * @throws Error carrying the raw solver message, or a German timeout message.
-	 *   Map it through toUserMessage before showing it.
+	 * @throws SolveError with a technical message. Map it through toUserMessage before
+	 *   showing it.
 	 */
 	run(
 		request: SolveRequest,
@@ -69,9 +71,7 @@ export class SolverClient {
 
 			const timeout = setTimeout(() => {
 				this.dispose();
-				reject(
-					new Error("Zeitüberschreitung: Die Berechnung dauert zu lange."),
-				);
+				reject(new SolveError("timeout", "Client timeout, worker terminated."));
 			}, timeoutMs(request));
 
 			worker.onmessage = (e: MessageEvent<WorkerMessage>) => {
@@ -81,13 +81,13 @@ export class SolverClient {
 				}
 				clearTimeout(timeout);
 				if (e.data.type === "result") resolve(e.data.data);
-				else reject(new Error(e.data.message));
+				else reject(new SolveError(e.data.kind, e.data.message));
 			};
 
 			worker.onerror = (e) => {
 				clearTimeout(timeout);
 				this.dispose();
-				reject(new Error(e.message ?? "Worker-Fehler"));
+				reject(new SolveError("worker", e.message ?? "Worker crashed."));
 			};
 
 			worker.postMessage(request);

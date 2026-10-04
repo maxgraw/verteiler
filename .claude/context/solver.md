@@ -157,7 +157,8 @@ the distinction the Gurobi attempt in the history below got wrong.
 ## Worker lifecycle
 
 solver.worker.ts wraps solve so Wasm never blocks the UI. It posts back three message types:
-status, result, error.
+status, result, error. A SolveError does not survive postMessage, so the error message
+carries its kind as a field and SolverClient rebuilds the SolveError from it.
 
 SolverClient in solver-client.ts owns the lifecycle, and each guard exists for a reason:
 

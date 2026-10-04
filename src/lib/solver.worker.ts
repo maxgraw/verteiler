@@ -1,3 +1,4 @@
+import { errorKind } from "./algorithm/errors";
 import { solve } from "./algorithm/index";
 import type { SolveRequest, WorkerMessage } from "./solver-client";
 
@@ -17,6 +18,7 @@ self.onmessage = async (e: MessageEvent<SolveRequest>) => {
 	} catch (err) {
 		post({
 			type: "error",
+			kind: errorKind(err),
 			message: err instanceof Error ? err.message : String(err),
 		});
 	}

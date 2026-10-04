@@ -1,5 +1,6 @@
 import type { Guarantee } from "./algorithm/types.js";
 import { DEFAULT_CAPACITY, TOTAL_SLOTS } from "./config.js";
+import { seedFromGroups } from "./lottery.js";
 import { type Group, parseChoices } from "./parser.js";
 import { STEP_COUNT } from "./steps.js";
 
@@ -99,6 +100,17 @@ export class VerteilerState {
 	);
 
 	readonly deadlineComplete = $derived(!!this.datum && !!this.uhrzeit);
+
+	/**
+	 * The draw for this cohort. Derived from the applications rather than stored, so two
+	 * browsers never disagree about which of the equally optimal distributions comes out.
+	 * Empty until a CSV is loaded, and solve treats that as no tie-break at all.
+	 */
+	readonly lotterySeed = $derived(
+		this.parsedGroups
+			? seedFromGroups(this.parsedGroups.map((g) => g.members))
+			: "",
+	);
 
 	constructor() {
 		if (typeof localStorage !== "undefined") {
